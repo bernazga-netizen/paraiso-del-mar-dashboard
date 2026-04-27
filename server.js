@@ -1,44 +1,23 @@
-const http = require('http');
-const fs = require('fs');
+const express = require('express');
+const fetch = require('node-fetch');
 const path = require('path');
+const app = express();
 
-const PORT = 3001;
+const BACKEND_URL = 'https://paraiso-del-mar-backend-production.railway.app';
 
-const server = http.createServer((req, res) => {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+app.use(express.static(path.join(__dirname)));
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200);
-    res.end();
-    return;
-  }
-
-  // Servir el archivo HTML
-  if (req.url === '/' || req.url === '') {
-    const filePath = path.join(__dirname, 'index.html');
-    fs.readFile(filePath, (err, content) => {
-      if (err) {
-        res.writeHead(500);
-        res.end('Error al cargar el dashboard');
-        return;
-      }
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(content);
-    });
-  } else {
-    res.writeHead(404);
-    res.end('Página no encontrada');
+// Proxy para estadísticas
+app.get('/api/estadisticas/:fecha', async (req, res) => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/estadisticas/${req.params.fecha}`);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`\n${'='.repeat(50)}`);
-  console.log(`📊 DASHBOARD PARAÍSO DEL MAR`);
-  console.log(`${'='.repeat(50)}`);
-  console.log(`\n✓ Dashboard en: http://localhost:${PORT}`);
-  console.log(`✓ Backend en: http://192.168.1.231:3000`);
-  console.log(`\n✓ Abre el navegador en: http://localhost:${PORT}\n`);
+app.listen(3001, () => {
+  console.log('Dashboard en http://localhost:3001');
 });
