@@ -206,7 +206,18 @@
             let html = '<div class="kpi-container">';
             html += `<div class="kpi"><div class="kpi-numero">${data.total}</div><div class="kpi-label">TOTAL</div></div>`;
             
-            if (data.porAcceso) {
+            // Recalcular totales por acceso considerando TODOS los filtros activos
+            if (data.detalladoPorAccesoYTipo && data.detalladoPorAccesoYTipo.length > 0) {
+                const accesos = ['Muelle Principal', 'Base 4', 'Base 1'];
+                accesos.forEach(nombreAcceso => {
+                    const totalAcceso = data.detalladoPorAccesoYTipo
+                        .filter(d => d.acceso === nombreAcceso)
+                        .reduce((sum, d) => sum + parseInt(d.total), 0);
+                    if (totalAcceso > 0) {
+                        html += `<div class="kpi"><div class="kpi-numero">${totalAcceso}</div><div class="kpi-label">${nombreAcceso}</div></div>`;
+                    }
+                });
+            } else if (data.porAcceso) {
                 data.porAcceso.forEach(a => {
                     html += `<div class="kpi"><div class="kpi-numero">${a.total}</div><div class="kpi-label">${a.acceso}</div></div>`;
                 });
