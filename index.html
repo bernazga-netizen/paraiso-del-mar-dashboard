@@ -149,14 +149,7 @@
             // Filtrar datos
             datosFiltrados = JSON.parse(JSON.stringify(datosActuales));
 
-            if (filtroTipo && datosFiltrados.porTipo) {
-                datosFiltrados.porTipo = datosFiltrados.porTipo.filter(t => t.tipo_persona === filtroTipo);
-            }
-
-            if (filtroAcceso && datosFiltrados.porAcceso) {
-                datosFiltrados.porAcceso = datosFiltrados.porAcceso.filter(a => a.acceso === filtroAcceso);
-            }
-
+            // Filtrar detalladoPorAccesoYTipo (base para todo)
             if (filtroTipo || filtroAcceso) {
                 if (datosFiltrados.detalladoPorAccesoYTipo) {
                     datosFiltrados.detalladoPorAccesoYTipo = datosFiltrados.detalladoPorAccesoYTipo.filter(d => {
@@ -165,6 +158,32 @@
                         if (filtroAcceso && d.acceso !== filtroAcceso) match = false;
                         return match;
                     });
+
+                    // Recalcular porTipo desde datos filtrados
+                    const tiposMap = {};
+                    datosFiltrados.detalladoPorAccesoYTipo.forEach(d => {
+                        if (!tiposMap[d.tipo_persona]) {
+                            tiposMap[d.tipo_persona] = 0;
+                        }
+                        tiposMap[d.tipo_persona] += parseInt(d.total);
+                    });
+                    datosFiltrados.porTipo = Object.keys(tiposMap).map(tipo => ({
+                        tipo_persona: tipo,
+                        total: tiposMap[tipo]
+                    }));
+
+                    // Recalcular porAcceso desde datos filtrados
+                    const accesosMap = {};
+                    datosFiltrados.detalladoPorAccesoYTipo.forEach(d => {
+                        if (!accesosMap[d.acceso]) {
+                            accesosMap[d.acceso] = 0;
+                        }
+                        accesosMap[d.acceso] += parseInt(d.total);
+                    });
+                    datosFiltrados.porAcceso = Object.keys(accesosMap).map(acceso => ({
+                        acceso: acceso,
+                        total: accesosMap[acceso]
+                    }));
                 }
             }
 
