@@ -666,7 +666,7 @@ async function openModal(id) {
       <div class="detail-field"><label>Dirección</label><p>${r.direccion || '—'}</p></div>
       <div class="detail-field"><label>Total personas</label><p>${r.num_personas}</p></div>
       ${acomps.length ? `<div class="detail-field"><label>Huéspedes adicionales</label>
-        <div class="acomp-list">${acomps.map(n => `<span class="acomp-chip">${n}</span>`).join('')}</div></div>` : ''}
+        <div class="acomp-list">${acomps.map(n => `<span class="acomp-chip">${typeof n === 'object' ? n.nombre : n}</span>`).join('')}</div></div>` : ''}
       ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${r.notas}</p></div>` : ''}
       ${r.pdf_firmado_url
         ? `<div class="detail-field"><label>Documento firmado</label>
@@ -713,7 +713,7 @@ function showToast(msg, title = 'Aviso') {
 
 function fmtDate(d) {
   if (!d) return '—';
-  const clean = d.toString().substring(0, 10); // toma solo YYYY-MM-DD
+  const clean = d.toString().substring(0, 10);
   const dt = new Date(clean + 'T12:00:00');
   return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
 }
