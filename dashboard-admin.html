@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inhouse · Administración — Paraíso del Mar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@400;500;600&display=swap');
+
+  :root {
+    --bg:       #0F0E0C;
+    --bg2:      #181612;
+    --bg3:      #201E1A;
+    --border:   rgba(255,255,255,.08);
+    --gold:     #C9A96E;
+    --gold-dim: rgba(201,169,110,.35);
+    --text:     #E8E2D6;
+    --text-dim: rgba(232,226,214,.45);
+    --text-mid: rgba(232,226,214,.7);
+    --ok:       #6BAE8A;
+    --warn:     #D4955A;
+    --info:     #6A9ED4;
+    --H:        #8BAD7A;  /* homeowner */
+    --R:        #6A9ED4;  /* renter */
+    --G:        #C488A4;  /* guest */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14px; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    font-weight: 400;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-mark {
+    width: 8px;
+    height: 24px;
+    background: var(--gold);
+    border-radius: 1px;
+  }
+  .brand-text {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--text);
+  }
+  .brand-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: .14em;
+    font-family: 'DM Mono', monospace;
+    margin-top: 1px;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--ok);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1} 50%{opacity:.3}
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #clock {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: .1em;
+  }
+  .btn-link {
+    background: none;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 6px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color .15s, background .15s;
+  }
+  .btn-link:hover { border-color: var(--gold); background: rgba(201,169,110,.06); }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+  @media(max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+
+  /* ── Sidebar — contadores ── */
+  .sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .kpi-group { display: flex; flex-direction: column; gap: 8px; }
+  .kpi-label {
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+  .kpi-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 10px 14px;
+  }
+  .kpi-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 3px;
+    letter-spacing: .06em;
+  }
+  .edificio-rows { display: flex; flex-direction: column; gap: 6px; }
+  .edificio-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: var(--bg3);
+    border-radius: 2px;
+    border: 1px solid var(--border);
+  }
+  .edificio-name {
+    font-size: 11px;
+    letter-spacing: .08em;
+    color: var(--text-mid);
+  }
+  .edificio-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+  }
+  .tipo-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .tipo-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    color: var(--text-mid);
+    letter-spacing: .06em;
+  }
+  .tipo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Main ── */
+  .main { padding: 20px 24px; overflow-y: auto; }
+
+  /* ── Filters ── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    align-items: center;
+  }
+  .filter-select, .filter-input {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    color: var(--text-mid);
+    padding: 6px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .06em;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .filter-select:focus, .filter-input:focus { border-color: var(--gold-dim); }
+  .filter-input { width: 180px; }
+  .filter-tab {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .filter-tab.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .filter-spacer { flex: 1; }
+
+  /* ── Table ── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  thead {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+    cursor: pointer;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg3); }
+  td {
+    padding: 10px 12px;
+    color: var(--text-mid);
+    vertical-align: middle;
+  }
+  td.primary { color: var(--text); font-weight: 500; }
+  .tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 400;
+  }
+  .tipo-H { background: rgba(139,173,122,.12); color: var(--H); border: 1px solid rgba(139,173,122,.2); }
+  .tipo-R { background: rgba(106,158,212,.12); color: var(--R); border: 1px solid rgba(106,158,212,.2); }
+  .tipo-G { background: rgba(196,136,164,.12); color: var(--G); border: 1px solid rgba(196,136,164,.2); }
+  .estado-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .estado-activo  { color: var(--ok); }
+  .estado-futuro  { color: var(--info); }
+  .estado-salida  { color: var(--text-dim); }
+  .pdf-icon {
+    font-size: 14px;
+    opacity: .5;
+    transition: opacity .15s;
+    cursor: pointer;
+  }
+  .pdf-icon.has-pdf { opacity: 1; color: var(--gold); }
+  .pdf-icon.has-pdf:hover { opacity: .7; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: .08em;
+  }
+
+  /* ── Modal detalle ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    max-width: 620px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .modal-sub { font-size: 11px; color: var(--text-dim); margin-top: 3px; letter-spacing: .06em; }
+  .modal-close {
+    background: none; border: none; color: var(--text-dim);
+    font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px;
+  }
+  .modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+  .detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .detail-field label {
+    font-size: 9px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .detail-field p { font-size: 13px; color: var(--text); }
+  .acomp-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .acomp-chip {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text-mid);
+  }
+  .modal-actions {
+    padding: 14px 22px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .btn-danger {
+    background: rgba(184,64,64,.12);
+    border: 1px solid rgba(184,64,64,.3);
+    color: #E07070;
+    padding: 7px 16px;
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+
+  /* ── Notificación toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--gold-dim);
+    color: var(--text);
+    padding: 12px 18px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 300;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all .3s ease;
+    max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-title { color: var(--gold); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div>
+      <div class="brand-text">INHOUSE</div>
+      <div class="brand-sub">Paraíso del Mar · Administración</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot"></div>
+    <span id="clock"></span>
+    <a href="registro-form.html" target="_blank" class="btn-link">＋ Nuevo registro</a>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- Sidebar KPIs -->
+  <aside class="sidebar">
+    <div class="kpi-group">
+      <div class="kpi-label">Ocupación hoy</div>
+      <div class="kpi-card">
+        <div class="kpi-val" id="kpi-personas">—</div>
+        <div class="kpi-sub">personas en el desarrollo</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val" id="kpi-unidades">—</div>
+        <div class="kpi-sub">unidades activas</div>
+      </div>
+    </div>
+
+    <div class="kpi-group">
+      <div class="kpi-label">Movimientos hoy</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div class="kpi-card">
+          <div class="kpi-val" style="font-size:22px;color:var(--ok)" id="kpi-ins">—</div>
+          <div class="kpi-sub">Check-ins</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-val" style="font-size:22px;color:var(--warn)" id="kpi-outs">—</div>
+          <div class="kpi-sub">Check-outs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-group">
+      <div class="kpi-label">Por edificio</div>
+      <div class="edificio-rows" id="edificioRows">
+        <div style="color:var(--text-dim);font-size:11px;padding:6px">Cargando…</div>
+      </div>
+    </div>
+
+    <div class="kpi-group">
+      <div class="kpi-label">Leyenda tipo</div>
+      <div class="tipo-legend">
+        <div class="tipo-legend-item"><div class="tipo-dot" style="background:var(--H)"></div>H · Homeowner / Propietario</div>
+        <div class="tipo-legend-item"><div class="tipo-dot" style="background:var(--R)"></div>R · Renter / Renta</div>
+        <div class="tipo-legend-item"><div class="tipo-dot" style="background:var(--G)"></div>G · Guest / Invitado</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <div class="filters">
+      <button class="filter-tab active" onclick="setEstado('activo',this)">Activos</button>
+      <button class="filter-tab"       onclick="setEstado('futuro',this)">Futuros</button>
+      <button class="filter-tab"       onclick="setEstado('salida',this)">Salidas</button>
+      <button class="filter-tab"       onclick="setEstado('',this)">Todos</button>
+
+      <select class="filter-select" id="f-edificio" onchange="applyFilters()">
+        <option value="">Edificio: Todos</option>
+        <option>A</option><option>B</option><option>C</option>
+        <option>D</option><option>E</option><option>F</option>
+        <option value="Casa">Casas</option>
+      </select>
+
+      <select class="filter-select" id="f-tipo" onchange="applyFilters()">
+        <option value="">Tipo: Todos</option>
+        <option value="H">H · Propietario</option>
+        <option value="R">R · Renta</option>
+        <option value="G">G · Invitado</option>
+      </select>
+
+      <div class="filter-spacer"></div>
+      <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="applyFilters()">
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Unidad</th>
+            <th>Huésped titular</th>
+            <th>Tipo</th>
+            <th>Check in</th>
+            <th>Check out</th>
+            <th>Personas</th>
+            <th>Property manager</th>
+            <th>Estado</th>
+            <th>PDF</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="9" class="empty-state">Cargando registros…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">—</div>
+        <div class="modal-sub" id="modalSub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="btnDelete" onclick="deleteActual()">Eliminar registro</button>
+      <button class="btn-link" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toastTitle">Nuevo registro</div>
+  <div id="toastMsg">—</div>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────
+const API_BASE = (window.location.hostname === 'localhost')
+  ? 'http://localhost:3000'
+  : 'https://paraiso-del-mar-backend.onrender.com'; // ← reemplazar
+
+let allData = [];
+let estado  = 'activo';
+let actualId = null;
+
+// ── Clock ────────────────────────────────────────────────────
+function tickClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'America/Mazatlan' });
+}
+tickClock();
+setInterval(tickClock, 1000);
+
+// ── Socket.io — tiempo real ──────────────────────────────────
+try {
+  const socket = io(API_BASE);
+  socket.on('inhouse:nuevo', d => {
+    showToast(`Nueva entrada: ${d.nombre_huesped} · ${d.unidad}`, 'Nuevo registro');
+    loadData();
+  });
+} catch(e) { console.warn('Socket.io no disponible:', e); }
+
+// ── Data loading ─────────────────────────────────────────────
+async function loadData() {
+  try {
+    const params = new URLSearchParams();
+    if (estado) params.set('estado', estado);
+    const f_edificio = document.getElementById('f-edificio').value;
+    const f_tipo     = document.getElementById('f-tipo').value;
+    const f_q        = document.getElementById('f-q').value;
+    if (f_edificio) params.set('edificio', f_edificio);
+    if (f_tipo)     params.set('tipo', f_tipo);
+    if (f_q)        params.set('q', f_q);
+
+    const [dataRes, oc] = await Promise.all([
+      fetch(`${API_BASE}/api/inhouse?${params}`).then(r => r.json()),
+      fetch(`${API_BASE}/api/inhouse/ocupacion`).then(r => r.json())
+    ]);
+
+    allData = dataRes.data || [];
+    renderTable(allData);
+    renderKPIs(oc);
+  } catch(e) {
+    console.error('Error cargando datos:', e);
+    document.getElementById('tableBody').innerHTML =
+      `<tr><td colspan="9" class="empty-state">Error de conexión con el servidor</td></tr>`;
+  }
+}
+
+function applyFilters() { loadData(); }
+
+function setEstado(val, btn) {
+  estado = val;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  loadData();
+}
+
+// ── Render table ─────────────────────────────────────────────
+function renderTable(rows) {
+  const tbody = document.getElementById('tableBody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Sin registros para los filtros seleccionados</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r => {
+    const estCls = `estado-${r.estado}`;
+    const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
+    const tipoCls = `tipo-${r.tipo || 'R'}`;
+    const tipos   = { H:'Homeowner', R:'Renta', G:'Guest', D:'Developer' };
+    const hasPdf  = !!r.pdf_firmado_url;
+    return `
+      <tr onclick="openModal('${r.id}')">
+        <td class="primary" style="font-family:'DM Mono',monospace">${r.unidad}</td>
+        <td class="primary">${r.nombre_huesped}</td>
+        <td><span class="tipo-badge ${tipoCls}">${r.tipo || 'R'} · ${tipos[r.tipo] || ''}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${fmtDate(r.fecha_ingreso)}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px">${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--text-dim)">Sin fecha</span>'}</td>
+        <td style="font-family:'DM Mono',monospace;text-align:center">${r.num_personas}</td>
+        <td>${r.property_manager || '<span style="color:var(--text-dim)">—</span>'}</td>
+        <td><span class="${estCls} estado-badge">${estTxt}</span></td>
+        <td onclick="event.stopPropagation();${hasPdf ? `downloadPdf('${r.id}','${r.unidad}')` : ''}">
+          <span class="pdf-icon ${hasPdf ? 'has-pdf' : ''}" title="${hasPdf ? 'Ver PDF firmado' : 'Sin PDF'}">
+            ${hasPdf ? '📄' : '·'}
+          </span>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+// ── Render KPIs ──────────────────────────────────────────────
+function renderKPIs(oc) {
+  const t = oc.totales || {};
+  document.getElementById('kpi-personas').textContent  = t.personas_activas  || '0';
+  document.getElementById('kpi-unidades').textContent  = t.registros_activos || '0';
+  document.getElementById('kpi-ins').textContent       = t.check_in_hoy      || '0';
+  document.getElementById('kpi-outs').textContent      = t.check_out_hoy     || '0';
+
+  const rows = oc.por_edificio || [];
+  const el   = document.getElementById('edificioRows');
+  if (!rows.length) { el.innerHTML = `<div style="color:var(--text-dim);font-size:11px">Sin datos</div>`; return; }
+  el.innerHTML = rows.map(r => `
+    <div class="edificio-row">
+      <span class="edificio-name">${r.edificio === 'Casa' ? 'Casas' : 'Edif. ' + r.edificio}</span>
+      <span class="edificio-num">${r.personas_total || 0}</span>
+    </div>`).join('');
+}
+
+// ── Modal ────────────────────────────────────────────────────
+async function openModal(id) {
+  actualId = id;
+  try {
+    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(x => x.json());
+    document.getElementById('modalTitle').textContent = r.nombre_huesped;
+    document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · ${r.tipo}`;
+
+    const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-row">
+        <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
+        <div class="detail-field"><label>Tipo</label><p>${{H:'Homeowner',R:'Renta',G:'Guest'}[r.tipo] || r.tipo}</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-field"><label>Check in</label><p>${fmtDate(r.fecha_ingreso)}</p></div>
+        <div class="detail-field"><label>Check out</label><p>${r.fecha_salida ? fmtDate(r.fecha_salida) : 'Sin fecha definida'}</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-field"><label>Email</label><p>${r.email || '—'}</p></div>
+        <div class="detail-field"><label>Teléfono</label><p>${r.telefono || '—'}</p></div>
+      </div>
+      <div class="detail-field"><label>Dirección</label><p>${r.direccion || '—'}</p></div>
+      <div class="detail-field"><label>Total de personas</label><p>${r.num_personas}</p></div>
+      ${acomps.length ? `
+        <div class="detail-field">
+          <label>Huéspedes adicionales</label>
+          <div class="acomp-list">
+            ${acomps.map(n => `<span class="acomp-chip">${n}</span>`).join('')}
+          </div>
+        </div>` : ''}
+      ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${r.notas}</p></div>` : ''}
+      ${r.pdf_firmado_url ? `
+        <div class="detail-field">
+          <label>Documento firmado</label>
+          <button class="btn-link" onclick="downloadPdf('${r.id}','${r.unidad}')">
+            📄 Descargar PDF con firma
+          </button>
+        </div>` : '<div style="font-size:11px;color:var(--text-dim)">Sin PDF adjunto</div>'}
+    `;
+    document.getElementById('modalOverlay').classList.add('open');
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  actualId = null;
+}
+
+async function deleteActual() {
+  if (!actualId) return;
+  if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  try {
+    await fetch(`${API_BASE}/api/inhouse/${actualId}`, { method: 'DELETE' });
+    closeModal();
+    loadData();
+    showToast('Registro eliminado', 'Acción completada');
+  } catch(e) {
+    alert('Error al eliminar: ' + e.message);
+  }
+}
+
+// ── PDF download ─────────────────────────────────────────────
+async function downloadPdf(id, unidad) {
+  try {
+    const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(r => r.json());
+    if (!data.pdf_firmado_url) return;
+    const a = document.createElement('a');
+    a.href = data.pdf_firmado_url;
+    a.download = `PDM_Registro_${unidad.replace(/[^a-zA-Z0-9]/g,'')}.pdf`;
+    a.click();
+  } catch(e) { console.error(e); }
+}
+
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, title = 'Aviso') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent   = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+// ── Date formatting ──────────────────────────────────────────
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ── Init ─────────────────────────────────────────────────────
+loadData();
+setInterval(loadData, 60000); // refresca cada minuto automáticamente
+</script>
+</body>
+</html>
