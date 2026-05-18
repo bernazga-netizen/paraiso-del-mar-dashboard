@@ -6,34 +6,33 @@
 <title>Inhouse · Administración — Paraíso del Mar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@400;500;600&display=swap');
-
+  /* PDM Brand */
   :root {
-    --bg:       #0F0E0C;
-    --bg2:      #181612;
-    --bg3:      #201E1A;
-    --border:   rgba(255,255,255,.08);
-    --gold:     #C9A96E;
-    --gold-dim: rgba(201,169,110,.35);
-    --text:     #E8E2D6;
-    --text-dim: rgba(232,226,214,.45);
-    --text-mid: rgba(232,226,214,.7);
-    --ok:       #6BAE8A;
-    --warn:     #D4955A;
-    --info:     #6A9ED4;
-    --H:        #8BAD7A;  /* homeowner */
-    --R:        #6A9ED4;  /* renter */
-    --G:        #C488A4;  /* guest */
+    --teal:      #007c89;
+    --teal-lt:   #71aeb7;
+    --teal-pale: #e8f4f6;
+    --navy:      #003660;
+    --navy-lt:   #0a4a7a;
+    --emerald:   #006b35;
+    --dust:      #f2efec;
+    --dust-dk:   #e5e0da;
+    --white:     #ffffff;
+    --ink:       #1a2e3a;
+    --ink-mid:   #3d5a66;
+    --border:    #c2d8dd;
+    --ok:        #006b35;
+    --warn:      #c87533;
+    --H:         #006b35;
+    --R:         #007c89;
+    --G:         #5a6fa8;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 14px; }
-
   body {
-    font-family: 'Syne', sans-serif;
-    font-weight: 400;
-    background: var(--bg);
-    color: var(--text);
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 12px;
+    background: var(--dust);
+    color: var(--ink);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -41,167 +40,163 @@
 
   /* ── Top bar ── */
   .topbar {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    background: var(--navy);
+    border-bottom: 3px solid var(--teal);
+    padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
   }
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    gap: 16px;
+  }
   .brand {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
-  .brand-mark {
-    width: 8px;
-    height: 24px;
-    background: var(--gold);
-    border-radius: 1px;
-  }
+  .brand-logo svg { width: 36px; height: 36px; }
   .brand-text {
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: .08em;
-    color: var(--text);
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--white);
   }
   .brand-sub {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: .14em;
-    font-family: 'DM Mono', monospace;
-    margin-top: 1px;
-  }
-  .live-dot {
-    width: 7px; height: 7px;
-    background: var(--ok);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-    flex-shrink: 0;
-  }
-  @keyframes pulse {
-    0%,100%{opacity:1} 50%{opacity:.3}
+    font-size: 9px;
+    color: var(--teal-lt);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-top: 2px;
   }
   .topbar-right {
     display: flex;
     align-items: center;
     gap: 12px;
   }
-  #clock {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: .1em;
-  }
-  .btn-link {
-    background: none;
-    border: 1px solid var(--gold-dim);
-    color: var(--gold);
-    padding: 6px 14px;
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: .12em;
-    border-radius: 2px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
+  .live-pill {
+    display: flex;
     align-items: center;
     gap: 6px;
-    transition: border-color .15s, background .15s;
+    background: rgba(0,124,137,.2);
+    border: 1px solid rgba(0,124,137,.4);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 9px;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    color: var(--teal-lt);
+    text-transform: uppercase;
   }
-  .btn-link:hover { border-color: var(--gold); background: rgba(201,169,110,.06); }
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--teal-lt);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+  #clock {
+    font-size: 11px;
+    color: var(--teal-lt);
+    letter-spacing: 0.06em;
+    font-family: Verdana, sans-serif;
+  }
+  .btn-nuevo {
+    background: var(--teal);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    font-family: Verdana, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background .15s;
+  }
+  .btn-nuevo:hover { background: var(--teal-lt); }
 
   /* ── Layout ── */
   .layout {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 210px 1fr;
     flex: 1;
     min-height: 0;
   }
   @media(max-width: 700px) {
     .layout { grid-template-columns: 1fr; }
-    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
   }
 
-  /* ── Sidebar — contadores ── */
+  /* ── Sidebar ── */
   .sidebar {
-    background: var(--bg2);
+    background: var(--white);
     border-right: 1px solid var(--border);
     padding: 20px 16px;
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
-  .kpi-group { display: flex; flex-direction: column; gap: 8px; }
   .kpi-label {
     font-size: 9px;
-    letter-spacing: .18em;
+    font-weight: bold;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-dim);
-    font-weight: 500;
+    color: var(--teal);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--teal-pale);
   }
   .kpi-card {
-    background: var(--bg3);
+    background: var(--dust);
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 10px 14px;
+    margin-bottom: 6px;
   }
   .kpi-val {
-    font-family: 'DM Mono', monospace;
-    font-size: 28px;
-    font-weight: 300;
-    color: var(--text);
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--navy);
     line-height: 1;
+    font-family: Verdana, sans-serif;
   }
   .kpi-sub {
     font-size: 10px;
-    color: var(--text-dim);
+    color: var(--ink-mid);
     margin-top: 3px;
-    letter-spacing: .06em;
   }
-  .edificio-rows { display: flex; flex-direction: column; gap: 6px; }
+  .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
   .edificio-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 6px 10px;
-    background: var(--bg3);
-    border-radius: 2px;
+    background: var(--dust);
     border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 4px;
   }
-  .edificio-name {
-    font-size: 11px;
-    letter-spacing: .08em;
-    color: var(--text-mid);
-  }
-  .edificio-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 15px;
-    color: var(--text);
-  }
-  .tipo-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .tipo-legend-item {
+  .edificio-name { font-size: 11px; color: var(--ink-mid); font-weight: bold; }
+  .edificio-num  { font-size: 16px; font-weight: bold; color: var(--teal); }
+
+  .tipo-legend { display: flex; flex-direction: column; gap: 6px; }
+  .tipo-item {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     font-size: 10px;
-    color: var(--text-mid);
-    letter-spacing: .06em;
+    color: var(--ink-mid);
   }
-  .tipo-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .tipo-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
   /* ── Main ── */
   .main { padding: 20px 24px; overflow-y: auto; }
@@ -211,63 +206,56 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     align-items: center;
   }
-  .filter-select, .filter-input {
-    background: var(--bg2);
+  .tab {
+    background: var(--white);
     border: 1px solid var(--border);
-    color: var(--text-mid);
-    padding: 6px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: .06em;
-    border-radius: 2px;
-    outline: none;
-    transition: border-color .15s;
-  }
-  .filter-select:focus, .filter-input:focus { border-color: var(--gold-dim); }
-  .filter-input { width: 180px; }
-  .filter-tab {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-dim);
+    color: var(--ink-mid);
     padding: 6px 14px;
-    font-family: 'Syne', sans-serif;
+    font-family: Verdana, sans-serif;
     font-size: 10px;
-    font-weight: 500;
-    letter-spacing: .14em;
+    font-weight: bold;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    border-radius: 2px;
+    border-radius: 3px;
     cursor: pointer;
     transition: all .15s;
   }
-  .filter-tab.active { background: var(--gold); color: var(--bg); border-color: var(--gold); }
+  .tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .filter-select, .filter-input {
+    background: var(--white);
+    border: 1px solid var(--border);
+    color: var(--ink);
+    padding: 6px 10px;
+    font-family: Verdana, sans-serif;
+    font-size: 11px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .filter-select:focus, .filter-input:focus { border-color: var(--teal); }
+  .filter-input { width: 180px; }
   .filter-spacer { flex: 1; }
 
   /* ── Table ── */
   .table-wrap {
+    background: var(--white);
     border: 1px solid var(--border);
     border-radius: 3px;
     overflow: hidden;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-  thead {
-    background: var(--bg3);
-    border-bottom: 1px solid var(--border);
-  }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--navy); }
   th {
     padding: 9px 12px;
     text-align: left;
     font-size: 9px;
-    letter-spacing: .18em;
+    font-weight: bold;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--text-dim);
-    font-weight: 500;
+    color: var(--teal-lt);
     white-space: nowrap;
   }
   tbody tr {
@@ -276,59 +264,43 @@
     cursor: pointer;
   }
   tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--bg3); }
-  td {
-    padding: 10px 12px;
-    color: var(--text-mid);
-    vertical-align: middle;
-  }
-  td.primary { color: var(--text); font-weight: 500; }
+  tbody tr:hover { background: var(--teal-pale); }
+  td { padding: 10px 12px; color: var(--ink-mid); vertical-align: middle; }
+  td.primary { color: var(--ink); font-weight: bold; }
+
   .tipo-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: .08em;
+    display: inline-block;
     padding: 2px 8px;
-    border-radius: 2px;
-    font-weight: 400;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
   }
-  .tipo-H { background: rgba(139,173,122,.12); color: var(--H); border: 1px solid rgba(139,173,122,.2); }
-  .tipo-R { background: rgba(106,158,212,.12); color: var(--R); border: 1px solid rgba(106,158,212,.2); }
-  .tipo-G { background: rgba(196,136,164,.12); color: var(--G); border: 1px solid rgba(196,136,164,.2); }
-  .estado-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-  }
-  .estado-activo  { color: var(--ok); }
-  .estado-futuro  { color: var(--info); }
-  .estado-salida  { color: var(--text-dim); }
-  .pdf-icon {
-    font-size: 14px;
-    opacity: .5;
-    transition: opacity .15s;
-    cursor: pointer;
-  }
-  .pdf-icon.has-pdf { opacity: 1; color: var(--gold); }
+  .tipo-H { background: #e8f5ee; color: var(--H); border: 1px solid #b2d9c3; }
+  .tipo-R { background: var(--teal-pale); color: var(--teal); border: 1px solid var(--border); }
+  .tipo-G { background: #eef0f8; color: var(--G); border: 1px solid #c5cbe8; }
+
+  .estado-activo { color: var(--ok); font-weight: bold; }
+  .estado-futuro { color: var(--teal); font-weight: bold; }
+  .estado-salida { color: var(--ink-mid); }
+
+  .pdf-icon { font-size: 14px; opacity: .3; cursor: default; }
+  .pdf-icon.has-pdf { opacity: 1; cursor: pointer; }
   .pdf-icon.has-pdf:hover { opacity: .7; }
 
   .empty-state {
     text-align: center;
     padding: 60px 20px;
-    color: var(--text-dim);
+    color: var(--ink-mid);
     font-size: 12px;
-    letter-spacing: .08em;
   }
 
-  /* ── Modal detalle ── */
+  /* ── Modal ── */
   .modal-overlay {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.7);
+    background: rgba(0,54,96,.6);
     z-index: 200;
     align-items: center;
     justify-content: center;
@@ -336,79 +308,86 @@
   }
   .modal-overlay.open { display: flex; }
   .modal {
-    background: var(--bg2);
+    background: var(--white);
     border: 1px solid var(--border);
     border-radius: 4px;
-    max-width: 620px;
+    max-width: 600px;
     width: 100%;
     max-height: 85vh;
     overflow-y: auto;
   }
   .modal-header {
-    padding: 18px 22px 14px;
-    border-bottom: 1px solid var(--border);
+    background: var(--navy);
+    padding: 16px 20px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
   }
-  .modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
-  .modal-sub { font-size: 11px; color: var(--text-dim); margin-top: 3px; letter-spacing: .06em; }
-  .modal-close {
-    background: none; border: none; color: var(--text-dim);
-    font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px;
-  }
-  .modal-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
-  .detail-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
+  .modal-title { font-size: 15px; font-weight: bold; color: var(--white); }
+  .modal-sub { font-size: 10px; color: var(--teal-lt); margin-top: 3px; letter-spacing: 0.06em; }
+  .modal-close { background: none; border: none; color: var(--teal-lt); font-size: 20px; cursor: pointer; }
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .detail-field label {
     font-size: 9px;
-    letter-spacing: .16em;
+    font-weight: bold;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--teal);
     display: block;
     margin-bottom: 3px;
   }
-  .detail-field p { font-size: 13px; color: var(--text); }
+  .detail-field p { font-size: 13px; color: var(--ink); }
   .acomp-list { display: flex; flex-wrap: wrap; gap: 6px; }
   .acomp-chip {
-    background: var(--bg3);
+    background: var(--teal-pale);
     border: 1px solid var(--border);
-    border-radius: 2px;
+    border-radius: 3px;
     padding: 3px 10px;
     font-size: 11px;
-    color: var(--text-mid);
+    color: var(--ink-mid);
   }
   .modal-actions {
-    padding: 14px 22px;
+    padding: 14px 20px;
     border-top: 1px solid var(--border);
     display: flex;
     gap: 8px;
     justify-content: flex-end;
   }
   .btn-danger {
-    background: rgba(184,64,64,.12);
-    border: 1px solid rgba(184,64,64,.3);
-    color: #E07070;
+    background: #fdf0ef;
+    border: 1px solid #e8c0c0;
+    color: #c0392b;
     padding: 7px 16px;
-    font-family: 'Syne', sans-serif;
+    font-family: Verdana, sans-serif;
     font-size: 11px;
-    font-weight: 500;
-    letter-spacing: .1em;
-    border-radius: 2px;
+    font-weight: bold;
+    border-radius: 3px;
     cursor: pointer;
   }
+  .btn-sec {
+    background: var(--teal);
+    border: none;
+    color: var(--white);
+    padding: 7px 16px;
+    font-family: Verdana, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-sec:hover { background: var(--navy); }
 
-  /* ── Notificación toast ── */
+  /* ── Toast ── */
   .toast {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    background: var(--bg3);
-    border: 1px solid var(--gold-dim);
-    color: var(--text);
+    background: var(--navy);
+    border: 1px solid var(--teal);
+    color: var(--white);
     padding: 12px 18px;
     border-radius: 3px;
     font-size: 12px;
@@ -419,30 +398,41 @@
     max-width: 300px;
   }
   .toast.show { transform: translateY(0); opacity: 1; }
-  .toast-title { color: var(--gold); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3px; }
+  .toast-title { color: var(--teal-lt); font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="brand">
-    <div class="brand-mark"></div>
-    <div>
-      <div class="brand-text">INHOUSE</div>
-      <div class="brand-sub">Paraíso del Mar · Administración</div>
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 28 V14" stroke="#71aeb7" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M18 16 Q13 9 7 11 Q12 13 15 17" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <path d="M18 16 Q23 9 29 11 Q24 13 21 17" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <path d="M18 19 Q13 14 8 16 Q13 16 16 20" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+          <path d="M18 19 Q23 14 28 16 Q23 16 20 20" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+          <path d="M10 30 Q14 28 18 29 Q22 28 26 30" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-text">Paraíso del Mar</div>
+        <div class="brand-sub">Control Inhouse · Administración</div>
+      </div>
     </div>
-  </div>
-  <div class="topbar-right">
-    <div class="live-dot"></div>
-    <span id="clock"></span>
-    <a href="registro-form.html" target="_blank" class="btn-link">＋ Nuevo registro</a>
+    <div class="topbar-right">
+      <div class="live-pill"><div class="live-dot"></div>En vivo</div>
+      <span id="clock"></span>
+      <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
+    </div>
   </div>
 </div>
 
 <div class="layout">
-  <!-- Sidebar KPIs -->
+  <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="kpi-group">
+    <div>
       <div class="kpi-label">Ocupación hoy</div>
       <div class="kpi-card">
         <div class="kpi-val" id="kpi-personas">—</div>
@@ -454,53 +444,51 @@
       </div>
     </div>
 
-    <div class="kpi-group">
+    <div>
       <div class="kpi-label">Movimientos hoy</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div class="kpi-card">
-          <div class="kpi-val" style="font-size:22px;color:var(--ok)" id="kpi-ins">—</div>
+      <div class="kpi-row">
+        <div class="kpi-card" style="border-left:3px solid var(--ok)">
+          <div class="kpi-val" style="color:var(--ok);font-size:24px" id="kpi-ins">—</div>
           <div class="kpi-sub">Check-ins</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-val" style="font-size:22px;color:var(--warn)" id="kpi-outs">—</div>
+        <div class="kpi-card" style="border-left:3px solid var(--warn)">
+          <div class="kpi-val" style="color:var(--warn);font-size:24px" id="kpi-outs">—</div>
           <div class="kpi-sub">Check-outs</div>
         </div>
       </div>
     </div>
 
-    <div class="kpi-group">
+    <div>
       <div class="kpi-label">Por edificio</div>
-      <div class="edificio-rows" id="edificioRows">
-        <div style="color:var(--text-dim);font-size:11px;padding:6px">Cargando…</div>
-      </div>
+      <div id="edificioRows"><div style="color:var(--ink-mid);font-size:11px;padding:4px">Cargando…</div></div>
     </div>
 
-    <div class="kpi-group">
-      <div class="kpi-label">Leyenda tipo</div>
+    <div>
+      <div class="kpi-label">Leyenda</div>
       <div class="tipo-legend">
-        <div class="tipo-legend-item"><div class="tipo-dot" style="background:var(--H)"></div>H · Homeowner / Propietario</div>
-        <div class="tipo-legend-item"><div class="tipo-dot" style="background:var(--R)"></div>R · Renter / Renta</div>
-        <div class="tipo-legend-item"><div class="tipo-dot" style="background:var(--G)"></div>G · Guest / Invitado</div>
+        <div class="tipo-item"><div class="tipo-dot" style="background:var(--H)"></div>H · Homeowner / Propietario</div>
+        <div class="tipo-item"><div class="tipo-dot" style="background:var(--R)"></div>R · Renter / Renta</div>
+        <div class="tipo-item"><div class="tipo-dot" style="background:var(--G)"></div>G · Guest / Invitado</div>
       </div>
     </div>
   </aside>
 
-  <!-- Main content -->
+  <!-- Main -->
   <main class="main">
     <div class="filters">
-      <button class="filter-tab active" onclick="setEstado('activo',this)">Activos</button>
-      <button class="filter-tab"       onclick="setEstado('futuro',this)">Futuros</button>
-      <button class="filter-tab"       onclick="setEstado('salida',this)">Salidas</button>
-      <button class="filter-tab"       onclick="setEstado('',this)">Todos</button>
+      <button class="tab active" onclick="setEstado('activo',this)">Activos</button>
+      <button class="tab"       onclick="setEstado('futuro',this)">Futuros</button>
+      <button class="tab"       onclick="setEstado('salida',this)">Salidas</button>
+      <button class="tab"       onclick="setEstado('',this)">Todos</button>
 
-      <select class="filter-select" id="f-edificio" onchange="applyFilters()">
+      <select class="filter-select" id="f-edificio" onchange="loadData()">
         <option value="">Edificio: Todos</option>
         <option>A</option><option>B</option><option>C</option>
         <option>D</option><option>E</option><option>F</option>
         <option value="Casa">Casas</option>
       </select>
 
-      <select class="filter-select" id="f-tipo" onchange="applyFilters()">
+      <select class="filter-select" id="f-tipo" onchange="loadData()">
         <option value="">Tipo: Todos</option>
         <option value="H">H · Propietario</option>
         <option value="R">R · Renta</option>
@@ -508,7 +496,7 @@
       </select>
 
       <div class="filter-spacer"></div>
-      <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="applyFilters()">
+      <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="loadData()">
     </div>
 
     <div class="table-wrap">
@@ -521,7 +509,7 @@
             <th>Check in</th>
             <th>Check out</th>
             <th>Personas</th>
-            <th>Property manager</th>
+            <th>Property Manager</th>
             <th>Estado</th>
             <th>PDF</th>
           </tr>
@@ -534,7 +522,7 @@
   </main>
 </div>
 
-<!-- Modal detalle -->
+<!-- Modal -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
@@ -546,114 +534,98 @@
     </div>
     <div class="modal-body" id="modalBody"></div>
     <div class="modal-actions">
-      <button class="btn-danger" id="btnDelete" onclick="deleteActual()">Eliminar registro</button>
-      <button class="btn-link" onclick="closeModal()">Cerrar</button>
+      <button class="btn-danger" onclick="deleteActual()">Eliminar registro</button>
+      <button class="btn-sec" onclick="closeModal()">Cerrar</button>
     </div>
   </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toast">
-  <div class="toast-title" id="toastTitle">Nuevo registro</div>
+  <div class="toast-title" id="toastTitle">Aviso</div>
   <div id="toastMsg">—</div>
 </div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────
-const API_BASE = (window.location.hostname === 'localhost')
-  ? 'http://localhost:3000'
-  : 'https://paraiso-del-mar-backend.onrender.com'; // ← reemplazar
+const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+let estado = 'activo', actualId = null;
 
-let allData = [];
-let estado  = 'activo';
-let actualId = null;
-
-// ── Clock ────────────────────────────────────────────────────
+// Clock
 function tickClock() {
   document.getElementById('clock').textContent =
     new Date().toLocaleString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'America/Mazatlan' });
 }
-tickClock();
-setInterval(tickClock, 1000);
+tickClock(); setInterval(tickClock, 1000);
 
-// ── Socket.io — tiempo real ──────────────────────────────────
+// Socket.io
 try {
   const socket = io(API_BASE);
   socket.on('inhouse:nuevo', d => {
-    showToast(`Nueva entrada: ${d.nombre_huesped} · ${d.unidad}`, 'Nuevo registro');
+    showToast(`${d.nombre_huesped} · ${d.unidad}`, 'Nuevo registro');
     loadData();
   });
-} catch(e) { console.warn('Socket.io no disponible:', e); }
+} catch(e) {}
 
-// ── Data loading ─────────────────────────────────────────────
+// Load data
 async function loadData() {
   try {
     const params = new URLSearchParams();
     if (estado) params.set('estado', estado);
-    const f_edificio = document.getElementById('f-edificio').value;
-    const f_tipo     = document.getElementById('f-tipo').value;
-    const f_q        = document.getElementById('f-q').value;
-    if (f_edificio) params.set('edificio', f_edificio);
-    if (f_tipo)     params.set('tipo', f_tipo);
-    if (f_q)        params.set('q', f_q);
+    const fe = document.getElementById('f-edificio').value;
+    const ft = document.getElementById('f-tipo').value;
+    const fq = document.getElementById('f-q').value;
+    if (fe) params.set('edificio', fe);
+    if (ft) params.set('tipo', ft);
+    if (fq) params.set('q', fq);
 
     const [dataRes, oc] = await Promise.all([
       fetch(`${API_BASE}/api/inhouse?${params}`).then(r => r.json()),
       fetch(`${API_BASE}/api/inhouse/ocupacion`).then(r => r.json())
     ]);
 
-    allData = dataRes.data || [];
-    renderTable(allData);
+    renderTable(dataRes.data || []);
     renderKPIs(oc);
   } catch(e) {
-    console.error('Error cargando datos:', e);
     document.getElementById('tableBody').innerHTML =
       `<tr><td colspan="9" class="empty-state">Error de conexión con el servidor</td></tr>`;
   }
 }
 
-function applyFilters() { loadData(); }
-
 function setEstado(val, btn) {
   estado = val;
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
   loadData();
 }
 
-// ── Render table ─────────────────────────────────────────────
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
     tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Sin registros para los filtros seleccionados</td></tr>`;
     return;
   }
+  const tipos = { H:'Homeowner', R:'Renta', G:'Guest' };
   tbody.innerHTML = rows.map(r => {
     const estCls = `estado-${r.estado}`;
     const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
-    const tipoCls = `tipo-${r.tipo || 'R'}`;
-    const tipos   = { H:'Homeowner', R:'Renta', G:'Guest', D:'Developer' };
-    const hasPdf  = !!r.pdf_firmado_url;
+    const hasPdf = !!r.pdf_firmado_url;
     return `
       <tr onclick="openModal('${r.id}')">
-        <td class="primary" style="font-family:'DM Mono',monospace">${r.unidad}</td>
+        <td class="primary">${r.unidad}</td>
         <td class="primary">${r.nombre_huesped}</td>
-        <td><span class="tipo-badge ${tipoCls}">${r.tipo || 'R'} · ${tipos[r.tipo] || ''}</span></td>
-        <td style="font-family:'DM Mono',monospace;font-size:11px">${fmtDate(r.fecha_ingreso)}</td>
-        <td style="font-family:'DM Mono',monospace;font-size:11px">${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--text-dim)">Sin fecha</span>'}</td>
-        <td style="font-family:'DM Mono',monospace;text-align:center">${r.num_personas}</td>
-        <td>${r.property_manager || '<span style="color:var(--text-dim)">—</span>'}</td>
-        <td><span class="${estCls} estado-badge">${estTxt}</span></td>
+        <td><span class="tipo-badge tipo-${r.tipo || 'R'}">${r.tipo} · ${tipos[r.tipo] || ''}</span></td>
+        <td>${fmtDate(r.fecha_ingreso)}</td>
+        <td>${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--ink-mid);font-size:10px">Sin fecha</span>'}</td>
+        <td style="text-align:center;font-weight:bold">${r.num_personas}</td>
+        <td>${r.property_manager || '<span style="color:var(--ink-mid)">—</span>'}</td>
+        <td><span class="${estCls}">${estTxt}</span></td>
         <td onclick="event.stopPropagation();${hasPdf ? `downloadPdf('${r.id}','${r.unidad}')` : ''}">
-          <span class="pdf-icon ${hasPdf ? 'has-pdf' : ''}" title="${hasPdf ? 'Ver PDF firmado' : 'Sin PDF'}">
-            ${hasPdf ? '📄' : '·'}
-          </span>
+          <span class="pdf-icon ${hasPdf ? 'has-pdf' : ''}" title="${hasPdf ? 'Descargar PDF firmado' : 'Sin PDF'}">📄</span>
         </td>
       </tr>`;
   }).join('');
 }
 
-// ── Render KPIs ──────────────────────────────────────────────
 function renderKPIs(oc) {
   const t = oc.totales || {};
   document.getElementById('kpi-personas').textContent  = t.personas_activas  || '0';
@@ -661,9 +633,9 @@ function renderKPIs(oc) {
   document.getElementById('kpi-ins').textContent       = t.check_in_hoy      || '0';
   document.getElementById('kpi-outs').textContent      = t.check_out_hoy     || '0';
 
+  const el = document.getElementById('edificioRows');
   const rows = oc.por_edificio || [];
-  const el   = document.getElementById('edificioRows');
-  if (!rows.length) { el.innerHTML = `<div style="color:var(--text-dim);font-size:11px">Sin datos</div>`; return; }
+  if (!rows.length) { el.innerHTML = `<div style="color:var(--ink-mid);font-size:11px">Sin datos</div>`; return; }
   el.innerHTML = rows.map(r => `
     <div class="edificio-row">
       <span class="edificio-name">${r.edificio === 'Casa' ? 'Casas' : 'Edif. ' + r.edificio}</span>
@@ -671,16 +643,13 @@ function renderKPIs(oc) {
     </div>`).join('');
 }
 
-// ── Modal ────────────────────────────────────────────────────
 async function openModal(id) {
   actualId = id;
   try {
     const { data: r } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(x => x.json());
     document.getElementById('modalTitle').textContent = r.nombre_huesped;
-    document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · ${r.tipo}`;
-
+    document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
     const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
-
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
         <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
@@ -688,34 +657,25 @@ async function openModal(id) {
       </div>
       <div class="detail-row">
         <div class="detail-field"><label>Check in</label><p>${fmtDate(r.fecha_ingreso)}</p></div>
-        <div class="detail-field"><label>Check out</label><p>${r.fecha_salida ? fmtDate(r.fecha_salida) : 'Sin fecha definida'}</p></div>
+        <div class="detail-field"><label>Check out</label><p>${r.fecha_salida ? fmtDate(r.fecha_salida) : 'Sin fecha'}</p></div>
       </div>
       <div class="detail-row">
         <div class="detail-field"><label>Email</label><p>${r.email || '—'}</p></div>
         <div class="detail-field"><label>Teléfono</label><p>${r.telefono || '—'}</p></div>
       </div>
       <div class="detail-field"><label>Dirección</label><p>${r.direccion || '—'}</p></div>
-      <div class="detail-field"><label>Total de personas</label><p>${r.num_personas}</p></div>
-      ${acomps.length ? `
-        <div class="detail-field">
-          <label>Huéspedes adicionales</label>
-          <div class="acomp-list">
-            ${acomps.map(n => `<span class="acomp-chip">${n}</span>`).join('')}
-          </div>
-        </div>` : ''}
+      <div class="detail-field"><label>Total personas</label><p>${r.num_personas}</p></div>
+      ${acomps.length ? `<div class="detail-field"><label>Huéspedes adicionales</label>
+        <div class="acomp-list">${acomps.map(n => `<span class="acomp-chip">${n}</span>`).join('')}</div></div>` : ''}
       ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${r.notas}</p></div>` : ''}
-      ${r.pdf_firmado_url ? `
-        <div class="detail-field">
-          <label>Documento firmado</label>
-          <button class="btn-link" onclick="downloadPdf('${r.id}','${r.unidad}')">
-            📄 Descargar PDF con firma
-          </button>
-        </div>` : '<div style="font-size:11px;color:var(--text-dim)">Sin PDF adjunto</div>'}
+      ${r.pdf_firmado_url
+        ? `<div class="detail-field"><label>Documento firmado</label>
+            <button class="btn-sec" onclick="downloadPdf('${r.id}','${r.unidad}')">📄 Descargar PDF firmado</button>
+           </div>`
+        : `<div style="font-size:11px;color:var(--ink-mid)">Sin PDF adjunto</div>`}
     `;
     document.getElementById('modalOverlay').classList.add('open');
-  } catch(e) {
-    console.error(e);
-  }
+  } catch(e) { console.error(e); }
 }
 
 function closeModal() {
@@ -724,19 +684,14 @@ function closeModal() {
 }
 
 async function deleteActual() {
-  if (!actualId) return;
-  if (!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  if (!actualId || !confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
   try {
     await fetch(`${API_BASE}/api/inhouse/${actualId}`, { method: 'DELETE' });
-    closeModal();
-    loadData();
+    closeModal(); loadData();
     showToast('Registro eliminado', 'Acción completada');
-  } catch(e) {
-    alert('Error al eliminar: ' + e.message);
-  }
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
-// ── PDF download ─────────────────────────────────────────────
 async function downloadPdf(id, unidad) {
   try {
     const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(r => r.json());
@@ -748,25 +703,22 @@ async function downloadPdf(id, unidad) {
   } catch(e) { console.error(e); }
 }
 
-// ── Toast ────────────────────────────────────────────────────
 function showToast(msg, title = 'Aviso') {
   const t = document.getElementById('toast');
   document.getElementById('toastTitle').textContent = title;
-  document.getElementById('toastMsg').textContent   = msg;
+  document.getElementById('toastMsg').textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 4500);
 }
 
-// ── Date formatting ──────────────────────────────────────────
 function fmtDate(d) {
   if (!d) return '—';
   const dt = new Date(d + 'T12:00:00');
   return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
 }
 
-// ── Init ─────────────────────────────────────────────────────
 loadData();
-setInterval(loadData, 60000); // refresca cada minuto automáticamente
+setInterval(loadData, 60000);
 </script>
 </body>
 </html>
