@@ -799,6 +799,17 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
     return;
   }
+
+  // Validación de fechas
+const fechaIn  = document.getElementById('fecha_ingreso').value;
+const fechaOut = document.getElementById('fecha_salida').value;
+if (fechaOut && fechaOut <= fechaIn) {
+  document.getElementById('fecha_salida').classList.add('error');
+  alert('La fecha de salida debe ser posterior a la fecha de llegada.');
+  return;
+} else {
+  document.getElementById('fecha_salida').classList.remove('error');
+}
   if (!valid) return;
 
   const acompanantes = [];
