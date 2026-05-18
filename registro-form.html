@@ -6,7 +6,6 @@
 <title>Registro de Huéspedes — Paraíso del Mar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  /* PDM Brand Colors */
   :root {
     --teal:       #007c89;
     --teal-lt:    #71aeb7;
@@ -24,110 +23,27 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Verdana, Geneva, sans-serif; font-size: 13px; background: var(--dust); color: var(--ink); min-height: 100vh; }
 
-  body {
-    font-family: Verdana, Geneva, sans-serif;
-    font-size: 13px;
-    background: var(--dust);
-    color: var(--ink);
-    min-height: 100vh;
-  }
+  .header { background: var(--navy); padding: 0; }
+  .header-inner { max-width: 780px; margin: 0 auto; padding: 20px 24px; display: flex; align-items: center; gap: 18px; }
+  .logo-mark svg { width: 52px; height: 52px; }
+  .header-text h1 { font-family: Verdana, sans-serif; font-size: 20px; font-weight: bold; color: var(--white); letter-spacing: 0.12em; text-transform: uppercase; }
+  .header-text h1 span { display: block; font-size: 11px; font-weight: normal; letter-spacing: 0.2em; color: var(--teal-lt); margin-top: 2px; }
+  .header-rule { height: 4px; background: linear-gradient(90deg, var(--teal) 0%, var(--teal-lt) 60%, transparent 100%); }
 
-  /* ── Header ── */
-  .header {
-    background: var(--navy);
-    padding: 0;
-  }
-  .header-inner {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  /* SVG logo mark — agave/palm estilizado en teal */
-  .logo-mark svg {
-    width: 52px;
-    height: 52px;
-  }
-  .header-text h1 {
-    font-family: Verdana, sans-serif;
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--white);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-  .header-text h1 span {
-    display: block;
-    font-size: 11px;
-    font-weight: normal;
-    letter-spacing: 0.2em;
-    color: var(--teal-lt);
-    margin-top: 2px;
-  }
-  .header-rule {
-    height: 4px;
-    background: linear-gradient(90deg, var(--teal) 0%, var(--teal-lt) 60%, transparent 100%);
-  }
+  .container { max-width: 780px; margin: 0 auto; padding: 32px 24px 80px; }
 
-  /* ── Container ── */
-  .container {
-    max-width: 780px;
-    margin: 0 auto;
-    padding: 32px 24px 80px;
-  }
-
-  /* ── Status messages ── */
-  .status-box {
-    display: none;
-    border-radius: 3px;
-    padding: 18px 22px;
-    margin-bottom: 20px;
-    font-size: 13px;
-    line-height: 1.6;
-  }
+  .status-box { display: none; border-radius: 3px; padding: 18px 22px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
   .status-box.ok  { background: #e8f5ee; border-left: 4px solid var(--ok);  color: var(--ok); }
   .status-box.err { background: #fdf0ef; border-left: 4px solid var(--err); color: var(--err); }
 
-  /* ── Section card ── */
-  .section {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .section-header {
-    background: var(--navy);
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-num {
-    width: 20px; height: 20px;
-    background: var(--teal);
-    color: var(--white);
-    font-size: 11px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .section-title {
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--teal-lt);
-  }
+  .section { background: var(--white); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
+  .section-header { background: var(--navy); padding: 10px 20px; display: flex; align-items: center; gap: 10px; }
+  .section-num { width: 20px; height: 20px; background: var(--teal); color: var(--white); font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
+  .section-title { font-size: 10px; font-weight: bold; letter-spacing: 0.18em; text-transform: uppercase; color: var(--teal-lt); }
   .section-body { padding: 20px; }
 
-  /* ── Fields ── */
   .row { display: grid; gap: 14px; margin-bottom: 14px; }
   .row:last-child { margin-bottom: 0; }
   .row-2 { grid-template-columns: 1fr 1fr; }
@@ -136,214 +52,54 @@
   @media(max-width: 560px) { .row-2, .row-3 { grid-template-columns: 1fr; } }
 
   .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label {
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-mid);
-  }
+  .field label { font-size: 10px; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mid); }
   .field label .req { color: var(--teal); margin-left: 2px; }
-  .field input, .field select, .field textarea {
-    border: 1px solid var(--border);
-    background: var(--white);
-    padding: 9px 11px;
-    font-family: Verdana, sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    border-radius: 3px;
-    outline: none;
-    transition: border-color .15s;
-    width: 100%;
+  .field input, .field select {
+    border: 1px solid var(--border); background: var(--white);
+    padding: 9px 11px; font-family: Verdana, sans-serif;
+    font-size: 13px; color: var(--ink); border-radius: 3px;
+    outline: none; transition: border-color .15s; width: 100%;
   }
   .field input:focus, .field select:focus { border-color: var(--teal); }
   .field input.error { border-color: var(--err); }
 
-  /* ── Tipo selector ── */
   .tipo-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .tipo-opt { display: none; }
-  .tipo-label {
-    padding: 7px 14px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-size: 11px;
-    font-weight: bold;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: all .15s;
-    color: var(--ink-mid);
-    background: var(--dust);
-  }
-  .tipo-opt:checked + .tipo-label {
-    background: var(--teal);
-    color: var(--white);
-    border-color: var(--teal);
-  }
+  .tipo-label { padding: 7px 14px; border: 1px solid var(--border); border-radius: 3px; font-size: 11px; font-weight: bold; letter-spacing: 0.08em; cursor: pointer; transition: all .15s; color: var(--ink-mid); background: var(--dust); }
+  .tipo-opt:checked + .tipo-label { background: var(--teal); color: var(--white); border-color: var(--teal); }
 
-  /* ── Guest grid ── */
   .guests-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media(max-width: 480px) { .guests-grid { grid-template-columns: 1fr; } }
-  .guest-field {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid var(--border);
-    padding: 7px 11px;
-    border-radius: 3px;
-    background: var(--dust);
-  }
-  .guest-num {
-    font-size: 11px;
-    font-weight: bold;
-    color: var(--teal);
-    min-width: 16px;
-  }
-  .guest-field input {
-    border: none;
-    background: transparent;
-    font-family: Verdana, sans-serif;
-    font-size: 13px;
-    color: var(--ink);
-    outline: none;
-    width: 100%;
-  }
+  .guest-field { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); padding: 7px 11px; border-radius: 3px; background: var(--dust); }
+  .guest-num { font-size: 11px; font-weight: bold; color: var(--teal); min-width: 16px; }
+  .guest-field input { border: none; background: transparent; font-family: Verdana, sans-serif; font-size: 13px; color: var(--ink); outline: none; width: 100%; }
 
-  /* ── Checkboxes ── */
   .check-group { display: flex; flex-direction: column; gap: 10px; }
   .check-item { display: flex; gap: 11px; cursor: pointer; align-items: flex-start; }
   .check-item input[type=checkbox] { display: none; }
-  .check-box {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border);
-    flex-shrink: 0;
-    margin-top: 1px;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .15s;
-  }
-  .check-item input:checked ~ .check-box {
-    background: var(--teal);
-    border-color: var(--teal);
-  }
-  .check-item input:checked ~ .check-box::after {
-    content: '';
-    width: 9px; height: 5px;
-    border-left: 2px solid white;
-    border-bottom: 2px solid white;
-    transform: rotate(-45deg) translateY(-1px);
-  }
+  .check-box { width: 18px; height: 18px; border: 2px solid var(--border); flex-shrink: 0; margin-top: 1px; border-radius: 2px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .check-item input:checked ~ .check-box { background: var(--teal); border-color: var(--teal); }
+  .check-item input:checked ~ .check-box::after { content: ''; width: 9px; height: 5px; border-left: 2px solid white; border-bottom: 2px solid white; transform: rotate(-45deg) translateY(-1px); }
   .check-text { font-size: 12px; line-height: 1.6; color: var(--ink-mid); }
-  .check-text strong {
-    color: var(--ink);
-    font-weight: bold;
-    display: block;
-    margin-bottom: 1px;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
+  .check-text strong { color: var(--ink); font-weight: bold; display: block; margin-bottom: 1px; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
 
-  /* ── Legal text ── */
-  .legal-text {
-    font-size: 12px;
-    line-height: 1.7;
-    color: var(--ink-mid);
-    padding: 14px 16px;
-    background: var(--teal-pale);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    margin-bottom: 14px;
-  }
+  .legal-text { font-size: 12px; line-height: 1.7; color: var(--ink-mid); padding: 14px 16px; background: var(--teal-pale); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 14px; }
 
-  /* ── Firma ── */
-  .firma-wrap {
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-  .firma-bar {
-    background: var(--dust-dk);
-    padding: 7px 14px;
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-mid);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #firma-canvas {
-    display: block;
-    width: 100%;
-    height: 160px;
-    cursor: crosshair;
-    background: var(--white);
-    touch-action: none;
-  }
-  .firma-actions {
-    padding: 7px 14px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: flex-end;
-  }
-  .btn-clear {
-    font-family: Verdana, sans-serif;
-    font-size: 11px;
-    color: var(--ink-mid);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 4px 8px;
-    opacity: .6;
-    transition: opacity .15s;
-  }
+  .firma-wrap { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+  .firma-bar { background: var(--dust-dk); padding: 7px 14px; font-size: 10px; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mid); display: flex; justify-content: space-between; align-items: center; }
+  #firma-canvas { display: block; width: 100%; height: 160px; cursor: crosshair; background: var(--white); touch-action: none; }
+  .firma-actions { padding: 7px 14px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+  .btn-clear { font-family: Verdana, sans-serif; font-size: 11px; color: var(--ink-mid); background: none; border: none; cursor: pointer; padding: 4px 8px; opacity: .6; transition: opacity .15s; }
   .btn-clear:hover { opacity: 1; }
 
-  /* ── Submit ── */
   .submit-area { margin-top: 24px; }
-  .btn-submit {
-    width: 100%;
-    background: var(--teal);
-    color: var(--white);
-    border: none;
-    padding: 15px 32px;
-    font-family: Verdana, sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: background .2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
+  .btn-submit { width: 100%; background: var(--teal); color: var(--white); border: none; padding: 15px 32px; font-family: Verdana, sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; border-radius: 3px; transition: background .2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .btn-submit:hover { background: var(--navy); }
   .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
-  .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    display: none;
-  }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Footer ── */
-  .page-footer {
-    margin-top: 32px;
-    text-align: center;
-    font-size: 10px;
-    color: var(--ink-mid);
-    letter-spacing: 0.08em;
-    opacity: .6;
-  }
+  .page-footer { margin-top: 32px; text-align: center; font-size: 10px; color: var(--ink-mid); letter-spacing: 0.08em; opacity: .6; }
 </style>
 </head>
 <body>
@@ -351,16 +107,13 @@
 <header class="header">
   <div class="header-inner">
     <div class="logo-mark">
-      <!-- Agave icon — PDM brand mark style -->
       <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="26" cy="26" r="25" stroke="#71aeb7" stroke-width="1"/>
-        <!-- agave leaves -->
         <path d="M26 38 V20" stroke="#71aeb7" stroke-width="1.5" stroke-linecap="round"/>
         <path d="M26 22 Q20 14 12 16 Q18 18 22 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
         <path d="M26 22 Q32 14 40 16 Q34 18 30 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
         <path d="M26 26 Q19 20 13 23 Q19 23 23 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
         <path d="M26 26 Q33 20 39 23 Q33 23 29 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-        <!-- water line -->
         <path d="M16 41 Q21 38 26 40 Q31 38 36 41" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
       </svg>
     </div>
@@ -376,7 +129,7 @@
   <div id="status-ok" class="status-box ok">
     ✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.
   </div>
-  <div id="status-err" class="status-box err" id="status-err">
+  <div id="status-err" class="status-box err">
     Error al enviar el registro. Por favor intente de nuevo o contacte a administración.
   </div>
 
@@ -532,7 +285,6 @@
       </div>
     </div>
 
-    <!-- SUBMIT -->
     <div class="submit-area">
       <button type="submit" class="btn-submit" id="btnSubmit">
         <div class="spinner" id="spinner"></div>
@@ -567,7 +319,6 @@ async function loadManagers() {
 }
 loadManagers();
 
-// Prefill PM from URL param
 const urlPm = new URLSearchParams(window.location.search).get('pm');
 if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = urlPm; }, 500);
 
@@ -623,7 +374,7 @@ function clearFirma() {
   updateFirmaStatus();
 }
 
-// ── PDF generation ───────────────────────────────────────────
+// ── PDF ───────────────────────────────────────────────────────
 function formatDate(d) {
   if (!d) return '';
   const [y, m, day] = d.split('-');
@@ -637,13 +388,10 @@ async function generarPDF(data, firmaDataURL) {
   const W = 215.9, M = 18;
   let y = 18;
 
-  // Header — Navy
   doc.setFillColor(0, 54, 96);
   doc.rect(0, 0, W, 32, 'F');
-  // Teal accent line
   doc.setFillColor(0, 124, 137);
   doc.rect(0, 32, W, 3, 'F');
-
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
@@ -656,9 +404,6 @@ async function generarPDF(data, firmaDataURL) {
   doc.text('GUEST REGISTRATION FORM · FORMA DE REGISTRO DE HUÉSPEDES', W / 2, 23, { align: 'center' });
 
   y = 44;
-  doc.setTextColor(26, 46, 58);
-
-  // Unidad y fechas
   doc.setFillColor(232, 244, 246);
   doc.rect(M, y - 5, W - M * 2, 10, 'F');
   doc.setFont('helvetica', 'bold');
@@ -677,45 +422,28 @@ async function generarPDF(data, firmaDataURL) {
   ];
   doc.setFont('helvetica', 'normal');
   campos.forEach(([lbl, val]) => {
-    doc.setFontSize(7);
-    doc.setTextColor(100, 120, 130);
-    doc.text(lbl + ':', M, y);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(26, 46, 58);
-    doc.text(val, M, y + 5);
-    doc.setFont('helvetica', 'normal');
-    doc.setDrawColor(194, 216, 221);
-    doc.line(M, y + 7, W - M, y + 7);
+    doc.setFontSize(7); doc.setTextColor(100, 120, 130); doc.text(lbl + ':', M, y);
+    doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 46, 58); doc.text(val, M, y + 5);
+    doc.setFont('helvetica', 'normal'); doc.setDrawColor(194, 216, 221); doc.line(M, y + 7, W - M, y + 7);
     y += 13;
   });
 
-  // Acompañantes
   if (data.acompanantes && data.acompanantes.length > 0) {
     y += 3;
-    doc.setFontSize(7);
-    doc.setTextColor(100, 120, 130);
+    doc.setFontSize(7); doc.setTextColor(100, 120, 130);
     doc.text('COMPLETE NAMES OF ALL OTHER GUESTS / NOMBRES COMPLETOS DE LOS DEMÁS HUÉSPEDES', M, y);
     y += 6;
     const colW = (W - M * 2) / 2;
     data.acompanantes.forEach((nombre, i) => {
       const col = i % 2, row = Math.floor(i / 2);
       const xPos = M + col * colW, yPos = y + row * 8;
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 120, 130);
-      doc.text(`${i + 1}.`, xPos, yPos);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(26, 46, 58);
-      doc.text(nombre, xPos + 5, yPos);
-      doc.setFont('helvetica', 'normal');
-      doc.setDrawColor(194, 216, 221);
-      doc.line(xPos + 5, yPos + 1.5, xPos + colW - 4, yPos + 1.5);
+      doc.setFontSize(7.5); doc.setTextColor(100, 120, 130); doc.text(`${i + 1}.`, xPos, yPos);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(26, 46, 58); doc.text(nombre, xPos + 5, yPos);
+      doc.setFont('helvetica', 'normal'); doc.setDrawColor(194, 216, 221); doc.line(xPos + 5, yPos + 1.5, xPos + colW - 4, yPos + 1.5);
     });
     y += Math.ceil(data.acompanantes.length / 2) * 8 + 4;
   }
 
-  // Legal
   y += 4;
   doc.setFillColor(232, 244, 246);
   const legalLines = doc.splitTextToSize(
@@ -723,94 +451,72 @@ async function generarPDF(data, firmaDataURL) {
     W - M * 2 - 4
   );
   doc.rect(M, y - 3, W - M * 2, legalLines.length * 4.2 + 4, 'F');
-  doc.setFontSize(7.5);
-  doc.setTextColor(61, 90, 102);
-  doc.text(legalLines, M + 2, y + 1);
+  doc.setFontSize(7.5); doc.setTextColor(61, 90, 102); doc.text(legalLines, M + 2, y + 1);
   y += legalLines.length * 4.2 + 8;
 
-  // Checkboxes
   const checks = [
     [data.acepta_reglamento,  'He leído y acepto el reglamento · I have read and agree to the rules'],
     [data.interesado_comprar, 'Interesado en propiedades en La Paz · Interested in looking at property'],
     [data.recibir_info,       'Desea recibir información sobre promociones y eventos'],
   ];
   checks.forEach(([checked, text]) => {
-    doc.setDrawColor(0, 124, 137);
-    doc.setFillColor(0, 124, 137);
+    doc.setDrawColor(0, 124, 137); doc.setFillColor(0, 124, 137);
     doc.rect(M, y - 3.2, 4, 4, checked ? 'F' : 'S');
-    if (checked) {
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(6);
-      doc.text('✓', M + 0.8, y + 0.2);
-    }
-    doc.setTextColor(61, 90, 102);
-    doc.setFontSize(8);
-    doc.text(text, M + 6, y);
+    if (checked) { doc.setTextColor(255,255,255); doc.setFontSize(6); doc.text('✓', M + 0.8, y + 0.2); }
+    doc.setTextColor(61, 90, 102); doc.setFontSize(8); doc.text(text, M + 6, y);
     y += 7;
   });
 
-  // Firma
   y += 6;
-  doc.setDrawColor(194, 216, 221);
-  doc.line(M, y + 18, M + 80, y + 18);
-  doc.setFontSize(7);
-  doc.setTextColor(100, 120, 130);
-  doc.text('Firma · Signature', M, y + 22);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(26, 46, 58);
-  doc.text(data.nombre_huesped, M, y + 28);
+  doc.setDrawColor(194, 216, 221); doc.line(M, y + 18, M + 80, y + 18);
+  doc.setFontSize(7); doc.setTextColor(100, 120, 130); doc.text('Firma · Signature', M, y + 22);
+  doc.setFont('helvetica', 'bold'); doc.setTextColor(26, 46, 58); doc.text(data.nombre_huesped, M, y + 28);
+  if (firmaDataURL) { try { doc.addImage(firmaDataURL, 'PNG', M, y, 80, 20); } catch(e) {} }
 
-  if (firmaDataURL) {
-    try { doc.addImage(firmaDataURL, 'PNG', M, y, 80, 20); } catch(e) {}
-  }
-
-  // Footer
-  doc.setFillColor(0, 54, 96);
-  doc.rect(0, 272, W, 8, 'F');
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.5);
-  doc.setTextColor(113, 174, 183);
+  doc.setFillColor(0, 54, 96); doc.rect(0, 272, W, 8, 'F');
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(113, 174, 183);
   const ahora = new Date().toLocaleString('es-MX', { timeZone: 'America/Mazatlan' });
   doc.text(`Paraíso del Mar · La Paz, BCS · Registro generado: ${ahora}`, W / 2, 277, { align: 'center' });
 
   return doc.output('datauristring');
 }
 
-// ── Submit ───────────────────────────────────────────────────
+// ── Submit ────────────────────────────────────────────────────
 document.getElementById('regForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
+  // 1. Campos requeridos
   let valid = true;
   ['unidad','nombre_huesped','fecha_ingreso'].forEach(id => {
     const el = document.getElementById(id);
     if (!el.value.trim()) { el.classList.add('error'); valid = false; }
     else el.classList.remove('error');
   });
+  if (!valid) return;
 
+  // 2. Validación de fechas
+  const fechaIn  = document.getElementById('fecha_ingreso').value;
+  const fechaOut = document.getElementById('fecha_salida').value;
+  if (fechaOut && fechaOut <= fechaIn) {
+    document.getElementById('fecha_salida').classList.add('error');
+    alert('La fecha de salida debe ser posterior a la fecha de llegada.\nThe check-out date must be after the check-in date.');
+    return;
+  }
+  document.getElementById('fecha_salida').classList.remove('error');
+
+  // 3. Firma
   if (!hasFirma) {
     document.getElementById('firmaWrap').style.borderColor = 'var(--err)';
-    alert('Por favor firme el formulario antes de enviar. · Please sign the form before submitting.');
+    alert('Por favor firme el formulario antes de enviar.\nPlease sign the form before submitting.');
     return;
-  } else {
-    document.getElementById('firmaWrap').style.borderColor = 'var(--border)';
   }
+  document.getElementById('firmaWrap').style.borderColor = 'var(--border)';
 
+  // 4. Reglamento
   if (!document.getElementById('acepta_reglamento').checked) {
     alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
     return;
   }
-
-  // Validación de fechas
-const fechaIn  = document.getElementById('fecha_ingreso').value;
-const fechaOut = document.getElementById('fecha_salida').value;
-if (fechaOut && fechaOut <= fechaIn) {
-  document.getElementById('fecha_salida').classList.add('error');
-  alert('La fecha de salida debe ser posterior a la fecha de llegada.');
-  return;
-} else {
-  document.getElementById('fecha_salida').classList.remove('error');
-}
-  if (!valid) return;
 
   const acompanantes = [];
   for (let i = 1; i <= 8; i++) {
@@ -822,19 +528,19 @@ if (fechaOut && fechaOut <= fechaIn) {
   const firmaDataURL = canvas.toDataURL('image/png');
 
   const payload = {
-    unidad:             document.getElementById('unidad').value.trim(),
+    unidad:              document.getElementById('unidad').value.trim(),
     tipo,
     property_manager_id: document.getElementById('property_manager_id').value || null,
-    nombre_huesped:     document.getElementById('nombre_huesped').value.trim(),
-    email:              document.getElementById('email').value.trim(),
-    telefono:           document.getElementById('telefono').value.trim(),
-    direccion:          document.getElementById('direccion').value.trim(),
-    fecha_ingreso:      document.getElementById('fecha_ingreso').value,
-    fecha_salida:       document.getElementById('fecha_salida').value || null,
-    num_personas:       acompanantes.length + 1,
-    acepta_reglamento:  document.getElementById('acepta_reglamento').checked,
-    interesado_comprar: document.getElementById('interesado_comprar').checked,
-    recibir_info:       document.getElementById('recibir_info').checked,
+    nombre_huesped:      document.getElementById('nombre_huesped').value.trim(),
+    email:               document.getElementById('email').value.trim(),
+    telefono:            document.getElementById('telefono').value.trim(),
+    direccion:           document.getElementById('direccion').value.trim(),
+    fecha_ingreso:       fechaIn,
+    fecha_salida:        fechaOut || null,
+    num_personas:        acompanantes.length + 1,
+    acepta_reglamento:   document.getElementById('acepta_reglamento').checked,
+    interesado_comprar:  document.getElementById('interesado_comprar').checked,
+    recibir_info:        document.getElementById('recibir_info').checked,
     acompanantes,
     firma_imagen: firmaDataURL,
   };
@@ -862,7 +568,6 @@ if (fechaOut && fechaOut <= fechaIn) {
     document.getElementById('regForm').style.display = 'none';
     window.scrollTo(0, 0);
 
-    // Auto-download PDF
     const link = document.createElement('a');
     link.href = pdfDataURI;
     link.download = `PDM_Registro_${payload.unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
