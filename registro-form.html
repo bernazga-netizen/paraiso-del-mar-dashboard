@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Huéspedes — Paraíso del Mar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap');
+
+  :root {
+    --gold:    #B8976A;
+    --gold-lt: #D4B896;
+    --ink:     #1A1714;
+    --ink-mid: #3D3830;
+    --sand:    #F5F0E8;
+    --sand-dk: #EBE4D5;
+    --border:  #D4C9B4;
+    --white:   #FDFBF7;
+    --ok:      #2E7D55;
+    --err:     #B84040;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    font-weight: 300;
+    background: var(--sand);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--ink);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .header-logo {
+    width: 52px;
+    height: 52px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-logo svg { width: 28px; height: 28px; }
+  .header-text h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--white);
+    letter-spacing: 0.08em;
+  }
+  .header-text p {
+    font-size: 11px;
+    color: var(--gold-lt);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* ── Form container ── */
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Section ── */
+  .section {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .section-header {
+    background: var(--sand-dk);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-num {
+    width: 22px;
+    height: 22px;
+    background: var(--ink);
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    font-weight: 500;
+  }
+  .section-body { padding: 24px; }
+
+  /* ── Fields ── */
+  .row { display: grid; gap: 16px; margin-bottom: 16px; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .row-1 { grid-template-columns: 1fr; }
+  @media(max-width: 560px) { .row-2, .row-3 { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    font-weight: 500;
+  }
+  .field label .req { color: var(--gold); margin-left: 2px; }
+  .field input, .field select, .field textarea {
+    border: 1px solid var(--border);
+    background: var(--white);
+    padding: 10px 12px;
+    font-family: 'Jost', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--ink);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--gold);
+  }
+  .field input.error { border-color: var(--err); }
+
+  /* ── Tipo badge ── */
+  .tipo-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tipo-opt { display: none; }
+  .tipo-label {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+  .tipo-opt:checked + .tipo-label {
+    background: var(--ink);
+    color: var(--gold);
+    border-color: var(--ink);
+  }
+
+  /* ── Guests grid ── */
+  .guests-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width: 480px) { .guests-grid { grid-template-columns: 1fr; } }
+  .guest-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 2px;
+    background: var(--white);
+  }
+  .guest-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    color: var(--gold);
+    min-width: 16px;
+  }
+  .guest-field input {
+    border: none;
+    background: transparent;
+    font-family: 'Jost', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--ink);
+    outline: none;
+    width: 100%;
+  }
+
+  /* ── Checkboxes ── */
+  .check-group { display: flex; flex-direction: column; gap: 12px; }
+  .check-item {
+    display: flex;
+    gap: 12px;
+    cursor: pointer;
+    align-items: flex-start;
+  }
+  .check-item input[type=checkbox] { display: none; }
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+  }
+  .check-item input:checked ~ .check-box {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .check-item input:checked ~ .check-box::after {
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+    transform: rotate(-45deg) translateY(-2px);
+  }
+  .check-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-mid);
+  }
+  .check-text strong {
+    color: var(--ink);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Firma ── */
+  .firma-wrap {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .firma-label-bar {
+    background: var(--sand-dk);
+    padding: 8px 14px;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #firma-canvas {
+    display: block;
+    width: 100%;
+    height: 160px;
+    cursor: crosshair;
+    background: var(--white);
+    touch-action: none;
+  }
+  .firma-actions {
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+  }
+  .btn-clear {
+    font-family: 'Jost', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    opacity: .6;
+    transition: opacity .15s;
+  }
+  .btn-clear:hover { opacity: 1; }
+
+  /* ── Submit ── */
+  .submit-area { margin-top: 32px; }
+  .btn-submit {
+    width: 100%;
+    background: var(--ink);
+    color: var(--gold);
+    border: none;
+    padding: 16px 32px;
+    font-family: 'Jost', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .btn-submit:hover { background: #2C2520; }
+  .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--gold-lt);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success / Error states ── */
+  .status-box {
+    display: none;
+    border-radius: 2px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .status-box.ok  { background: #EDF7F2; border: 1px solid #B2D9C3; color: var(--ok); }
+  .status-box.err { background: #FDF0F0; border: 1px solid #E8C0C0; color: var(--err); }
+
+  /* ── Nota legal ── */
+  .legal-text {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    padding: 16px;
+    background: var(--sand-dk);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <!-- Palm / wave icon representativo -->
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 22V10" stroke="#B8976A" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M14 10 Q10 4 4 6 Q8 8 10 12" stroke="#B8976A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <path d="M14 10 Q18 4 24 6 Q20 8 18 12" stroke="#B8976A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <path d="M4 24 Q9 21 14 22 Q19 21 24 24" stroke="#B8976A" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>Paraíso del Mar</h1>
+    <p>Registro de huéspedes · Guest registration</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div id="status-ok" class="status-box ok">
+    ✓ Registro enviado correctamente. El PDF con su firma ha sido guardado. La administración revisará la información.
+  </div>
+  <div id="status-err" class="status-box err">
+    Ocurrió un error al enviar el registro. Por favor intente de nuevo o contacte a administración.
+  </div>
+
+  <form id="regForm" novalidate>
+
+    <!-- 1. UNIDAD Y ESTADÍA -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <div class="section-title">Unidad y estadía · Unit &amp; stay</div>
+      </div>
+      <div class="section-body">
+        <div class="row row-3">
+          <div class="field">
+            <label>Unidad <span class="req">*</span></label>
+            <input id="unidad" type="text" placeholder="A-202, C-401…" required>
+          </div>
+          <div class="field">
+            <label>Fecha de llegada <span class="req">*</span></label>
+            <input id="fecha_ingreso" type="date" required>
+          </div>
+          <div class="field">
+            <label>Fecha de salida</label>
+            <input id="fecha_salida" type="date">
+          </div>
+        </div>
+        <div class="row row-2">
+          <div class="field">
+            <label>Property manager</label>
+            <select id="property_manager_id">
+              <option value="">— Seleccionar —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tipo de ocupación <span class="req">*</span></label>
+            <div class="tipo-group">
+              <input class="tipo-opt" type="radio" name="tipo" id="tipoH" value="H">
+              <label class="tipo-label" for="tipoH">H · Propietario</label>
+              <input class="tipo-opt" type="radio" name="tipo" id="tipoR" value="R" checked>
+              <label class="tipo-label" for="tipoR">R · Renta</label>
+              <input class="tipo-opt" type="radio" name="tipo" id="tipoG" value="G">
+              <label class="tipo-label" for="tipoG">G · Invitado</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. DATOS DEL TITULAR -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <div class="section-title">Titular del registro · Primary guest</div>
+      </div>
+      <div class="section-body">
+        <div class="row row-1">
+          <div class="field">
+            <label>Nombre completo <span class="req">*</span></label>
+            <input id="nombre_huesped" type="text" placeholder="Full name" required>
+          </div>
+        </div>
+        <div class="row row-2">
+          <div class="field">
+            <label>Correo electrónico</label>
+            <input id="email" type="email" placeholder="email@example.com">
+          </div>
+          <div class="field">
+            <label>Teléfono</label>
+            <input id="telefono" type="tel" placeholder="+1 555 000 0000">
+          </div>
+        </div>
+        <div class="row row-1">
+          <div class="field">
+            <label>Dirección · Address</label>
+            <input id="direccion" type="text" placeholder="Street, City, State, Country, Postal Code">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. HUÉSPEDES ADICIONALES -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <div class="section-title">Huéspedes adicionales · Other guests (1–8)</div>
+      </div>
+      <div class="section-body">
+        <div class="guests-grid" id="guestsGrid">
+          <!-- generado por JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. COMPROMISOS Y PREFERENCIAS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <div class="section-title">Compromisos y preferencias</div>
+      </div>
+      <div class="section-body">
+        <div class="legal-text" id="legalText">
+          He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia.<br><br>
+          <em>I have read and agree to abide by the rules and regulations of Paraiso del Mar, I acknowledge that breaking these rules may cause the loss of my time in the property. I also take full responsibility for any damage I or any of my guests may cause during my stay.</em>
+        </div>
+        <div class="check-group">
+          <label class="check-item">
+            <input type="checkbox" id="acepta_reglamento">
+            <div class="check-box"></div>
+            <span class="check-text">
+              <strong>Acepto el reglamento · I agree to the rules</strong>
+              Confirmo haber leído y aceptar las reglas y reglamento de Paraíso del Mar.
+            </span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="interesado_comprar">
+            <div class="check-box"></div>
+            <span class="check-text">
+              <strong>Interesado en propiedad · Property interest</strong>
+              Me interesa ver propiedades en La Paz / I'm interested in looking at property in La Paz.
+            </span>
+          </label>
+          <label class="check-item">
+            <input type="checkbox" id="recibir_info">
+            <div class="check-box"></div>
+            <span class="check-text">
+              <strong>Comunicaciones · Communications</strong>
+              Me gustaría recibir información sobre promociones, actividades y eventos.
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. FIRMA -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <div class="section-title">Firma del titular · Guest signature</div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:12px;color:var(--ink-mid);margin-bottom:14px;letter-spacing:.03em">
+          Firme en el recuadro usando su dedo (móvil) o el cursor (computadora).
+          Sign in the box using your finger (mobile) or cursor (computer).
+        </p>
+        <div class="firma-wrap">
+          <div class="firma-label-bar">
+            <span>Firma · Signature</span>
+            <span id="firma-status" style="color:var(--err);font-size:10px">Pendiente</span>
+          </div>
+          <canvas id="firma-canvas"></canvas>
+          <div class="firma-actions">
+            <button type="button" class="btn-clear" onclick="clearFirma()">✕ Borrar firma</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Enviar registro y generar PDF</span>
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────
+// Cambiar por la URL real del backend en Render
+const API_BASE = (window.location.hostname === 'localhost')
+  ? 'http://localhost:3000'
+  : 'https://paraiso-del-mar-backend.onrender.com'; // ← reemplazar
+
+// ── Property managers: cargar desde API ─────────────────────
+async function loadManagers() {
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/managers`);
+    const { data } = await r.json();
+    const sel = document.getElementById('property_manager_id');
+    data.forEach(pm => {
+      const o = document.createElement('option');
+      o.value = pm.id;
+      o.textContent = pm.nombre;
+      sel.appendChild(o);
+    });
+  } catch(e) {
+    console.warn('No se pudo cargar property managers:', e);
+  }
+}
+loadManagers();
+
+// ── Guests grid ──────────────────────────────────────────────
+const grid = document.getElementById('guestsGrid');
+for (let i = 1; i <= 8; i++) {
+  const div = document.createElement('div');
+  div.className = 'guest-field';
+  div.innerHTML = `<span class="guest-num">${i}</span>
+    <input type="text" id="guest${i}" placeholder="Full name · Nombre completo">`;
+  grid.appendChild(div);
+}
+
+// ── Firma canvas ─────────────────────────────────────────────
+const canvas = document.getElementById('firma-canvas');
+const ctx    = canvas.getContext('2d');
+let drawing  = false;
+let hasFirma = false;
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * window.devicePixelRatio;
+  canvas.height = rect.height * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  ctx.strokeStyle = '#1A1714';
+  ctx.lineWidth   = 2;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src  = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - rect.left, y: src.clientY - rect.top };
+}
+
+canvas.addEventListener('mousedown',  e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove',  e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasFirma = true; });
+canvas.addEventListener('mouseup',    () => { drawing = false; updateFirmaStatus(); });
+canvas.addEventListener('mouseleave', () => { drawing = false; });
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasFirma = true; }, { passive: false });
+canvas.addEventListener('touchend',   () => { drawing = false; updateFirmaStatus(); });
+
+function updateFirmaStatus() {
+  const el = document.getElementById('firma-status');
+  el.textContent = hasFirma ? '✓ Firmado' : 'Pendiente';
+  el.style.color = hasFirma ? 'var(--ok)' : 'var(--err)';
+}
+
+function clearFirma() {
+  ctx.clearRect(0, 0, canvas.width / devicePixelRatio, canvas.height / devicePixelRatio);
+  hasFirma = false;
+  updateFirmaStatus();
+}
+
+function getFirmaDataURL() {
+  return hasFirma ? canvas.toDataURL('image/png') : null;
+}
+
+// ── Generación de PDF con jsPDF ──────────────────────────────
+async function generarPDF(data, firmaDataURL) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+
+  const W = 215.9, M = 18;
+  let y = 18;
+
+  // Header
+  doc.setFillColor(26, 23, 20);
+  doc.rect(0, 0, W, 30, 'F');
+  doc.setTextColor(184, 151, 106);
+  doc.setFont('times', 'normal');
+  doc.setFontSize(18);
+  doc.text('PARAÍSO DEL MAR', W / 2, 14, { align: 'center' });
+  doc.setFontSize(8);
+  doc.setTextColor(212, 184, 150);
+  doc.text('GUEST REGISTRATION FORM · FORMA DE REGISTRO DE HUÉSPEDES', W / 2, 22, { align: 'center' });
+
+  y = 40;
+  doc.setTextColor(26, 23, 20);
+
+  // Unidad y fechas
+  doc.setFillColor(235, 228, 213);
+  doc.rect(M, y - 4, W - M * 2, 8, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(61, 56, 48);
+  doc.text(`UNIT / UNIDAD: ${data.unidad}`, M + 2, y + 1);
+  doc.text(`CHECK IN: ${formatDate(data.fecha_ingreso)}`, W / 2 - 10, y + 1);
+  doc.text(`CHECK OUT: ${data.fecha_salida ? formatDate(data.fecha_salida) : 'SIN FECHA'}`, W - M - 40, y + 1);
+
+  y += 14;
+  // Datos del titular
+  const campos = [
+    ['GUEST NAME / NOMBRE DEL HUÉSPED', data.nombre_huesped],
+    ['EMAIL / CORREO ELECTRÓNICO',      data.email || '—'],
+    ['ADDRESS / DIRECCIÓN',             data.direccion || '—'],
+    ['TELEPHONE / TELÉFONO',            data.telefono || '—'],
+  ];
+  doc.setFont('helvetica', 'normal');
+  campos.forEach(([lbl, val]) => {
+    doc.setFontSize(7);
+    doc.setTextColor(100, 95, 88);
+    doc.text(lbl + ':', M, y);
+    doc.setFontSize(9.5);
+    doc.setTextColor(26, 23, 20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(val, M, y + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.setDrawColor(212, 201, 180);
+    doc.line(M, y + 7, W - M, y + 7);
+    y += 12;
+  });
+
+  // Acompañantes
+  if (data.acompanantes && data.acompanantes.length > 0) {
+    y += 4;
+    doc.setFontSize(7);
+    doc.setTextColor(100, 95, 88);
+    doc.text('COMPLETE NAMES OF ALL OTHER GUESTS / NOMBRES COMPLETOS DE LOS DEMÁS HUÉSPEDES', M, y);
+    y += 6;
+    const cols = 2;
+    const colW = (W - M * 2) / cols;
+    data.acompanantes.forEach((nombre, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const xPos = M + col * colW;
+      const yPos = y + row * 8;
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 95, 88);
+      doc.text(`${i + 1}.`, xPos, yPos);
+      doc.setTextColor(26, 23, 20);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text(nombre, xPos + 5, yPos);
+      doc.setFont('helvetica', 'normal');
+      doc.setDrawColor(212, 201, 180);
+      doc.line(xPos + 5, yPos + 1.5, xPos + colW - 4, yPos + 1.5);
+    });
+    y += Math.ceil(data.acompanantes.length / cols) * 8 + 4;
+  }
+
+  // Responsiva
+  y += 6;
+  doc.setFillColor(245, 240, 232);
+  const legalLines = doc.splitTextToSize(
+    'He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia. / I have read and agree to abide by the rules and regulations of Paraiso del Mar.',
+    W - M * 2 - 4
+  );
+  doc.rect(M, y - 3, W - M * 2, legalLines.length * 4.2 + 4, 'F');
+  doc.setFontSize(7.5);
+  doc.setTextColor(61, 56, 48);
+  doc.text(legalLines, M + 2, y + 1);
+  y += legalLines.length * 4.2 + 8;
+
+  // Checkboxes
+  const checks = [
+    [data.acepta_reglamento, 'He leído y acepto el reglamento · I have read and agree to the rules'],
+    [data.interesado_comprar, 'Interesado en ver propiedades en La Paz · Interested in looking at property in La Paz'],
+    [data.recibir_info, 'Me gustaría recibir información sobre promociones, actividades y eventos'],
+  ];
+  checks.forEach(([checked, text]) => {
+    doc.setDrawColor(184, 151, 106);
+    doc.setFillColor(26, 23, 20);
+    doc.rect(M, y - 3, 4, 4, checked ? 'F' : 'S');
+    if (checked) {
+      doc.setTextColor(184, 151, 106);
+      doc.setFontSize(7);
+      doc.text('✓', M + 0.8, y);
+    }
+    doc.setTextColor(61, 56, 48);
+    doc.setFontSize(8);
+    doc.text(text, M + 6, y);
+    y += 7;
+  });
+
+  // Firma
+  y += 6;
+  doc.setDrawColor(212, 201, 180);
+  doc.line(M, y + 16, M + 80, y + 16);
+  doc.setFontSize(7);
+  doc.setTextColor(100, 95, 88);
+  doc.text('Firma · Signature', M, y + 20);
+  doc.text(`${data.nombre_huesped}`, M, y + 25);
+
+  if (firmaDataURL) {
+    try {
+      doc.addImage(firmaDataURL, 'PNG', M, y - 2, 80, 20);
+    } catch(e) { console.warn('firma img error', e); }
+  }
+
+  // Fecha de registro
+  doc.setFontSize(7);
+  doc.setTextColor(150, 140, 125);
+  const ahora = new Date().toLocaleString('es-MX', { timeZone: 'America/Mazatlan' });
+  doc.text(`Registro generado: ${ahora}`, W - M, y + 25, { align: 'right' });
+
+  return doc.output('datauristring'); // base64
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  const meses = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${meses[parseInt(m) - 1]} ${day}, ${y}`;
+}
+
+// ── Submit ───────────────────────────────────────────────────
+document.getElementById('regForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  // Validación básica
+  const unidad = document.getElementById('unidad').value.trim();
+  const nombre = document.getElementById('nombre_huesped').value.trim();
+  const fechaIn = document.getElementById('fecha_ingreso').value;
+
+  let valid = true;
+  ['unidad','nombre_huesped','fecha_ingreso'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+    else el.classList.remove('error');
+  });
+
+  if (!hasFirma) {
+    document.querySelector('.firma-wrap').style.borderColor = 'var(--err)';
+    valid = false;
+    alert('Por favor firme el formulario antes de enviar.');
+    return;
+  } else {
+    document.querySelector('.firma-wrap').style.borderColor = 'var(--border)';
+  }
+
+  if (!document.getElementById('acepta_reglamento').checked) {
+    alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
+    return;
+  }
+
+  if (!valid) return;
+
+  // Recopilar datos
+  const acompanantes = [];
+  for (let i = 1; i <= 8; i++) {
+    const v = document.getElementById(`guest${i}`).value.trim();
+    if (v) acompanantes.push(v);
+  }
+
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  const firmaDataURL = getFirmaDataURL();
+
+  const payload = {
+    unidad,
+    tipo,
+    property_manager_id: document.getElementById('property_manager_id').value || null,
+    nombre_huesped: nombre,
+    email:          document.getElementById('email').value.trim(),
+    telefono:       document.getElementById('telefono').value.trim(),
+    direccion:      document.getElementById('direccion').value.trim(),
+    fecha_ingreso:  fechaIn,
+    fecha_salida:   document.getElementById('fecha_salida').value || null,
+    num_personas:   acompanantes.length + 1,
+    acepta_reglamento: document.getElementById('acepta_reglamento').checked,
+    interesado_comprar: document.getElementById('interesado_comprar').checked,
+    recibir_info:   document.getElementById('recibir_info').checked,
+    acompanantes,
+    firma_imagen:   firmaDataURL,
+  };
+
+  // Generar PDF
+  const btn = document.getElementById('btnSubmit');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btnText');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  btnText.textContent = 'Generando PDF…';
+
+  try {
+    const pdfDataURI = await generarPDF({ ...payload }, firmaDataURL);
+    payload.pdf_firmado_url = pdfDataURI;
+
+    btnText.textContent = 'Enviando registro…';
+
+    const res = await fetch(`${API_BASE}/api/inhouse`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    // Mostrar éxito
+    document.getElementById('status-ok').style.display = 'block';
+    document.getElementById('status-err').style.display = 'none';
+    document.getElementById('regForm').style.display = 'none';
+    window.scrollTo(0, 0);
+
+    // Descarga automática del PDF para el huésped
+    const link = document.createElement('a');
+    link.href = pdfDataURI;
+    link.download = `PDM_Registro_${unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
+    link.click();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('status-err').style.display = 'block';
+    document.getElementById('status-err').textContent =
+      'Error al enviar el registro: ' + err.message + '. Por favor contacte a administración.';
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+    btnText.textContent = 'Enviar registro y generar PDF';
+  }
+});
+</script>
+</body>
+</html>
