@@ -557,7 +557,7 @@ async function loadManagers() {
     const r = await fetch(`${API_BASE}/api/inhouse/managers`);
     const { data } = await r.json();
     const sel = document.getElementById('property_manager_id');
-    data.forEach(pm => {
+    data.filter(pm => pm.activo).forEach(pm => {
       const o = document.createElement('option');
       o.value = pm.id;
       o.textContent = pm.nombre;
