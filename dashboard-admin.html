@@ -45,22 +45,61 @@
   .btn-pm { background: transparent; color: var(--teal-lt); border: 1px solid rgba(113,174,183,.4); padding: 8px 14px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: all .15s; }
   .btn-pm:hover { background: rgba(113,174,183,.1); border-color: var(--teal-lt); }
 
-  .layout { display: grid; grid-template-columns: 210px 1fr; flex: 1; min-height: 0; }
+  .layout { display: grid; grid-template-columns: 220px 1fr; flex: 1; min-height: 0; }
   @media(max-width: 700px) { .layout { grid-template-columns: 1fr; } }
 
-  .sidebar { background: var(--white); border-right: 1px solid var(--border); padding: 20px 16px; display: flex; flex-direction: column; gap: 20px; }
+  /* ── Sidebar mejorado ── */
+  .sidebar { background: var(--white); border-right: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
   .kpi-label { font-size: 9px; font-weight: bold; letter-spacing: 0.18em; text-transform: uppercase; color: var(--teal); margin-bottom: 6px; padding-bottom: 4px; border-bottom: 2px solid var(--teal-pale); }
+
+  /* Total grande */
+  .kpi-total { background: var(--navy); border-radius: 4px; padding: 12px 14px; margin-bottom: 6px; }
+  .kpi-total-val { font-size: 36px; font-weight: bold; color: var(--white); line-height: 1; }
+  .kpi-total-sub { font-size: 10px; color: var(--teal-lt); margin-top: 3px; }
+
+  /* Desglose por categoría */
+  .cat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    margin-bottom: 4px;
+    background: var(--dust);
+  }
+  .cat-left { display: flex; align-items: center; gap: 7px; }
+  .cat-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .cat-name { font-size: 11px; color: var(--ink-mid); font-weight: bold; }
+  .cat-unidades { font-size: 9px; color: var(--ink-mid); opacity: .7; margin-top: 1px; }
+  .cat-personas { font-size: 18px; font-weight: bold; color: var(--ink); }
+
+  /* Futuros */
+  .kpi-futuro {
+    background: var(--teal-pale);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: 3px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .kpi-futuro-label { font-size: 10px; color: var(--teal); font-weight: bold; }
+  .kpi-futuro-val { font-size: 20px; font-weight: bold; color: var(--teal); }
+
+  /* Movimientos */
   .kpi-card { background: var(--dust); border: 1px solid var(--border); border-radius: 3px; padding: 10px 14px; margin-bottom: 6px; }
   .kpi-val { font-size: 30px; font-weight: bold; color: var(--navy); line-height: 1; }
   .kpi-sub { font-size: 10px; color: var(--ink-mid); margin-top: 3px; }
   .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+  /* Por edificio */
   .edificio-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--dust); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 4px; }
   .edificio-name { font-size: 11px; color: var(--ink-mid); font-weight: bold; }
   .edificio-num  { font-size: 16px; font-weight: bold; color: var(--teal); }
-  .tipo-legend { display: flex; flex-direction: column; gap: 6px; }
-  .tipo-item { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--ink-mid); }
-  .tipo-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
+  /* ── Main ── */
   .main { padding: 20px 24px; overflow-y: auto; }
   .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
   .tab { background: var(--white); border: 1px solid var(--border); color: var(--ink-mid); padding: 6px 14px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: all .15s; }
@@ -112,21 +151,14 @@
   .btn-edit { background: var(--dust); border: 1px solid var(--border); color: var(--ink-mid); padding: 7px 16px; font-family: Verdana, sans-serif; font-size: 11px; font-weight: bold; border-radius: 3px; cursor: pointer; }
   .btn-edit:hover { background: var(--dust-dk); }
 
-  /* ── Modal editar ── */
   .edit-modal { max-width: 560px; }
   .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .edit-field { display: flex; flex-direction: column; gap: 5px; }
   .edit-field.full { grid-column: 1 / -1; }
   .edit-field label { font-size: 9px; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mid); }
-  .edit-field input, .edit-field select {
-    border: 1px solid var(--border); background: var(--white);
-    padding: 8px 10px; font-family: Verdana, sans-serif;
-    font-size: 12px; color: var(--ink); border-radius: 3px; outline: none;
-    transition: border-color .15s;
-  }
+  .edit-field input, .edit-field select { border: 1px solid var(--border); background: var(--white); padding: 8px 10px; font-family: Verdana, sans-serif; font-size: 12px; color: var(--ink); border-radius: 3px; outline: none; transition: border-color .15s; }
   .edit-field input:focus, .edit-field select:focus { border-color: var(--teal); }
 
-  /* ── Modal PM ── */
   .pm-modal { max-width: 500px; }
   .pm-form { display: grid; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--teal-pale); }
   .pm-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -181,30 +213,83 @@
 
 <div class="layout">
   <aside class="sidebar">
+
+    <!-- OCUPACIÓN HOY -->
     <div>
       <div class="kpi-label">Ocupación hoy</div>
-      <div class="kpi-card"><div class="kpi-val" id="kpi-personas">—</div><div class="kpi-sub">personas en el desarrollo</div></div>
-      <div class="kpi-card"><div class="kpi-val" id="kpi-unidades">—</div><div class="kpi-sub">unidades activas</div></div>
+      <div class="kpi-total">
+        <div class="kpi-total-val" id="kpi-personas">—</div>
+        <div class="kpi-total-sub" id="kpi-fecha-hoy">personas en el desarrollo</div>
+      </div>
+
+      <!-- Desglose por categoría -->
+      <div class="cat-row" style="border-left:3px solid var(--H)">
+        <div class="cat-left">
+          <div class="cat-dot" style="background:var(--H)"></div>
+          <div>
+            <div class="cat-name">Propietarios</div>
+            <div class="cat-unidades" id="cat-H-uni">— unidades</div>
+          </div>
+        </div>
+        <div class="cat-personas" id="cat-H-per">—</div>
+      </div>
+
+      <div class="cat-row" style="border-left:3px solid var(--R)">
+        <div class="cat-left">
+          <div class="cat-dot" style="background:var(--R)"></div>
+          <div>
+            <div class="cat-name">Rentas</div>
+            <div class="cat-unidades" id="cat-R-uni">— unidades</div>
+          </div>
+        </div>
+        <div class="cat-personas" id="cat-R-per">—</div>
+      </div>
+
+      <div class="cat-row" style="border-left:3px solid var(--G)">
+        <div class="cat-left">
+          <div class="cat-dot" style="background:var(--G)"></div>
+          <div>
+            <div class="cat-name">Invitados</div>
+            <div class="cat-unidades" id="cat-G-uni">— unidades</div>
+          </div>
+        </div>
+        <div class="cat-personas" id="cat-G-per">—</div>
+      </div>
     </div>
+
+    <!-- FUTUROS -->
+    <div>
+      <div class="kpi-label">Próximas llegadas</div>
+      <div class="kpi-futuro">
+        <div>
+          <div class="kpi-futuro-label">Registros futuros</div>
+          <div style="font-size:9px;color:var(--ink-mid);margin-top:2px">Check-in pendiente</div>
+        </div>
+        <div class="kpi-futuro-val" id="kpi-futuros">—</div>
+      </div>
+    </div>
+
+    <!-- MOVIMIENTOS HOY -->
     <div>
       <div class="kpi-label">Movimientos hoy</div>
       <div class="kpi-row">
-        <div class="kpi-card" style="border-left:3px solid var(--ok)"><div class="kpi-val" style="color:var(--ok);font-size:24px" id="kpi-ins">—</div><div class="kpi-sub">Check-ins</div></div>
-        <div class="kpi-card" style="border-left:3px solid var(--warn)"><div class="kpi-val" style="color:var(--warn);font-size:24px" id="kpi-outs">—</div><div class="kpi-sub">Check-outs</div></div>
+        <div class="kpi-card" style="border-left:3px solid var(--ok)">
+          <div class="kpi-val" style="color:var(--ok);font-size:24px" id="kpi-ins">—</div>
+          <div class="kpi-sub">Check-ins</div>
+        </div>
+        <div class="kpi-card" style="border-left:3px solid var(--warn)">
+          <div class="kpi-val" style="color:var(--warn);font-size:24px" id="kpi-outs">—</div>
+          <div class="kpi-sub">Check-outs</div>
+        </div>
       </div>
     </div>
+
+    <!-- POR EDIFICIO -->
     <div>
-      <div class="kpi-label">Por edificio</div>
+      <div class="kpi-label">Por edificio · hoy</div>
       <div id="edificioRows"><div style="color:var(--ink-mid);font-size:11px;padding:4px">Cargando…</div></div>
     </div>
-    <div>
-      <div class="kpi-label">Leyenda</div>
-      <div class="tipo-legend">
-        <div class="tipo-item"><div class="tipo-dot" style="background:var(--H)"></div>H · Homeowner / Propietario</div>
-        <div class="tipo-item"><div class="tipo-dot" style="background:var(--R)"></div>R · Renter / Renta</div>
-        <div class="tipo-item"><div class="tipo-dot" style="background:var(--G)"></div>G · Guest / Invitado</div>
-      </div>
-    </div>
+
   </aside>
 
   <main class="main">
@@ -261,7 +346,7 @@
   </div>
 </div>
 
-<!-- Modal editar registro -->
+<!-- Modal editar -->
 <div class="modal-overlay" id="editOverlay" onclick="if(event.target===this)closeEditModal()">
   <div class="modal edit-modal">
     <div class="modal-header">
@@ -270,54 +355,23 @@
     </div>
     <div class="modal-body">
       <div class="edit-grid">
-        <div class="edit-field">
-          <label>Unidad</label>
-          <input id="edit-unidad" type="text" placeholder="A-202">
-        </div>
-        <div class="edit-field">
-          <label>Tipo</label>
+        <div class="edit-field"><label>Unidad</label><input id="edit-unidad" type="text" placeholder="A-202"></div>
+        <div class="edit-field"><label>Tipo</label>
           <select id="edit-tipo">
             <option value="H">H · Propietario</option>
             <option value="R">R · Renta</option>
             <option value="G">G · Invitado</option>
           </select>
         </div>
-        <div class="edit-field">
-          <label>Check in</label>
-          <input id="edit-fecha-in" type="date">
-        </div>
-        <div class="edit-field">
-          <label>Check out</label>
-          <input id="edit-fecha-out" type="date">
-        </div>
-        <div class="edit-field full">
-          <label>Nombre del huésped</label>
-          <input id="edit-nombre" type="text" placeholder="Nombre completo">
-        </div>
-        <div class="edit-field">
-          <label>Email</label>
-          <input id="edit-email" type="email" placeholder="email@ejemplo.com">
-        </div>
-        <div class="edit-field">
-          <label>Teléfono</label>
-          <input id="edit-telefono" type="tel" placeholder="+1 555 000 0000">
-        </div>
-        <div class="edit-field full">
-          <label>Dirección</label>
-          <input id="edit-direccion" type="text" placeholder="Dirección completa">
-        </div>
-        <div class="edit-field">
-          <label>Número de personas</label>
-          <input id="edit-personas" type="number" min="1" max="20">
-        </div>
-        <div class="edit-field">
-          <label>Property Manager</label>
-          <select id="edit-pm"></select>
-        </div>
-        <div class="edit-field full">
-          <label>Notas</label>
-          <input id="edit-notas" type="text" placeholder="Observaciones adicionales">
-        </div>
+        <div class="edit-field"><label>Check in</label><input id="edit-fecha-in" type="date"></div>
+        <div class="edit-field"><label>Check out</label><input id="edit-fecha-out" type="date"></div>
+        <div class="edit-field full"><label>Nombre del huésped</label><input id="edit-nombre" type="text"></div>
+        <div class="edit-field"><label>Email</label><input id="edit-email" type="email"></div>
+        <div class="edit-field"><label>Teléfono</label><input id="edit-telefono" type="tel"></div>
+        <div class="edit-field full"><label>Dirección</label><input id="edit-direccion" type="text"></div>
+        <div class="edit-field"><label>Número de personas</label><input id="edit-personas" type="number" min="1" max="20"></div>
+        <div class="edit-field"><label>Property Manager</label><select id="edit-pm"></select></div>
+        <div class="edit-field full"><label>Notas</label><input id="edit-notas" type="text"></div>
       </div>
     </div>
     <div class="modal-actions">
@@ -327,7 +381,7 @@
   </div>
 </div>
 
-<!-- Modal Property Managers -->
+<!-- Modal PMs -->
 <div class="modal-overlay" id="pmOverlay" onclick="if(event.target===this)closePMModal()">
   <div class="modal pm-modal">
     <div class="modal-header">
@@ -337,10 +391,7 @@
     <div class="pm-form">
       <div style="font-size:9px;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px">Agregar nuevo PM</div>
       <div class="pm-form-row">
-        <div class="pm-field" style="grid-column:1/-1">
-          <label>Nombre <span style="color:var(--teal)">*</span></label>
-          <input id="pm-nombre" type="text" placeholder="Nombre completo o empresa">
-        </div>
+        <div class="pm-field" style="grid-column:1/-1"><label>Nombre <span style="color:var(--teal)">*</span></label><input id="pm-nombre" type="text" placeholder="Nombre completo o empresa"></div>
       </div>
       <div class="pm-form-row">
         <div class="pm-field"><label>Email</label><input id="pm-email" type="email" placeholder="email@ejemplo.com"></div>
@@ -370,6 +421,10 @@ function tickClock() {
     new Date().toLocaleString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'America/Mazatlan' });
 }
 tickClock(); setInterval(tickClock, 1000);
+
+// Fecha de hoy en el KPI
+const hoyStr = new Date().toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long', timeZone:'America/Mazatlan' });
+document.getElementById('kpi-fecha-hoy').textContent = `personas · ${hoyStr}`;
 
 // Socket.io
 try {
@@ -434,16 +489,35 @@ function renderTable(rows) {
   }).join('');
 }
 
-// ── KPIs ─────────────────────────────────────────────────────
+// ── KPIs mejorados ────────────────────────────────────────────
 function renderKPIs(oc) {
   const t = oc.totales || {};
-  document.getElementById('kpi-personas').textContent  = t.personas_activas  || '0';
-  document.getElementById('kpi-unidades').textContent  = t.registros_activos || '0';
-  document.getElementById('kpi-ins').textContent       = t.check_in_hoy      || '0';
-  document.getElementById('kpi-outs').textContent      = t.check_out_hoy     || '0';
+
+  // Total personas activas HOY (solo activos, no futuros)
+  document.getElementById('kpi-personas').textContent = t.personas_activas || '0';
+  document.getElementById('kpi-ins').textContent      = t.check_in_hoy    || '0';
+  document.getElementById('kpi-outs').textContent     = t.check_out_hoy   || '0';
+  document.getElementById('kpi-futuros').textContent  = t.futuros          || '0';
+
+  // Desglose por categoría — calculado desde por_edificio agrupado por tipo
+  const porTipo = { H: { personas: 0, unidades: 0 }, R: { personas: 0, unidades: 0 }, G: { personas: 0, unidades: 0 } };
+  (oc.por_tipo_hoy || []).forEach(r => {
+    if (porTipo[r.tipo]) {
+      porTipo[r.tipo].personas = parseInt(r.personas_total) || 0;
+      porTipo[r.tipo].unidades = parseInt(r.unidades_total) || 0;
+    }
+  });
+
+  ['H','R','G'].forEach(tipo => {
+    const d = porTipo[tipo];
+    document.getElementById(`cat-${tipo}-per`).textContent = d.personas;
+    document.getElementById(`cat-${tipo}-uni`).textContent = `${d.unidades} unidad${d.unidades !== 1 ? 'es' : ''}`;
+  });
+
+  // Por edificio
   const el = document.getElementById('edificioRows');
   const rows = oc.por_edificio || [];
-  if (!rows.length) { el.innerHTML = `<div style="color:var(--ink-mid);font-size:11px">Sin datos</div>`; return; }
+  if (!rows.length) { el.innerHTML = `<div style="color:var(--ink-mid);font-size:11px">Sin datos hoy</div>`; return; }
   el.innerHTML = rows.map(r => `
     <div class="edificio-row">
       <span class="edificio-name">${r.edificio === 'Casa' ? 'Casas' : 'Edif. ' + r.edificio}</span>
@@ -486,10 +560,7 @@ async function openModal(id) {
   } catch(e) { console.error(e); }
 }
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  actualId = null;
-}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); actualId = null; }
 
 async function deleteActual() {
   if (!actualId || !confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
@@ -504,72 +575,67 @@ async function deleteActual() {
 async function openEditModal() {
   if (!actualId) return;
   try {
-    // Cargar PMs activos para el select
     const { data: pms } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
     pmsCatalogo = pms.filter(p => p.activo);
     const selPm = document.getElementById('edit-pm');
     selPm.innerHTML = '<option value="">— Sin PM —</option>' +
       pmsCatalogo.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
-    // Cargar datos del registro
     const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`).then(x => x.json());
-
-    document.getElementById('editSub').textContent = `${r.unidad} · ${r.nombre_huesped}`;
-    document.getElementById('edit-unidad').value    = r.unidad || '';
-    document.getElementById('edit-tipo').value      = r.tipo || 'R';
-    document.getElementById('edit-fecha-in').value  = r.fecha_ingreso ? r.fecha_ingreso.toString().substring(0,10) : '';
-    document.getElementById('edit-fecha-out').value = r.fecha_salida  ? r.fecha_salida.toString().substring(0,10)  : '';
-    document.getElementById('edit-nombre').value    = r.nombre_huesped || '';
-    document.getElementById('edit-email').value     = r.email    || '';
-    document.getElementById('edit-telefono').value  = r.telefono || '';
-    document.getElementById('edit-direccion').value = r.direccion || '';
-    document.getElementById('edit-personas').value  = r.num_personas || 1;
-    document.getElementById('edit-notas').value     = r.notas || '';
-
-    // Seleccionar PM actual
+    document.getElementById('editSub').textContent      = `${r.unidad} · ${r.nombre_huesped}`;
+    document.getElementById('edit-unidad').value        = r.unidad || '';
+    document.getElementById('edit-tipo').value          = r.tipo || 'R';
+    document.getElementById('edit-fecha-in').value      = r.fecha_ingreso ? r.fecha_ingreso.toString().substring(0,10) : '';
+    document.getElementById('edit-fecha-out').value     = r.fecha_salida  ? r.fecha_salida.toString().substring(0,10)  : '';
+    document.getElementById('edit-nombre').value        = r.nombre_huesped || '';
+    document.getElementById('edit-email').value         = r.email    || '';
+    document.getElementById('edit-telefono').value      = r.telefono || '';
+    document.getElementById('edit-direccion').value     = r.direccion || '';
+    document.getElementById('edit-personas').value      = r.num_personas || 1;
+    document.getElementById('edit-notas').value         = r.notas || '';
     if (r.property_manager_id) selPm.value = r.property_manager_id;
 
-    // Cerrar detalle y abrir edición
     document.getElementById('modalOverlay').classList.remove('open');
     document.getElementById('editOverlay').classList.add('open');
   } catch(e) { alert('Error al cargar el registro: ' + e.message); }
 }
 
-function closeEditModal() {
-  document.getElementById('editOverlay').classList.remove('open');
-}
+function closeEditModal() { document.getElementById('editOverlay').classList.remove('open'); }
 
 async function guardarEdicion() {
   if (!actualId) return;
   const payload = {
-    unidad:             document.getElementById('edit-unidad').value.trim(),
-    tipo:               document.getElementById('edit-tipo').value,
-    fecha_ingreso:      document.getElementById('edit-fecha-in').value  || null,
-    fecha_salida:       document.getElementById('edit-fecha-out').value || null,
-    nombre_huesped:     document.getElementById('edit-nombre').value.trim(),
-    email:              document.getElementById('edit-email').value.trim()     || null,
-    telefono:           document.getElementById('edit-telefono').value.trim()  || null,
-    direccion:          document.getElementById('edit-direccion').value.trim() || null,
-    num_personas:       parseInt(document.getElementById('edit-personas').value) || 1,
+    unidad:              document.getElementById('edit-unidad').value.trim(),
+    tipo:                document.getElementById('edit-tipo').value,
+    fecha_ingreso:       document.getElementById('edit-fecha-in').value  || null,
+    fecha_salida:        document.getElementById('edit-fecha-out').value || null,
+    nombre_huesped:      document.getElementById('edit-nombre').value.trim(),
+    email:               document.getElementById('edit-email').value.trim()     || null,
+    telefono:            document.getElementById('edit-telefono').value.trim()  || null,
+    direccion:           document.getElementById('edit-direccion').value.trim() || null,
+    num_personas:        parseInt(document.getElementById('edit-personas').value) || 1,
     property_manager_id: document.getElementById('edit-pm').value || null,
-    notas:              document.getElementById('edit-notas').value.trim() || null,
+    notas:               document.getElementById('edit-notas').value.trim() || null,
   };
-
   if (!payload.unidad || !payload.nombre_huesped || !payload.fecha_ingreso) {
-    alert('Unidad, nombre y fecha de llegada son requeridos.');
-    return;
+    alert('Unidad, nombre y fecha de llegada son requeridos.'); return;
   }
-
   try {
     const res = await fetch(`${API_BASE}/api/inhouse/${actualId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error(await res.text());
-
-    closeEditModal();
-    loadData();
+    if (!res.ok) {
+      const errData = await res.json().catch(() => null);
+      if (errData && errData.codigo === 'TRASLAPE_FECHAS') {
+        alert(`⚠️ ${errData.error}\n${errData.detalle}`);
+      } else {
+        throw new Error(await res.text());
+      }
+      return;
+    }
+    closeEditModal(); loadData();
     showToast('Registro actualizado correctamente', 'Edición guardada');
   } catch(e) { alert('Error al guardar: ' + e.message); }
 }
@@ -593,10 +659,7 @@ async function loadPMs() {
       <div class="pm-row ${pm.activo ? '' : 'inactive'}">
         <div>
           <div class="pm-name">${pm.nombre}</div>
-          <div class="pm-contact">
-            ${pm.email || ''}${pm.email && pm.telefono ? ' · ' : ''}${pm.telefono || ''}
-            ${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}
-          </div>
+          <div class="pm-contact">${pm.email || ''}${pm.email && pm.telefono ? ' · ' : ''}${pm.telefono || ''}${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}</div>
         </div>
         <button class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}" onclick="togglePM(${pm.id}, ${pm.activo})">
           ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
@@ -606,14 +669,13 @@ async function loadPMs() {
 }
 
 async function agregarPM() {
-  const nombre   = document.getElementById('pm-nombre').value.trim();
-  const email    = document.getElementById('pm-email').value.trim();
+  const nombre = document.getElementById('pm-nombre').value.trim();
+  const email  = document.getElementById('pm-email').value.trim();
   const telefono = document.getElementById('pm-telefono').value.trim();
   if (!nombre) { document.getElementById('pm-nombre').focus(); return; }
   try {
     const res = await fetch(`${API_BASE}/api/inhouse/managers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, email, telefono })
     });
     if (!res.ok) throw new Error(await res.text());
@@ -628,8 +690,7 @@ async function agregarPM() {
 async function togglePM(id, activo) {
   try {
     await fetch(`${API_BASE}/api/inhouse/managers/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ activo: !activo })
     });
     await loadPMs();
@@ -637,7 +698,6 @@ async function togglePM(id, activo) {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
-// ── PDF ───────────────────────────────────────────────────────
 async function downloadPdf(id, unidad) {
   try {
     const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(r => r.json());
@@ -649,7 +709,6 @@ async function downloadPdf(id, unidad) {
   } catch(e) { console.error(e); }
 }
 
-// ── Utils ─────────────────────────────────────────────────────
 function showToast(msg, title = 'Aviso') {
   const t = document.getElementById('toast');
   document.getElementById('toastTitle').textContent = title;
