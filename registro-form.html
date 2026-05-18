@@ -37,6 +37,7 @@
   .status-box { display: none; border-radius: 3px; padding: 18px 22px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
   .status-box.ok  { background: #e8f5ee; border-left: 4px solid var(--ok);  color: var(--ok); }
   .status-box.err { background: #fdf0ef; border-left: 4px solid var(--err); color: var(--err); }
+  .status-box.err .err-detalle { font-size: 11px; margin-top: 6px; opacity: .8; }
 
   .section { background: var(--white); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
   .section-header { background: var(--navy); padding: 10px 20px; display: flex; align-items: center; gap: 10px; }
@@ -130,7 +131,8 @@
     ✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.
   </div>
   <div id="status-err" class="status-box err">
-    Error al enviar el registro. Por favor intente de nuevo o contacte a administración.
+    <div id="err-msg">Error al enviar el registro. Por favor intente de nuevo o contacte a administración.</div>
+    <div id="err-detalle" class="err-detalle" style="display:none"></div>
   </div>
 
   <form id="regForm" novalidate>
@@ -481,9 +483,27 @@ async function generarPDF(data, firmaDataURL) {
   return doc.output('datauristring');
 }
 
+// ── Mostrar error ─────────────────────────────────────────────
+function mostrarError(msg, detalle) {
+  const errEl = document.getElementById('status-err');
+  document.getElementById('err-msg').textContent = msg;
+  const detalleEl = document.getElementById('err-detalle');
+  if (detalle) {
+    detalleEl.textContent = detalle;
+    detalleEl.style.display = 'block';
+  } else {
+    detalleEl.style.display = 'none';
+  }
+  errEl.style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
 // ── Submit ────────────────────────────────────────────────────
 document.getElementById('regForm').addEventListener('submit', async function(e) {
   e.preventDefault();
+
+  // Ocultar errores anteriores
+  document.getElementById('status-err').style.display = 'none';
 
   // 1. Campos requeridos
   let valid = true;
@@ -562,7 +582,23 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error(await res.text());
+
+    // ── Manejo de errores del servidor ────────────────────────
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => null);
+      if (errBody && errBody.codigo === 'TRASLAPE_FECHAS') {
+        mostrarError(
+          `⚠️ ${errBody.error}`,
+          errBody.detalle + ' — Por favor contacte a administración para verificar las fechas.'
+        );
+      } else {
+        mostrarError(
+          'Error al enviar el registro. Por favor intente de nuevo o contacte a administración.',
+          errBody ? errBody.error : null
+        );
+      }
+      return;
+    }
 
     document.getElementById('status-ok').style.display = 'block';
     document.getElementById('regForm').style.display = 'none';
@@ -574,9 +610,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     link.click();
 
   } catch(err) {
-    const errEl = document.getElementById('status-err');
-    errEl.style.display = 'block';
-    errEl.textContent = 'Error al enviar el registro: ' + err.message + '. Por favor contacte a administración.';
+    mostrarError('Error de conexión. Por favor verifique su internet e intente de nuevo.');
   } finally {
     btn.disabled = false;
     spinner.style.display = 'none';
