@@ -54,11 +54,7 @@
     padding: 12px 24px;
     gap: 16px;
   }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .brand { display: flex; align-items: center; gap: 12px; }
   .brand-logo svg { width: 36px; height: 36px; }
   .brand-text {
     font-size: 14px;
@@ -74,11 +70,7 @@
     text-transform: uppercase;
     margin-top: 2px;
   }
-  .topbar-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
   .live-pill {
     display: flex;
     align-items: center;
@@ -100,17 +92,12 @@
     animation: pulse 2s ease-in-out infinite;
   }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-  #clock {
-    font-size: 11px;
-    color: var(--teal-lt);
-    letter-spacing: 0.06em;
-    font-family: Verdana, sans-serif;
-  }
+  #clock { font-size: 11px; color: var(--teal-lt); letter-spacing: 0.06em; }
   .btn-nuevo {
     background: var(--teal);
     color: var(--white);
     border: none;
-    padding: 8px 16px;
+    padding: 8px 14px;
     font-family: Verdana, sans-serif;
     font-size: 10px;
     font-weight: bold;
@@ -123,6 +110,21 @@
     transition: background .15s;
   }
   .btn-nuevo:hover { background: var(--teal-lt); }
+  .btn-pm {
+    background: transparent;
+    color: var(--teal-lt);
+    border: 1px solid rgba(113,174,183,.4);
+    padding: 8px 14px;
+    font-family: Verdana, sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-pm:hover { background: rgba(113,174,183,.1); border-color: var(--teal-lt); }
 
   /* ── Layout ── */
   .layout {
@@ -131,9 +133,7 @@
     flex: 1;
     min-height: 0;
   }
-  @media(max-width: 700px) {
-    .layout { grid-template-columns: 1fr; }
-  }
+  @media(max-width: 700px) { .layout { grid-template-columns: 1fr; } }
 
   /* ── Sidebar ── */
   .sidebar {
@@ -161,20 +161,9 @@
     padding: 10px 14px;
     margin-bottom: 6px;
   }
-  .kpi-val {
-    font-size: 30px;
-    font-weight: bold;
-    color: var(--navy);
-    line-height: 1;
-    font-family: Verdana, sans-serif;
-  }
-  .kpi-sub {
-    font-size: 10px;
-    color: var(--ink-mid);
-    margin-top: 3px;
-  }
+  .kpi-val { font-size: 30px; font-weight: bold; color: var(--navy); line-height: 1; }
+  .kpi-sub { font-size: 10px; color: var(--ink-mid); margin-top: 3px; }
   .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-
   .edificio-row {
     display: flex;
     justify-content: space-between;
@@ -187,28 +176,15 @@
   }
   .edificio-name { font-size: 11px; color: var(--ink-mid); font-weight: bold; }
   .edificio-num  { font-size: 16px; font-weight: bold; color: var(--teal); }
-
   .tipo-legend { display: flex; flex-direction: column; gap: 6px; }
-  .tipo-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 10px;
-    color: var(--ink-mid);
-  }
+  .tipo-item { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--ink-mid); }
   .tipo-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
   /* ── Main ── */
   .main { padding: 20px 24px; overflow-y: auto; }
 
   /* ── Filters ── */
-  .filters {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-    align-items: center;
-  }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
   .tab {
     background: var(--white);
     border: 1px solid var(--border);
@@ -240,12 +216,7 @@
   .filter-spacer { flex: 1; }
 
   /* ── Table ── */
-  .table-wrap {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-  }
+  .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; }
   thead { background: var(--navy); }
   th {
@@ -258,44 +229,24 @@
     color: var(--teal-lt);
     white-space: nowrap;
   }
-  tbody tr {
-    border-bottom: 1px solid var(--border);
-    transition: background .1s;
-    cursor: pointer;
-  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; cursor: pointer; }
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: var(--teal-pale); }
   td { padding: 10px 12px; color: var(--ink-mid); vertical-align: middle; }
   td.primary { color: var(--ink); font-weight: bold; }
-
-  .tipo-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 10px;
-    font-weight: bold;
-    letter-spacing: 0.06em;
-  }
+  .tipo-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: bold; }
   .tipo-H { background: #e8f5ee; color: var(--H); border: 1px solid #b2d9c3; }
   .tipo-R { background: var(--teal-pale); color: var(--teal); border: 1px solid var(--border); }
   .tipo-G { background: #eef0f8; color: var(--G); border: 1px solid #c5cbe8; }
-
   .estado-activo { color: var(--ok); font-weight: bold; }
   .estado-futuro { color: var(--teal); font-weight: bold; }
   .estado-salida { color: var(--ink-mid); }
-
   .pdf-icon { font-size: 14px; opacity: .3; cursor: default; }
   .pdf-icon.has-pdf { opacity: 1; cursor: pointer; }
   .pdf-icon.has-pdf:hover { opacity: .7; }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--ink-mid); font-size: 12px; }
 
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--ink-mid);
-    font-size: 12px;
-  }
-
-  /* ── Modal ── */
+  /* ── Modal base ── */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -324,81 +275,107 @@
     align-items: flex-start;
   }
   .modal-title { font-size: 15px; font-weight: bold; color: var(--white); }
-  .modal-sub { font-size: 10px; color: var(--teal-lt); margin-top: 3px; letter-spacing: 0.06em; }
+  .modal-sub { font-size: 10px; color: var(--teal-lt); margin-top: 3px; }
   .modal-close { background: none; border: none; color: var(--teal-lt); font-size: 20px; cursor: pointer; }
   .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
   .detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .detail-field label {
-    font-size: 9px;
-    font-weight: bold;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--teal);
-    display: block;
-    margin-bottom: 3px;
+    font-size: 9px; font-weight: bold; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--teal); display: block; margin-bottom: 3px;
   }
   .detail-field p { font-size: 13px; color: var(--ink); }
   .acomp-list { display: flex; flex-wrap: wrap; gap: 6px; }
   .acomp-chip {
-    background: var(--teal-pale);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 3px 10px;
-    font-size: 11px;
-    color: var(--ink-mid);
+    background: var(--teal-pale); border: 1px solid var(--border);
+    border-radius: 3px; padding: 3px 10px; font-size: 11px; color: var(--ink-mid);
   }
   .modal-actions {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+    padding: 14px 20px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
   }
   .btn-danger {
-    background: #fdf0ef;
-    border: 1px solid #e8c0c0;
-    color: #c0392b;
-    padding: 7px 16px;
-    font-family: Verdana, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 3px;
-    cursor: pointer;
+    background: #fdf0ef; border: 1px solid #e8c0c0; color: #c0392b;
+    padding: 7px 16px; font-family: Verdana, sans-serif;
+    font-size: 11px; font-weight: bold; border-radius: 3px; cursor: pointer;
   }
   .btn-sec {
-    background: var(--teal);
-    border: none;
-    color: var(--white);
-    padding: 7px 16px;
-    font-family: Verdana, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 3px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
+    background: var(--teal); border: none; color: var(--white);
+    padding: 7px 16px; font-family: Verdana, sans-serif;
+    font-size: 11px; font-weight: bold; border-radius: 3px; cursor: pointer;
+    text-decoration: none; display: inline-block;
   }
   .btn-sec:hover { background: var(--navy); }
 
+  /* ── Modal PM ── */
+  .pm-modal { max-width: 500px; }
+  .pm-form {
+    display: grid;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--teal-pale);
+  }
+  .pm-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pm-field { display: flex; flex-direction: column; gap: 4px; }
+  .pm-field label {
+    font-size: 9px; font-weight: bold; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-mid);
+  }
+  .pm-field input {
+    border: 1px solid var(--border); background: var(--white);
+    padding: 7px 10px; font-family: Verdana, sans-serif;
+    font-size: 12px; color: var(--ink); border-radius: 3px; outline: none;
+  }
+  .pm-field input:focus { border-color: var(--teal); }
+  .btn-add-pm {
+    background: var(--teal); border: none; color: var(--white);
+    padding: 8px 16px; font-family: Verdana, sans-serif;
+    font-size: 11px; font-weight: bold; border-radius: 3px;
+    cursor: pointer; align-self: end;
+  }
+  .btn-add-pm:hover { background: var(--navy); }
+  .pm-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+  .pm-list-label {
+    font-size: 9px; font-weight: bold; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--teal); margin-bottom: 4px;
+  }
+  .pm-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--white);
+  }
+  .pm-row.inactive { opacity: .5; background: var(--dust); }
+  .pm-name { font-weight: bold; color: var(--ink); font-size: 12px; }
+  .pm-contact { font-size: 10px; color: var(--ink-mid); margin-top: 2px; }
+  .pm-badge-active {
+    font-size: 9px; font-weight: bold; padding: 2px 8px;
+    border-radius: 10px; background: #e8f5ee; color: var(--ok);
+    border: 1px solid #b2d9c3; cursor: pointer; white-space: nowrap;
+  }
+  .pm-badge-inactive {
+    font-size: 9px; font-weight: bold; padding: 2px 8px;
+    border-radius: 10px; background: var(--dust); color: var(--ink-mid);
+    border: 1px solid var(--border); cursor: pointer; white-space: nowrap;
+  }
+
   /* ── Toast ── */
   .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: var(--navy);
-    border: 1px solid var(--teal);
-    color: var(--white);
-    padding: 12px 18px;
-    border-radius: 3px;
-    font-size: 12px;
-    z-index: 300;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all .3s ease;
-    max-width: 300px;
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--navy); border: 1px solid var(--teal);
+    color: var(--white); padding: 12px 18px; border-radius: 3px;
+    font-size: 12px; z-index: 300;
+    transform: translateY(80px); opacity: 0;
+    transition: all .3s ease; max-width: 300px;
   }
   .toast.show { transform: translateY(0); opacity: 1; }
-  .toast-title { color: var(--teal-lt); font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+  .toast-title {
+    color: var(--teal-lt); font-size: 9px; font-weight: bold;
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px;
+  }
 </style>
 </head>
 <body>
@@ -424,6 +401,7 @@
     <div class="topbar-right">
       <div class="live-pill"><div class="live-dot"></div>En vivo</div>
       <span id="clock"></span>
+      <button class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
       <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
     </div>
   </div>
@@ -443,7 +421,6 @@
         <div class="kpi-sub">unidades activas</div>
       </div>
     </div>
-
     <div>
       <div class="kpi-label">Movimientos hoy</div>
       <div class="kpi-row">
@@ -457,12 +434,10 @@
         </div>
       </div>
     </div>
-
     <div>
       <div class="kpi-label">Por edificio</div>
       <div id="edificioRows"><div style="color:var(--ink-mid);font-size:11px;padding:4px">Cargando…</div></div>
     </div>
-
     <div>
       <div class="kpi-label">Leyenda</div>
       <div class="tipo-legend">
@@ -480,25 +455,21 @@
       <button class="tab"       onclick="setEstado('futuro',this)">Futuros</button>
       <button class="tab"       onclick="setEstado('salida',this)">Salidas</button>
       <button class="tab"       onclick="setEstado('',this)">Todos</button>
-
       <select class="filter-select" id="f-edificio" onchange="loadData()">
         <option value="">Edificio: Todos</option>
         <option>A</option><option>B</option><option>C</option>
         <option>D</option><option>E</option><option>F</option>
         <option value="Casa">Casas</option>
       </select>
-
       <select class="filter-select" id="f-tipo" onchange="loadData()">
         <option value="">Tipo: Todos</option>
         <option value="H">H · Propietario</option>
         <option value="R">R · Renta</option>
         <option value="G">G · Invitado</option>
       </select>
-
       <div class="filter-spacer"></div>
       <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="loadData()">
     </div>
-
     <div class="table-wrap">
       <table>
         <thead>
@@ -522,7 +493,7 @@
   </main>
 </div>
 
-<!-- Modal -->
+<!-- Modal detalle registro -->
 <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-header">
@@ -540,6 +511,51 @@
   </div>
 </div>
 
+<!-- Modal Property Managers -->
+<div class="modal-overlay" id="pmOverlay" onclick="if(event.target===this)closePMModal()">
+  <div class="modal pm-modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Property Managers</div>
+        <div class="modal-sub">Agregar o desactivar property managers</div>
+      </div>
+      <button class="modal-close" onclick="closePMModal()">×</button>
+    </div>
+
+    <!-- Formulario agregar nuevo PM -->
+    <div class="pm-form">
+      <div style="font-size:9px;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:4px">
+        Agregar nuevo PM
+      </div>
+      <div class="pm-form-row">
+        <div class="pm-field" style="grid-column:1/-1">
+          <label>Nombre <span style="color:var(--teal)">*</span></label>
+          <input id="pm-nombre" type="text" placeholder="Nombre completo o empresa">
+        </div>
+      </div>
+      <div class="pm-form-row">
+        <div class="pm-field">
+          <label>Email</label>
+          <input id="pm-email" type="email" placeholder="email@ejemplo.com">
+        </div>
+        <div class="pm-field">
+          <label>Teléfono</label>
+          <input id="pm-telefono" type="tel" placeholder="+52 612 000 0000">
+        </div>
+      </div>
+      <div>
+        <button class="btn-add-pm" onclick="agregarPM()">＋ Agregar PM</button>
+      </div>
+    </div>
+
+    <!-- Lista de PMs -->
+    <div class="pm-list">
+      <div class="pm-list-label">PMs registrados</div>
+      <div id="pmListBody">Cargando…</div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast">
   <div class="toast-title" id="toastTitle">Aviso</div>
@@ -550,14 +566,14 @@
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
 let estado = 'activo', actualId = null;
 
-// Clock
+// ── Clock ────────────────────────────────────────────────────
 function tickClock() {
   document.getElementById('clock').textContent =
     new Date().toLocaleString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'America/Mazatlan' });
 }
 tickClock(); setInterval(tickClock, 1000);
 
-// Socket.io
+// ── Socket.io ────────────────────────────────────────────────
 try {
   const socket = io(API_BASE);
   socket.on('inhouse:nuevo', d => {
@@ -566,7 +582,7 @@ try {
   });
 } catch(e) {}
 
-// Load data
+// ── Data ─────────────────────────────────────────────────────
 async function loadData() {
   try {
     const params = new URLSearchParams();
@@ -598,6 +614,7 @@ function setEstado(val, btn) {
   loadData();
 }
 
+// ── Render tabla ─────────────────────────────────────────────
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) {
@@ -626,6 +643,7 @@ function renderTable(rows) {
   }).join('');
 }
 
+// ── Render KPIs ──────────────────────────────────────────────
 function renderKPIs(oc) {
   const t = oc.totales || {};
   document.getElementById('kpi-personas').textContent  = t.personas_activas  || '0';
@@ -643,6 +661,7 @@ function renderKPIs(oc) {
     </div>`).join('');
 }
 
+// ── Modal detalle registro ───────────────────────────────────
 async function openModal(id) {
   actualId = id;
   try {
@@ -670,8 +689,7 @@ async function openModal(id) {
       ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${r.notas}</p></div>` : ''}
       ${r.pdf_firmado_url
         ? `<div class="detail-field"><label>Documento firmado</label>
-            <button class="btn-sec" onclick="downloadPdf('${r.id}','${r.unidad}')">📄 Descargar PDF firmado</button>
-           </div>`
+            <button class="btn-sec" onclick="downloadPdf('${r.id}','${r.unidad}')">📄 Descargar PDF firmado</button></div>`
         : `<div style="font-size:11px;color:var(--ink-mid)">Sin PDF adjunto</div>`}
     `;
     document.getElementById('modalOverlay').classList.add('open');
@@ -692,6 +710,91 @@ async function deleteActual() {
   } catch(e) { alert('Error: ' + e.message); }
 }
 
+// ── Modal Property Managers ──────────────────────────────────
+async function openPMModal() {
+  document.getElementById('pmOverlay').classList.add('open');
+  document.getElementById('pm-nombre').value = '';
+  document.getElementById('pm-email').value = '';
+  document.getElementById('pm-telefono').value = '';
+  await loadPMs();
+}
+
+function closePMModal() {
+  document.getElementById('pmOverlay').classList.remove('open');
+}
+
+async function loadPMs() {
+  try {
+    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const el = document.getElementById('pmListBody');
+    if (!data.length) { el.innerHTML = '<div style="color:var(--ink-mid);font-size:11px">Sin PMs registrados</div>'; return; }
+
+    el.innerHTML = data.map(pm => `
+      <div class="pm-row ${pm.activo ? '' : 'inactive'}">
+        <div>
+          <div class="pm-name">${pm.nombre}</div>
+          <div class="pm-contact">
+            ${pm.email ? pm.email : ''}
+            ${pm.email && pm.telefono ? ' · ' : ''}
+            ${pm.telefono ? pm.telefono : ''}
+            ${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}
+          </div>
+        </div>
+        <button
+          class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}"
+          onclick="togglePM(${pm.id}, ${pm.activo})">
+          ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
+        </button>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('pmListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar PMs</div>';
+  }
+}
+
+async function agregarPM() {
+  const nombre   = document.getElementById('pm-nombre').value.trim();
+  const email    = document.getElementById('pm-email').value.trim();
+  const telefono = document.getElementById('pm-telefono').value.trim();
+
+  if (!nombre) {
+    document.getElementById('pm-nombre').focus();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/inhouse/managers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, email, telefono })
+    });
+    if (!res.ok) throw new Error(await res.text());
+
+    document.getElementById('pm-nombre').value = '';
+    document.getElementById('pm-email').value = '';
+    document.getElementById('pm-telefono').value = '';
+
+    await loadPMs();
+    showToast(`PM "${nombre}" agregado correctamente`, 'Property Manager');
+  } catch(e) {
+    alert('Error al agregar PM: ' + e.message);
+  }
+}
+
+async function togglePM(id, activo) {
+  try {
+    await fetch(`${API_BASE}/api/inhouse/managers/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activo: !activo })
+    });
+    await loadPMs();
+    showToast(`PM ${activo ? 'desactivado' : 'activado'}`, 'Property Manager');
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+}
+
+// ── PDF ──────────────────────────────────────────────────────
 async function downloadPdf(id, unidad) {
   try {
     const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(r => r.json());
@@ -703,6 +806,7 @@ async function downloadPdf(id, unidad) {
   } catch(e) { console.error(e); }
 }
 
+// ── Toast ────────────────────────────────────────────────────
 function showToast(msg, title = 'Aviso') {
   const t = document.getElementById('toast');
   document.getElementById('toastTitle').textContent = title;
@@ -711,6 +815,7 @@ function showToast(msg, title = 'Aviso') {
   setTimeout(() => t.classList.remove('show'), 4500);
 }
 
+// ── Fecha ────────────────────────────────────────────────────
 function fmtDate(d) {
   if (!d) return '—';
   const clean = d.toString().substring(0, 10);
@@ -718,8 +823,10 @@ function fmtDate(d) {
   return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
 }
 
+// ── Init ─────────────────────────────────────────────────────
 loadData();
 setInterval(loadData, 60000);
 </script>
 </body>
 </html>
+
