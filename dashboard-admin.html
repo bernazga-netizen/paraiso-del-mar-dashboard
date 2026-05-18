@@ -713,7 +713,8 @@ function showToast(msg, title = 'Aviso') {
 
 function fmtDate(d) {
   if (!d) return '—';
-  const dt = new Date(d + 'T12:00:00');
+  const clean = d.toString().substring(0, 10); // toma solo YYYY-MM-DD
+  const dt = new Date(clean + 'T12:00:00');
   return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
 }
 
