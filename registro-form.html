@@ -6,248 +6,269 @@
 <title>Registro de Huéspedes — Paraíso del Mar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap');
-
+  /* PDM Brand Colors */
   :root {
-    --gold:    #B8976A;
-    --gold-lt: #D4B896;
-    --ink:     #1A1714;
-    --ink-mid: #3D3830;
-    --sand:    #F5F0E8;
-    --sand-dk: #EBE4D5;
-    --border:  #D4C9B4;
-    --white:   #FDFBF7;
-    --ok:      #2E7D55;
-    --err:     #B84040;
+    --teal:       #007c89;
+    --teal-lt:    #71aeb7;
+    --teal-pale:  #e8f4f6;
+    --navy:       #003660;
+    --emerald:    #006b35;
+    --dust:       #f2efec;
+    --dust-dk:    #e5e0da;
+    --white:      #ffffff;
+    --ink:        #1a2e3a;
+    --ink-mid:    #3d5a66;
+    --border:     #c2d8dd;
+    --ok:         #006b35;
+    --err:        #c0392b;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'Jost', sans-serif;
-    font-weight: 300;
-    background: var(--sand);
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 13px;
+    background: var(--dust);
     color: var(--ink);
     min-height: 100vh;
   }
 
   /* ── Header ── */
   .header {
-    background: var(--ink);
-    padding: 28px 40px 24px;
+    background: var(--navy);
+    padding: 0;
+  }
+  .header-inner {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 20px 24px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 18px;
   }
-  .header-logo {
+  /* SVG logo mark — agave/palm estilizado en teal */
+  .logo-mark svg {
     width: 52px;
     height: 52px;
-    border: 1.5px solid var(--gold);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
   }
-  .header-logo svg { width: 28px; height: 28px; }
   .header-text h1 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 22px;
-    font-weight: 300;
+    font-family: Verdana, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
     color: var(--white);
-    letter-spacing: 0.08em;
-  }
-  .header-text p {
-    font-size: 11px;
-    color: var(--gold-lt);
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-top: 3px;
+  }
+  .header-text h1 span {
+    display: block;
+    font-size: 11px;
+    font-weight: normal;
+    letter-spacing: 0.2em;
+    color: var(--teal-lt);
+    margin-top: 2px;
+  }
+  .header-rule {
+    height: 4px;
+    background: linear-gradient(90deg, var(--teal) 0%, var(--teal-lt) 60%, transparent 100%);
   }
 
-  /* ── Form container ── */
+  /* ── Container ── */
   .container {
     max-width: 780px;
     margin: 0 auto;
-    padding: 40px 24px 80px;
+    padding: 32px 24px 80px;
   }
 
-  /* ── Section ── */
+  /* ── Status messages ── */
+  .status-box {
+    display: none;
+    border-radius: 3px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .status-box.ok  { background: #e8f5ee; border-left: 4px solid var(--ok);  color: var(--ok); }
+  .status-box.err { background: #fdf0ef; border-left: 4px solid var(--err); color: var(--err); }
+
+  /* ── Section card ── */
   .section {
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 2px;
-    margin-bottom: 20px;
+    border-radius: 3px;
+    margin-bottom: 16px;
     overflow: hidden;
   }
   .section-header {
-    background: var(--sand-dk);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 24px;
+    background: var(--navy);
+    padding: 10px 20px;
     display: flex;
     align-items: center;
     gap: 10px;
   }
   .section-num {
-    width: 22px;
-    height: 22px;
-    background: var(--ink);
-    color: var(--gold);
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 13px;
+    width: 20px; height: 20px;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
     flex-shrink: 0;
   }
   .section-title {
-    font-size: 11px;
+    font-size: 10px;
+    font-weight: bold;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--ink-mid);
-    font-weight: 500;
+    color: var(--teal-lt);
   }
-  .section-body { padding: 24px; }
+  .section-body { padding: 20px; }
 
   /* ── Fields ── */
-  .row { display: grid; gap: 16px; margin-bottom: 16px; }
+  .row { display: grid; gap: 14px; margin-bottom: 14px; }
+  .row:last-child { margin-bottom: 0; }
   .row-2 { grid-template-columns: 1fr 1fr; }
   .row-3 { grid-template-columns: 1fr 1fr 1fr; }
   .row-1 { grid-template-columns: 1fr; }
   @media(max-width: 560px) { .row-2, .row-3 { grid-template-columns: 1fr; } }
 
-  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
   .field label {
     font-size: 10px;
-    letter-spacing: 0.14em;
+    font-weight: bold;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-mid);
-    font-weight: 500;
   }
-  .field label .req { color: var(--gold); margin-left: 2px; }
+  .field label .req { color: var(--teal); margin-left: 2px; }
   .field input, .field select, .field textarea {
     border: 1px solid var(--border);
     background: var(--white);
-    padding: 10px 12px;
-    font-family: 'Jost', sans-serif;
-    font-size: 14px;
-    font-weight: 300;
+    padding: 9px 11px;
+    font-family: Verdana, sans-serif;
+    font-size: 13px;
     color: var(--ink);
-    border-radius: 2px;
+    border-radius: 3px;
     outline: none;
     transition: border-color .15s;
     width: 100%;
   }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--gold);
-  }
+  .field input:focus, .field select:focus { border-color: var(--teal); }
   .field input.error { border-color: var(--err); }
 
-  /* ── Tipo badge ── */
+  /* ── Tipo selector ── */
   .tipo-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .tipo-opt { display: none; }
   .tipo-label {
-    padding: 8px 16px;
+    padding: 7px 14px;
     border: 1px solid var(--border);
-    border-radius: 2px;
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
     cursor: pointer;
     transition: all .15s;
-    user-select: none;
+    color: var(--ink-mid);
+    background: var(--dust);
   }
   .tipo-opt:checked + .tipo-label {
-    background: var(--ink);
-    color: var(--gold);
-    border-color: var(--ink);
+    background: var(--teal);
+    color: var(--white);
+    border-color: var(--teal);
   }
 
-  /* ── Guests grid ── */
-  .guests-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  /* ── Guest grid ── */
+  .guests-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   @media(max-width: 480px) { .guests-grid { grid-template-columns: 1fr; } }
   .guest-field {
     display: flex;
     align-items: center;
     gap: 8px;
     border: 1px solid var(--border);
-    padding: 8px 12px;
-    border-radius: 2px;
-    background: var(--white);
+    padding: 7px 11px;
+    border-radius: 3px;
+    background: var(--dust);
   }
   .guest-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 15px;
-    color: var(--gold);
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--teal);
     min-width: 16px;
   }
   .guest-field input {
     border: none;
     background: transparent;
-    font-family: 'Jost', sans-serif;
+    font-family: Verdana, sans-serif;
     font-size: 13px;
-    font-weight: 300;
     color: var(--ink);
     outline: none;
     width: 100%;
   }
 
   /* ── Checkboxes ── */
-  .check-group { display: flex; flex-direction: column; gap: 12px; }
-  .check-item {
-    display: flex;
-    gap: 12px;
-    cursor: pointer;
-    align-items: flex-start;
-  }
+  .check-group { display: flex; flex-direction: column; gap: 10px; }
+  .check-item { display: flex; gap: 11px; cursor: pointer; align-items: flex-start; }
   .check-item input[type=checkbox] { display: none; }
   .check-box {
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--border);
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
     flex-shrink: 0;
-    margin-top: 2px;
+    margin-top: 1px;
+    border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background .15s;
+    transition: all .15s;
   }
   .check-item input:checked ~ .check-box {
-    background: var(--ink);
-    border-color: var(--ink);
+    background: var(--teal);
+    border-color: var(--teal);
   }
   .check-item input:checked ~ .check-box::after {
     content: '';
-    width: 10px;
-    height: 6px;
-    border-left: 2px solid var(--gold);
-    border-bottom: 2px solid var(--gold);
-    transform: rotate(-45deg) translateY(-2px);
+    width: 9px; height: 5px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: rotate(-45deg) translateY(-1px);
   }
-  .check-text {
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--ink-mid);
-  }
+  .check-text { font-size: 12px; line-height: 1.6; color: var(--ink-mid); }
   .check-text strong {
     color: var(--ink);
-    font-weight: 500;
+    font-weight: bold;
     display: block;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── Legal text ── */
+  .legal-text {
     font-size: 12px;
-    letter-spacing: 0.06em;
+    line-height: 1.7;
+    color: var(--ink-mid);
+    padding: 14px 16px;
+    background: var(--teal-pale);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 14px;
   }
 
   /* ── Firma ── */
   .firma-wrap {
     border: 1px solid var(--border);
-    border-radius: 2px;
+    border-radius: 3px;
     overflow: hidden;
   }
-  .firma-label-bar {
-    background: var(--sand-dk);
-    padding: 8px 14px;
+  .firma-bar {
+    background: var(--dust-dk);
+    padding: 7px 14px;
     font-size: 10px;
-    letter-spacing: 0.14em;
+    font-weight: bold;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--ink-mid);
     display: flex;
@@ -263,16 +284,14 @@
     touch-action: none;
   }
   .firma-actions {
-    padding: 8px 14px;
+    padding: 7px 14px;
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: flex-end;
   }
   .btn-clear {
-    font-family: 'Jost', sans-serif;
+    font-family: Verdana, sans-serif;
     font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
     color: var(--ink-mid);
     background: none;
     border: none;
@@ -284,88 +303,81 @@
   .btn-clear:hover { opacity: 1; }
 
   /* ── Submit ── */
-  .submit-area { margin-top: 32px; }
+  .submit-area { margin-top: 24px; }
   .btn-submit {
     width: 100%;
-    background: var(--ink);
-    color: var(--gold);
+    background: var(--teal);
+    color: var(--white);
     border: none;
-    padding: 16px 32px;
-    font-family: 'Jost', sans-serif;
+    padding: 15px 32px;
+    font-family: Verdana, sans-serif;
     font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 0.2em;
+    font-weight: bold;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 3px;
     transition: background .2s;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
   }
-  .btn-submit:hover { background: #2C2520; }
+  .btn-submit:hover { background: var(--navy); }
   .btn-submit:disabled { opacity: .5; cursor: not-allowed; }
   .spinner {
     width: 16px; height: 16px;
-    border: 2px solid var(--gold-lt);
-    border-top-color: var(--gold);
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
     border-radius: 50%;
     animation: spin .7s linear infinite;
     display: none;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Success / Error states ── */
-  .status-box {
-    display: none;
-    border-radius: 2px;
-    padding: 20px 24px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .status-box.ok  { background: #EDF7F2; border: 1px solid #B2D9C3; color: var(--ok); }
-  .status-box.err { background: #FDF0F0; border: 1px solid #E8C0C0; color: var(--err); }
-
-  /* ── Nota legal ── */
-  .legal-text {
-    font-size: 12px;
-    line-height: 1.7;
+  /* ── Footer ── */
+  .page-footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 10px;
     color: var(--ink-mid);
-    padding: 16px;
-    background: var(--sand-dk);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    margin-bottom: 16px;
+    letter-spacing: 0.08em;
+    opacity: .6;
   }
 </style>
 </head>
 <body>
 
 <header class="header">
-  <div class="header-logo">
-    <!-- Palm / wave icon representativo -->
-    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 22V10" stroke="#B8976A" stroke-width="1.2" stroke-linecap="round"/>
-      <path d="M14 10 Q10 4 4 6 Q8 8 10 12" stroke="#B8976A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-      <path d="M14 10 Q18 4 24 6 Q20 8 18 12" stroke="#B8976A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-      <path d="M4 24 Q9 21 14 22 Q19 21 24 24" stroke="#B8976A" stroke-width="1" stroke-linecap="round" fill="none"/>
-    </svg>
+  <div class="header-inner">
+    <div class="logo-mark">
+      <!-- Agave icon — PDM brand mark style -->
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="26" r="25" stroke="#71aeb7" stroke-width="1"/>
+        <!-- agave leaves -->
+        <path d="M26 38 V20" stroke="#71aeb7" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M26 22 Q20 14 12 16 Q18 18 22 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 22 Q32 14 40 16 Q34 18 30 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 26 Q19 20 13 23 Q19 23 23 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <path d="M26 26 Q33 20 39 23 Q33 23 29 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <!-- water line -->
+        <path d="M16 41 Q21 38 26 40 Q31 38 36 41" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Paraíso del Mar <span>Guest Registration · Registro de Huéspedes</span></h1>
+    </div>
   </div>
-  <div class="header-text">
-    <h1>Paraíso del Mar</h1>
-    <p>Registro de huéspedes · Guest registration</p>
-  </div>
+  <div class="header-rule"></div>
 </header>
 
 <div class="container">
 
   <div id="status-ok" class="status-box ok">
-    ✓ Registro enviado correctamente. El PDF con su firma ha sido guardado. La administración revisará la información.
+    ✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.
   </div>
-  <div id="status-err" class="status-box err">
-    Ocurrió un error al enviar el registro. Por favor intente de nuevo o contacte a administración.
+  <div id="status-err" class="status-box err" id="status-err">
+    Error al enviar el registro. Por favor intente de nuevo o contacte a administración.
   </div>
 
   <form id="regForm" novalidate>
@@ -374,26 +386,26 @@
     <div class="section">
       <div class="section-header">
         <div class="section-num">1</div>
-        <div class="section-title">Unidad y estadía · Unit &amp; stay</div>
+        <div class="section-title">Unidad y estadía · Unit &amp; Stay</div>
       </div>
       <div class="section-body">
         <div class="row row-3">
           <div class="field">
             <label>Unidad <span class="req">*</span></label>
-            <input id="unidad" type="text" placeholder="A-202, C-401…" required>
+            <input id="unidad" type="text" placeholder="A-202, C-401, Casa 112…" required>
           </div>
           <div class="field">
-            <label>Fecha de llegada <span class="req">*</span></label>
+            <label>Fecha de llegada · Check in <span class="req">*</span></label>
             <input id="fecha_ingreso" type="date" required>
           </div>
           <div class="field">
-            <label>Fecha de salida</label>
+            <label>Fecha de salida · Check out</label>
             <input id="fecha_salida" type="date">
           </div>
         </div>
         <div class="row row-2">
           <div class="field">
-            <label>Property manager</label>
+            <label>Property Manager</label>
             <select id="property_manager_id">
               <option value="">— Seleccionar —</option>
             </select>
@@ -413,26 +425,26 @@
       </div>
     </div>
 
-    <!-- 2. DATOS DEL TITULAR -->
+    <!-- 2. TITULAR -->
     <div class="section">
       <div class="section-header">
         <div class="section-num">2</div>
-        <div class="section-title">Titular del registro · Primary guest</div>
+        <div class="section-title">Titular del registro · Primary Guest</div>
       </div>
       <div class="section-body">
         <div class="row row-1">
           <div class="field">
-            <label>Nombre completo <span class="req">*</span></label>
+            <label>Nombre completo · Full name <span class="req">*</span></label>
             <input id="nombre_huesped" type="text" placeholder="Full name" required>
           </div>
         </div>
         <div class="row row-2">
           <div class="field">
-            <label>Correo electrónico</label>
+            <label>Correo electrónico · Email</label>
             <input id="email" type="email" placeholder="email@example.com">
           </div>
           <div class="field">
-            <label>Teléfono</label>
+            <label>Teléfono · Telephone</label>
             <input id="telefono" type="tel" placeholder="+1 555 000 0000">
           </div>
         </div>
@@ -445,29 +457,27 @@
       </div>
     </div>
 
-    <!-- 3. HUÉSPEDES ADICIONALES -->
+    <!-- 3. ACOMPAÑANTES -->
     <div class="section">
       <div class="section-header">
         <div class="section-num">3</div>
-        <div class="section-title">Huéspedes adicionales · Other guests (1–8)</div>
+        <div class="section-title">Huéspedes adicionales · Other Guests (1–8)</div>
       </div>
       <div class="section-body">
-        <div class="guests-grid" id="guestsGrid">
-          <!-- generado por JS -->
-        </div>
+        <div class="guests-grid" id="guestsGrid"></div>
       </div>
     </div>
 
-    <!-- 4. COMPROMISOS Y PREFERENCIAS -->
+    <!-- 4. COMPROMISOS -->
     <div class="section">
       <div class="section-header">
         <div class="section-num">4</div>
         <div class="section-title">Compromisos y preferencias</div>
       </div>
       <div class="section-body">
-        <div class="legal-text" id="legalText">
+        <div class="legal-text">
           He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia.<br><br>
-          <em>I have read and agree to abide by the rules and regulations of Paraiso del Mar, I acknowledge that breaking these rules may cause the loss of my time in the property. I also take full responsibility for any damage I or any of my guests may cause during my stay.</em>
+          <em>I have read and agree to abide by the rules and regulations of Paraiso del Mar. I acknowledge that breaking these rules may cause the loss of my time in the property. I also take full responsibility for any damage I or any of my guests may cause during my stay.</em>
         </div>
         <div class="check-group">
           <label class="check-item">
@@ -502,17 +512,17 @@
     <div class="section">
       <div class="section-header">
         <div class="section-num">5</div>
-        <div class="section-title">Firma del titular · Guest signature</div>
+        <div class="section-title">Firma del titular · Guest Signature</div>
       </div>
       <div class="section-body">
-        <p style="font-size:12px;color:var(--ink-mid);margin-bottom:14px;letter-spacing:.03em">
-          Firme en el recuadro usando su dedo (móvil) o el cursor (computadora).
+        <p style="font-size:12px;color:var(--ink-mid);margin-bottom:12px">
+          Firme en el recuadro usando su dedo (móvil) o el cursor (computadora) ·
           Sign in the box using your finger (mobile) or cursor (computer).
         </p>
-        <div class="firma-wrap">
-          <div class="firma-label-bar">
+        <div class="firma-wrap" id="firmaWrap">
+          <div class="firma-bar">
             <span>Firma · Signature</span>
-            <span id="firma-status" style="color:var(--err);font-size:10px">Pendiente</span>
+            <span id="firma-status" style="color:var(--err);font-size:10px;font-weight:bold">Pendiente</span>
           </div>
           <canvas id="firma-canvas"></canvas>
           <div class="firma-actions">
@@ -531,16 +541,17 @@
     </div>
 
   </form>
+
+  <div class="page-footer">
+    Paraíso del Mar · La Paz, Baja California Sur, México · paraiso-del-mar-dashboard.vercel.app
+  </div>
+
 </div>
 
 <script>
-// ── Config ──────────────────────────────────────────────────
-// Cambiar por la URL real del backend en Render
-const API_BASE = (window.location.hostname === 'localhost')
-  ? 'http://localhost:3000'
-  : 'https://paraiso-del-mar-backend.onrender.com'; // ← reemplazar
+const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
 
-// ── Property managers: cargar desde API ─────────────────────
+// ── Property managers ────────────────────────────────────────
 async function loadManagers() {
   try {
     const r = await fetch(`${API_BASE}/api/inhouse/managers`);
@@ -552,11 +563,13 @@ async function loadManagers() {
       o.textContent = pm.nombre;
       sel.appendChild(o);
     });
-  } catch(e) {
-    console.warn('No se pudo cargar property managers:', e);
-  }
+  } catch(e) { console.warn('No se pudo cargar PMs:', e); }
 }
 loadManagers();
+
+// Prefill PM from URL param
+const urlPm = new URLSearchParams(window.location.search).get('pm');
+if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = urlPm; }, 500);
 
 // ── Guests grid ──────────────────────────────────────────────
 const grid = document.getElementById('guestsGrid');
@@ -570,29 +583,27 @@ for (let i = 1; i <= 8; i++) {
 
 // ── Firma canvas ─────────────────────────────────────────────
 const canvas = document.getElementById('firma-canvas');
-const ctx    = canvas.getContext('2d');
-let drawing  = false;
-let hasFirma = false;
+const ctx = canvas.getContext('2d');
+let drawing = false, hasFirma = false;
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
-  canvas.width  = rect.width  * window.devicePixelRatio;
-  canvas.height = rect.height * window.devicePixelRatio;
-  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-  ctx.strokeStyle = '#1A1714';
-  ctx.lineWidth   = 2;
-  ctx.lineCap     = 'round';
-  ctx.lineJoin    = 'round';
+  canvas.width  = rect.width  * devicePixelRatio;
+  canvas.height = rect.height * devicePixelRatio;
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  ctx.strokeStyle = '#003660';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
-  const src  = e.touches ? e.touches[0] : e;
+  const src = e.touches ? e.touches[0] : e;
   return { x: src.clientX - rect.left, y: src.clientY - rect.top };
 }
-
 canvas.addEventListener('mousedown',  e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
 canvas.addEventListener('mousemove',  e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasFirma = true; });
 canvas.addEventListener('mouseup',    () => { drawing = false; updateFirmaStatus(); });
@@ -606,51 +617,58 @@ function updateFirmaStatus() {
   el.textContent = hasFirma ? '✓ Firmado' : 'Pendiente';
   el.style.color = hasFirma ? 'var(--ok)' : 'var(--err)';
 }
-
 function clearFirma() {
   ctx.clearRect(0, 0, canvas.width / devicePixelRatio, canvas.height / devicePixelRatio);
   hasFirma = false;
   updateFirmaStatus();
 }
 
-function getFirmaDataURL() {
-  return hasFirma ? canvas.toDataURL('image/png') : null;
+// ── PDF generation ───────────────────────────────────────────
+function formatDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  const meses = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${meses[parseInt(m)-1]} ${day}, ${y}`;
 }
 
-// ── Generación de PDF con jsPDF ──────────────────────────────
 async function generarPDF(data, firmaDataURL) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-
   const W = 215.9, M = 18;
   let y = 18;
 
-  // Header
-  doc.setFillColor(26, 23, 20);
-  doc.rect(0, 0, W, 30, 'F');
-  doc.setTextColor(184, 151, 106);
-  doc.setFont('times', 'normal');
-  doc.setFontSize(18);
-  doc.text('PARAÍSO DEL MAR', W / 2, 14, { align: 'center' });
-  doc.setFontSize(8);
-  doc.setTextColor(212, 184, 150);
-  doc.text('GUEST REGISTRATION FORM · FORMA DE REGISTRO DE HUÉSPEDES', W / 2, 22, { align: 'center' });
+  // Header — Navy
+  doc.setFillColor(0, 54, 96);
+  doc.rect(0, 0, W, 32, 'F');
+  // Teal accent line
+  doc.setFillColor(0, 124, 137);
+  doc.rect(0, 32, W, 3, 'F');
 
-  y = 40;
-  doc.setTextColor(26, 23, 20);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setCharSpace(2);
+  doc.text('PARAÍSO DEL MAR', W / 2, 14, { align: 'center' });
+  doc.setCharSpace(0);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(113, 174, 183);
+  doc.text('GUEST REGISTRATION FORM · FORMA DE REGISTRO DE HUÉSPEDES', W / 2, 23, { align: 'center' });
+
+  y = 44;
+  doc.setTextColor(26, 46, 58);
 
   // Unidad y fechas
-  doc.setFillColor(235, 228, 213);
-  doc.rect(M, y - 4, W - M * 2, 8, 'F');
+  doc.setFillColor(232, 244, 246);
+  doc.rect(M, y - 5, W - M * 2, 10, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
-  doc.setTextColor(61, 56, 48);
-  doc.text(`UNIT / UNIDAD: ${data.unidad}`, M + 2, y + 1);
+  doc.setTextColor(0, 54, 96);
+  doc.text(`UNIT: ${data.unidad}`, M + 3, y + 1);
   doc.text(`CHECK IN: ${formatDate(data.fecha_ingreso)}`, W / 2 - 10, y + 1);
-  doc.text(`CHECK OUT: ${data.fecha_salida ? formatDate(data.fecha_salida) : 'SIN FECHA'}`, W - M - 40, y + 1);
+  doc.text(`CHECK OUT: ${data.fecha_salida ? formatDate(data.fecha_salida) : 'TBD'}`, W - M - 42, y + 1);
 
   y += 14;
-  // Datos del titular
   const campos = [
     ['GUEST NAME / NOMBRE DEL HUÉSPED', data.nombre_huesped],
     ['EMAIL / CORREO ELECTRÓNICO',      data.email || '—'],
@@ -660,75 +678,72 @@ async function generarPDF(data, firmaDataURL) {
   doc.setFont('helvetica', 'normal');
   campos.forEach(([lbl, val]) => {
     doc.setFontSize(7);
-    doc.setTextColor(100, 95, 88);
+    doc.setTextColor(100, 120, 130);
     doc.text(lbl + ':', M, y);
-    doc.setFontSize(9.5);
-    doc.setTextColor(26, 23, 20);
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
+    doc.setTextColor(26, 46, 58);
     doc.text(val, M, y + 5);
     doc.setFont('helvetica', 'normal');
-    doc.setDrawColor(212, 201, 180);
+    doc.setDrawColor(194, 216, 221);
     doc.line(M, y + 7, W - M, y + 7);
-    y += 12;
+    y += 13;
   });
 
   // Acompañantes
   if (data.acompanantes && data.acompanantes.length > 0) {
-    y += 4;
+    y += 3;
     doc.setFontSize(7);
-    doc.setTextColor(100, 95, 88);
+    doc.setTextColor(100, 120, 130);
     doc.text('COMPLETE NAMES OF ALL OTHER GUESTS / NOMBRES COMPLETOS DE LOS DEMÁS HUÉSPEDES', M, y);
     y += 6;
-    const cols = 2;
-    const colW = (W - M * 2) / cols;
+    const colW = (W - M * 2) / 2;
     data.acompanantes.forEach((nombre, i) => {
-      const col = i % cols;
-      const row = Math.floor(i / cols);
-      const xPos = M + col * colW;
-      const yPos = y + row * 8;
+      const col = i % 2, row = Math.floor(i / 2);
+      const xPos = M + col * colW, yPos = y + row * 8;
       doc.setFontSize(7.5);
-      doc.setTextColor(100, 95, 88);
+      doc.setTextColor(100, 120, 130);
       doc.text(`${i + 1}.`, xPos, yPos);
-      doc.setTextColor(26, 23, 20);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(9);
+      doc.setTextColor(26, 46, 58);
       doc.text(nombre, xPos + 5, yPos);
       doc.setFont('helvetica', 'normal');
-      doc.setDrawColor(212, 201, 180);
+      doc.setDrawColor(194, 216, 221);
       doc.line(xPos + 5, yPos + 1.5, xPos + colW - 4, yPos + 1.5);
     });
-    y += Math.ceil(data.acompanantes.length / cols) * 8 + 4;
+    y += Math.ceil(data.acompanantes.length / 2) * 8 + 4;
   }
 
-  // Responsiva
-  y += 6;
-  doc.setFillColor(245, 240, 232);
+  // Legal
+  y += 4;
+  doc.setFillColor(232, 244, 246);
   const legalLines = doc.splitTextToSize(
-    'He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia. / I have read and agree to abide by the rules and regulations of Paraiso del Mar.',
+    'He leído y acepto cumplir con el reglamento de Paraíso del Mar / I have read and agree to abide by the rules and regulations of Paraiso del Mar. I acknowledge that breaking these rules may cause the loss of my time in the property.',
     W - M * 2 - 4
   );
   doc.rect(M, y - 3, W - M * 2, legalLines.length * 4.2 + 4, 'F');
   doc.setFontSize(7.5);
-  doc.setTextColor(61, 56, 48);
+  doc.setTextColor(61, 90, 102);
   doc.text(legalLines, M + 2, y + 1);
   y += legalLines.length * 4.2 + 8;
 
   // Checkboxes
   const checks = [
-    [data.acepta_reglamento, 'He leído y acepto el reglamento · I have read and agree to the rules'],
-    [data.interesado_comprar, 'Interesado en ver propiedades en La Paz · Interested in looking at property in La Paz'],
-    [data.recibir_info, 'Me gustaría recibir información sobre promociones, actividades y eventos'],
+    [data.acepta_reglamento,  'He leído y acepto el reglamento · I have read and agree to the rules'],
+    [data.interesado_comprar, 'Interesado en propiedades en La Paz · Interested in looking at property'],
+    [data.recibir_info,       'Desea recibir información sobre promociones y eventos'],
   ];
   checks.forEach(([checked, text]) => {
-    doc.setDrawColor(184, 151, 106);
-    doc.setFillColor(26, 23, 20);
-    doc.rect(M, y - 3, 4, 4, checked ? 'F' : 'S');
+    doc.setDrawColor(0, 124, 137);
+    doc.setFillColor(0, 124, 137);
+    doc.rect(M, y - 3.2, 4, 4, checked ? 'F' : 'S');
     if (checked) {
-      doc.setTextColor(184, 151, 106);
-      doc.setFontSize(7);
-      doc.text('✓', M + 0.8, y);
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(6);
+      doc.text('✓', M + 0.8, y + 0.2);
     }
-    doc.setTextColor(61, 56, 48);
+    doc.setTextColor(61, 90, 102);
     doc.setFontSize(8);
     doc.text(text, M + 6, y);
     y += 7;
@@ -736,43 +751,34 @@ async function generarPDF(data, firmaDataURL) {
 
   // Firma
   y += 6;
-  doc.setDrawColor(212, 201, 180);
-  doc.line(M, y + 16, M + 80, y + 16);
+  doc.setDrawColor(194, 216, 221);
+  doc.line(M, y + 18, M + 80, y + 18);
   doc.setFontSize(7);
-  doc.setTextColor(100, 95, 88);
-  doc.text('Firma · Signature', M, y + 20);
-  doc.text(`${data.nombre_huesped}`, M, y + 25);
+  doc.setTextColor(100, 120, 130);
+  doc.text('Firma · Signature', M, y + 22);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(26, 46, 58);
+  doc.text(data.nombre_huesped, M, y + 28);
 
   if (firmaDataURL) {
-    try {
-      doc.addImage(firmaDataURL, 'PNG', M, y - 2, 80, 20);
-    } catch(e) { console.warn('firma img error', e); }
+    try { doc.addImage(firmaDataURL, 'PNG', M, y, 80, 20); } catch(e) {}
   }
 
-  // Fecha de registro
-  doc.setFontSize(7);
-  doc.setTextColor(150, 140, 125);
+  // Footer
+  doc.setFillColor(0, 54, 96);
+  doc.rect(0, 272, W, 8, 'F');
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.5);
+  doc.setTextColor(113, 174, 183);
   const ahora = new Date().toLocaleString('es-MX', { timeZone: 'America/Mazatlan' });
-  doc.text(`Registro generado: ${ahora}`, W - M, y + 25, { align: 'right' });
+  doc.text(`Paraíso del Mar · La Paz, BCS · Registro generado: ${ahora}`, W / 2, 277, { align: 'center' });
 
-  return doc.output('datauristring'); // base64
-}
-
-function formatDate(d) {
-  if (!d) return '';
-  const [y, m, day] = d.split('-');
-  const meses = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${meses[parseInt(m) - 1]} ${day}, ${y}`;
+  return doc.output('datauristring');
 }
 
 // ── Submit ───────────────────────────────────────────────────
 document.getElementById('regForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-
-  // Validación básica
-  const unidad = document.getElementById('unidad').value.trim();
-  const nombre = document.getElementById('nombre_huesped').value.trim();
-  const fechaIn = document.getElementById('fecha_ingreso').value;
 
   let valid = true;
   ['unidad','nombre_huesped','fecha_ingreso'].forEach(id => {
@@ -782,22 +788,19 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   });
 
   if (!hasFirma) {
-    document.querySelector('.firma-wrap').style.borderColor = 'var(--err)';
-    valid = false;
-    alert('Por favor firme el formulario antes de enviar.');
+    document.getElementById('firmaWrap').style.borderColor = 'var(--err)';
+    alert('Por favor firme el formulario antes de enviar. · Please sign the form before submitting.');
     return;
   } else {
-    document.querySelector('.firma-wrap').style.borderColor = 'var(--border)';
+    document.getElementById('firmaWrap').style.borderColor = 'var(--border)';
   }
 
   if (!document.getElementById('acepta_reglamento').checked) {
     alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
     return;
   }
-
   if (!valid) return;
 
-  // Recopilar datos
   const acompanantes = [];
   for (let i = 1; i <= 8; i++) {
     const v = document.getElementById(`guest${i}`).value.trim();
@@ -805,31 +808,29 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
 
   const tipo = document.querySelector('input[name="tipo"]:checked').value;
-  const firmaDataURL = getFirmaDataURL();
+  const firmaDataURL = canvas.toDataURL('image/png');
 
   const payload = {
-    unidad,
+    unidad:             document.getElementById('unidad').value.trim(),
     tipo,
     property_manager_id: document.getElementById('property_manager_id').value || null,
-    nombre_huesped: nombre,
-    email:          document.getElementById('email').value.trim(),
-    telefono:       document.getElementById('telefono').value.trim(),
-    direccion:      document.getElementById('direccion').value.trim(),
-    fecha_ingreso:  fechaIn,
-    fecha_salida:   document.getElementById('fecha_salida').value || null,
-    num_personas:   acompanantes.length + 1,
-    acepta_reglamento: document.getElementById('acepta_reglamento').checked,
+    nombre_huesped:     document.getElementById('nombre_huesped').value.trim(),
+    email:              document.getElementById('email').value.trim(),
+    telefono:           document.getElementById('telefono').value.trim(),
+    direccion:          document.getElementById('direccion').value.trim(),
+    fecha_ingreso:      document.getElementById('fecha_ingreso').value,
+    fecha_salida:       document.getElementById('fecha_salida').value || null,
+    num_personas:       acompanantes.length + 1,
+    acepta_reglamento:  document.getElementById('acepta_reglamento').checked,
     interesado_comprar: document.getElementById('interesado_comprar').checked,
-    recibir_info:   document.getElementById('recibir_info').checked,
+    recibir_info:       document.getElementById('recibir_info').checked,
     acompanantes,
-    firma_imagen:   firmaDataURL,
+    firma_imagen: firmaDataURL,
   };
 
-  // Generar PDF
   const btn = document.getElementById('btnSubmit');
   const spinner = document.getElementById('spinner');
   const btnText = document.getElementById('btnText');
-
   btn.disabled = true;
   spinner.style.display = 'block';
   btnText.textContent = 'Generando PDF…';
@@ -837,34 +838,29 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   try {
     const pdfDataURI = await generarPDF({ ...payload }, firmaDataURL);
     payload.pdf_firmado_url = pdfDataURI;
-
-    btnText.textContent = 'Enviando registro…';
+    btnText.textContent = 'Enviando…';
 
     const res = await fetch(`${API_BASE}/api/inhouse`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
     if (!res.ok) throw new Error(await res.text());
 
-    // Mostrar éxito
     document.getElementById('status-ok').style.display = 'block';
-    document.getElementById('status-err').style.display = 'none';
     document.getElementById('regForm').style.display = 'none';
     window.scrollTo(0, 0);
 
-    // Descarga automática del PDF para el huésped
+    // Auto-download PDF
     const link = document.createElement('a');
     link.href = pdfDataURI;
-    link.download = `PDM_Registro_${unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
+    link.download = `PDM_Registro_${payload.unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
     link.click();
 
-  } catch (err) {
-    console.error(err);
-    document.getElementById('status-err').style.display = 'block';
-    document.getElementById('status-err').textContent =
-      'Error al enviar el registro: ' + err.message + '. Por favor contacte a administración.';
+  } catch(err) {
+    const errEl = document.getElementById('status-err');
+    errEl.style.display = 'block';
+    errEl.textContent = 'Error al enviar el registro: ' + err.message + '. Por favor contacte a administración.';
   } finally {
     btn.disabled = false;
     spinner.style.display = 'none';
