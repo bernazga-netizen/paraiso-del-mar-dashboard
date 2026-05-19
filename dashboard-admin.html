@@ -180,6 +180,104 @@
   .pm-badge-active { font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 10px; background: #e8f5ee; color: var(--ok); border: 1px solid #b2d9c3; cursor: pointer; white-space: nowrap; }
   .pm-badge-inactive { font-size: 9px; font-weight: bold; padding: 2px 8px; border-radius: 10px; background: var(--dust); color: var(--ink-mid); border: 1px solid var(--border); cursor: pointer; white-space: nowrap; }
 
+
+  /* ── Login screen ── */
+  .login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: var(--navy);
+    flex-direction: column;
+    gap: 0;
+  }
+  .login-box {
+    background: var(--white);
+    border-radius: 4px;
+    width: 100%;
+    max-width: 380px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+  }
+  .login-header {
+    background: var(--navy);
+    padding: 28px 28px 20px;
+    text-align: center;
+    border-bottom: 3px solid var(--teal);
+  }
+  .login-header svg { width: 48px; height: 48px; margin-bottom: 10px; }
+  .login-title { font-size: 16px; font-weight: bold; color: var(--white); letter-spacing: 0.1em; text-transform: uppercase; }
+  .login-sub { font-size: 10px; color: var(--teal-lt); letter-spacing: 0.14em; margin-top: 4px; }
+  .login-body { padding: 24px 28px 28px; }
+  .login-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+  .login-field label { font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-mid); }
+  .login-field select, .login-field input {
+    border: 1px solid var(--border); background: var(--dust);
+    padding: 10px 12px; font-family: Verdana, sans-serif;
+    font-size: 13px; color: var(--ink); border-radius: 3px;
+    outline: none; transition: border-color .15s; width: 100%;
+  }
+  .login-field select:focus, .login-field input:focus { border-color: var(--teal); background: var(--white); }
+  .login-err { color: #c0392b; font-size: 11px; margin-bottom: 10px; display: none; padding: 8px 12px; background: #fdf0ef; border-radius: 3px; }
+  .btn-login {
+    width: 100%; background: var(--teal); color: var(--white); border: none;
+    padding: 12px; font-family: Verdana, sans-serif; font-size: 11px;
+    font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase;
+    border-radius: 3px; cursor: pointer; transition: background .15s;
+  }
+  .btn-login:hover { background: var(--navy); }
+  .btn-login:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Usuario en topbar ── */
+  .user-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 10px; color: var(--teal-lt); cursor: pointer;
+    transition: background .15s;
+  }
+  .user-pill:hover { background: rgba(255,255,255,.14); }
+  .user-avatar {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--teal); color: var(--white);
+    font-size: 9px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Pestaña Auditoría ── */
+  .main-tabs {
+    display: flex; gap: 2px; margin-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+  }
+  .main-tab {
+    background: none; border: none; padding: 8px 18px;
+    font-family: Verdana, sans-serif; font-size: 10px;
+    font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-mid); cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all .15s;
+  }
+  .main-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+  .main-tab:hover { color: var(--ink); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Tabla auditoría */
+  .audit-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .audit-row-crear  { background: #e8f5ee; }
+  .audit-row-editar { background: var(--white); }
+  .audit-row-eliminar { background: #fdf0ef; }
+  .accion-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 3px;
+    font-size: 10px; font-weight: bold;
+  }
+  .accion-crear   { background: #e8f5ee; color: var(--ok); border: 1px solid #b2d9c3; }
+  .accion-editar  { background: var(--teal-pale); color: var(--teal); border: 1px solid var(--border); }
+  .accion-eliminar{ background: #fdf0ef; color: #c0392b; border: 1px solid #e8c0c0; }
+  .valor-antes  { text-decoration: line-through; color: #c0392b; font-size: 11px; }
+  .valor-despues{ color: var(--ok); font-size: 11px; }
+
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); border: 1px solid var(--teal); color: var(--white); padding: 12px 18px; border-radius: 3px; font-size: 12px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all .3s ease; max-width: 300px; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast-title { color: var(--teal-lt); font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
@@ -187,6 +285,47 @@
 </head>
 <body>
 
+<!-- Login Screen -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="login-header">
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="26" r="25" stroke="#71aeb7" stroke-width="1"/>
+        <path d="M26 38 V20" stroke="#71aeb7" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M26 22 Q20 14 12 16 Q18 18 22 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 22 Q32 14 40 16 Q34 18 30 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+        <path d="M26 26 Q19 20 13 23 Q19 23 23 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <path d="M26 26 Q33 20 39 23 Q33 23 29 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <path d="M16 41 Q21 38 26 40 Q31 38 36 41" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="login-title">Paraíso del Mar</div>
+      <div class="login-sub">Control Inhouse · Administración</div>
+    </div>
+    <div class="login-body">
+      <div class="login-field">
+        <label>Usuario</label>
+        <select id="login-nombre">
+          <option value="">— Seleccionar —</option>
+          <option>Beatriz Loubet</option>
+          <option>Christopher Davila</option>
+          <option>Mario Orozco</option>
+          <option>Cristina Robledo</option>
+          <option>Bernardo Zuñiga</option>
+        </select>
+      </div>
+      <div class="login-field">
+        <label>Contraseña</label>
+        <input id="login-password" type="password" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="login-err" class="login-err">Usuario o contraseña incorrectos.</div>
+      <button class="btn-login" id="btnLogin" onclick="doLogin()">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard (oculto hasta login) -->
+<div id="dashboardScreen" style="display:none;flex-direction:column;min-height:100vh;">
 <div class="topbar">
   <div class="topbar-inner">
     <div class="brand">
@@ -208,6 +347,7 @@
     <div class="topbar-right">
       <div class="live-pill"><div class="live-dot"></div>En vivo</div>
       <span id="clock"></span>
+      <div class="user-pill" onclick="cerrarSesion()" title="Cerrar sesión"><div class="user-avatar" id="userAvatar">?</div><span id="userNombre">—</span> · Salir</div>
       <button class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
       <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
     </div>
@@ -296,6 +436,13 @@
   </aside>
 
   <main class="main">
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchTab('inhouse', this)">📋 Registros</button>
+      <button class="main-tab" onclick="switchTab('auditoria', this)">🔍 Auditoría</button>
+    </div>
+
+    <!-- Panel Registros -->
+    <div id="panel-inhouse" class="tab-panel active">
     <div class="filters">
       <button class="tab active" onclick="setEstado('activo',this)">Activos</button>
       <button class="tab"       onclick="setEstado('futuro',this)">Futuros</button>
@@ -334,6 +481,46 @@
         </tbody>
       </table>
     </div>
+      </div><!-- /panel-inhouse -->
+
+    <!-- Panel Auditoría -->
+    <div id="panel-auditoria" class="tab-panel">
+      <div class="audit-filters">
+        <select class="filter-select" id="aud-accion" onchange="loadAuditoria()">
+          <option value="">Acción: Todas</option>
+          <option value="crear">Crear</option>
+          <option value="editar">Editar</option>
+          <option value="eliminar">Eliminar</option>
+        </select>
+        <select class="filter-select" id="aud-usuario" onchange="loadAuditoria()">
+          <option value="">Usuario: Todos</option>
+        </select>
+        <input class="filter-input" type="date" id="aud-fecha-ini" onchange="loadAuditoria()" style="width:140px">
+        <input class="filter-input" type="date" id="aud-fecha-fin" onchange="loadAuditoria()" style="width:140px">
+        <div class="filter-spacer"></div>
+        <button class="btn-export" onclick="exportarAuditoria()">⬇ Excel</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha y hora</th>
+              <th>Usuario</th>
+              <th>Acción</th>
+              <th>Unidad</th>
+              <th>Huésped</th>
+              <th>Campo</th>
+              <th>Antes</th>
+              <th>Después</th>
+            </tr>
+          </thead>
+          <tbody id="auditBody">
+            <tr><td colspan="8" class="empty-state">Seleccione la pestaña para cargar</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /panel-auditoria -->
+
   </main>
 </div>
 
@@ -574,7 +761,7 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 async function deleteActual() {
   if (!actualId || !confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
   try {
-    await fetch(`${API_BASE}/api/inhouse/${actualId}`, { method: 'DELETE' });
+    await fetch(`${API_BASE}/api/inhouse/${actualId}?usuario_nombre=${encodeURIComponent(usuarioActual ? usuarioActual.nombre : 'Administración')}`, { method: 'DELETE' });
     closeModal(); loadData();
     showToast('Registro eliminado', 'Acción completada');
   } catch(e) { alert('Error: ' + e.message); }
@@ -625,6 +812,8 @@ async function guardarEdicion() {
     num_personas:        parseInt(document.getElementById('edit-personas').value) || 1,
     property_manager_id: document.getElementById('edit-pm').value || null,
     notas:               document.getElementById('edit-notas').value.trim() || null,
+    usuario_id:          usuarioActual ? usuarioActual.id : null,
+    usuario_nombre:      usuarioActual ? usuarioActual.nombre : 'Administración',
   };
   if (!payload.unidad || !payload.nombre_huesped || !payload.fecha_ingreso) {
     alert('Unidad, nombre y fecha de llegada son requeridos.'); return;
@@ -796,9 +985,160 @@ async function loadPMFilter() {
   } catch(e) { console.warn('No se pudo cargar PMs en filtro:', e); }
 }
 
-loadData();
-loadPMFilter();
-setInterval(loadData, 60000);
+
+// ── Sesión ────────────────────────────────────────────────────
+let usuarioActual = null;
+
+function initSesion() {
+  const saved = sessionStorage.getItem('pdm_usuario');
+  if (saved) {
+    usuarioActual = JSON.parse(saved);
+    mostrarDashboard();
+  }
+}
+
+function mostrarDashboard() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'flex';
+  document.getElementById('userNombre').textContent = usuarioActual.nombre.split(' ')[0];
+  document.getElementById('userAvatar').textContent = usuarioActual.nombre.charAt(0).toUpperCase();
+  loadData();
+  loadPMFilter();
+  loadAuditoriaUsuarios();
+}
+
+async function doLogin() {
+  const nombre   = document.getElementById('login-nombre').value;
+  const password = document.getElementById('login-password').value;
+  const errEl    = document.getElementById('login-err');
+  const btn      = document.getElementById('btnLogin');
+
+  if (!nombre || !password) {
+    errEl.textContent = 'Seleccione usuario e ingrese contraseña.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, password })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      errEl.textContent = data.error || 'Usuario o contraseña incorrectos.';
+      errEl.style.display = 'block';
+    } else {
+      usuarioActual = data.usuario;
+      sessionStorage.setItem('pdm_usuario', JSON.stringify(usuarioActual));
+      mostrarDashboard();
+    }
+  } catch(e) {
+    errEl.textContent = 'Error de conexión. Intente de nuevo.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+}
+
+function cerrarSesion() {
+  if (!confirm('¿Cerrar sesión?')) return;
+  sessionStorage.removeItem('pdm_usuario');
+  usuarioActual = null;
+  document.getElementById('dashboardScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-err').style.display = 'none';
+}
+
+// ── Pestañas ──────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  if (tab === 'auditoria') loadAuditoria();
+}
+
+// ── Auditoría ─────────────────────────────────────────────────
+async function loadAuditoriaUsuarios() {
+  try {
+    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`).then(r => r.json());
+    const sel = document.getElementById('aud-usuario');
+    sel.innerHTML = '<option value="">Usuario: Todos</option>' +
+      data.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
+  } catch(e) {}
+}
+
+async function loadAuditoria() {
+  const params = new URLSearchParams();
+  const accion  = document.getElementById('aud-accion').value;
+  const usuario = document.getElementById('aud-usuario').value;
+  const fini    = document.getElementById('aud-fecha-ini').value;
+  const ffin    = document.getElementById('aud-fecha-fin').value;
+  if (accion)  params.set('accion', accion);
+  if (usuario) params.set('usuario_id', usuario);
+  if (fini)    params.set('fecha_inicio', fini);
+  if (ffin)    params.set('fecha_fin', ffin);
+
+  const tbody = document.getElementById('auditBody');
+  tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Cargando…</td></tr>`;
+
+  try {
+    const { data } = await fetch(`${API_BASE}/api/historial?${params}`).then(r => r.json());
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Sin registros de auditoría</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(h => `
+      <tr class="audit-row-${h.accion}">
+        <td style="white-space:nowrap;font-size:11px">${fmtDateTime(h.created_at)}</td>
+        <td style="font-weight:bold">${h.usuario_nombre || '—'}</td>
+        <td><span class="accion-badge accion-${h.accion}">${h.accion}</span></td>
+        <td style="font-weight:bold">${h.unidad || '—'}</td>
+        <td>${h.nombre_huesped || '—'}</td>
+        <td style="font-size:11px;color:var(--ink-mid)">${h.campo || '—'}</td>
+        <td><span class="valor-antes">${h.valor_antes || '—'}</span></td>
+        <td><span class="valor-despues">${h.valor_despues || '—'}</span></td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Error al cargar auditoría</td></tr>`;
+  }
+}
+
+function fmtDateTime(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleString('es-MX', {
+    day:'2-digit', month:'short', year:'numeric',
+    hour:'2-digit', minute:'2-digit', timeZone:'America/Mazatlan'
+  });
+}
+
+function exportarAuditoria() {
+  const rows = [['Fecha y hora','Usuario','Acción','Unidad','Huésped','Campo','Antes','Después']];
+  document.querySelectorAll('#auditBody tr[class]').forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    if (tds.length < 8) return;
+    rows.push(Array.from(tds).map(td => td.textContent.trim()));
+  });
+  if (rows.length === 1) { alert('Sin datos para exportar.'); return; }
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:18},{wch:20},{wch:10},{wch:10},{wch:25},{wch:20},{wch:20},{wch:20}];
+  const fecha = new Date().toLocaleDateString('es-MX',{timeZone:'America/Mazatlan'}).replace(/\//g,'-');
+  XLSX.utils.book_append_sheet(wb, ws, 'Auditoria');
+  XLSX.writeFile(wb, `PDM_Auditoria_${fecha}.xlsx`);
+}
+
+initSesion();
+setInterval(() => { if(usuarioActual) loadData(); }, 60000);
 </script>
+</div><!-- /dashboardScreen -->
 </body>
 </html>
