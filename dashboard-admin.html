@@ -278,6 +278,31 @@
   .valor-antes  { text-decoration: line-through; color: #c0392b; font-size: 11px; }
   .valor-despues{ color: var(--ok); font-size: 11px; }
 
+
+  /* ── Modal perfil / cambiar contraseña ── */
+  .perfil-modal { max-width: 400px; }
+  .perfil-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .perfil-field label { font-size: 9px; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mid); }
+  .perfil-field input { border: 1px solid var(--border); background: var(--dust); padding: 9px 11px; font-family: Verdana, sans-serif; font-size: 13px; color: var(--ink); border-radius: 3px; outline: none; transition: border-color .15s; width: 100%; }
+  .perfil-field input:focus { border-color: var(--teal); background: var(--white); }
+  .perfil-info { background: var(--teal-pale); border: 1px solid var(--border); border-radius: 3px; padding: 12px 14px; margin-bottom: 16px; }
+  .perfil-nombre { font-size: 16px; font-weight: bold; color: var(--navy); }
+  .perfil-rol { font-size: 10px; color: var(--ink-mid); margin-top: 2px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .perfil-err { color: #c0392b; font-size: 11px; margin-bottom: 8px; display: none; padding: 7px 10px; background: #fdf0ef; border-radius: 3px; }
+  .perfil-ok  { color: var(--ok); font-size: 11px; margin-bottom: 8px; display: none; padding: 7px 10px; background: #e8f5ee; border-radius: 3px; }
+
+  /* ── Modal usuarios (admin) ── */
+  .usuarios-modal { max-width: 520px; }
+  .usr-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1px solid var(--border); border-radius: 3px; background: var(--white); margin-bottom: 6px; }
+  .usr-row.inactive { opacity: .5; background: var(--dust); }
+  .usr-nombre { font-weight: bold; color: var(--ink); font-size: 12px; }
+  .usr-meta { font-size: 10px; color: var(--ink-mid); margin-top: 2px; }
+  .usr-actions { display: flex; gap: 6px; }
+  .btn-usr-reset { background: var(--teal-pale); border: 1px solid var(--border); color: var(--teal); padding: 4px 10px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+  .btn-usr-toggle { font-size: 9px; font-weight: bold; padding: 4px 10px; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+  .btn-usr-active   { background: #e8f5ee; color: var(--ok); border: 1px solid #b2d9c3; }
+  .btn-usr-inactive { background: var(--dust); color: var(--ink-mid); border: 1px solid var(--border); }
+
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); border: 1px solid var(--teal); color: var(--white); padding: 12px 18px; border-radius: 3px; font-size: 12px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all .3s ease; max-width: 300px; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast-title { color: var(--teal-lt); font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
@@ -347,7 +372,8 @@
     <div class="topbar-right">
       <div class="live-pill"><div class="live-dot"></div>En vivo</div>
       <span id="clock"></span>
-      <div class="user-pill" onclick="cerrarSesion()" title="Cerrar sesión"><div class="user-avatar" id="userAvatar">?</div><span id="userNombre">—</span> · Salir</div>
+      <div class="user-pill" onclick="openPerfilModal()" title="Mi perfil"><div class="user-avatar" id="userAvatar">?</div><span id="userNombre">—</span></div>
+      <button id="btnUsuarios" class="btn-pm" onclick="openUsuariosModal()" style="display:none">👥 Usuarios</button>
       <button class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
       <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
     </div>
@@ -522,6 +548,55 @@
     </div><!-- /panel-auditoria -->
 
   </main>
+</div>
+
+
+<!-- Modal Perfil / Cambiar contraseña -->
+<div class="modal-overlay" id="perfilOverlay" onclick="if(event.target===this)closePerfilModal()">
+  <div class="modal perfil-modal">
+    <div class="modal-header">
+      <div><div class="modal-title">Mi perfil</div><div class="modal-sub">Cambiar contraseña</div></div>
+      <button class="modal-close" onclick="closePerfilModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="perfil-info">
+        <div class="perfil-nombre" id="perfil-nombre">—</div>
+        <div class="perfil-rol" id="perfil-rol">—</div>
+      </div>
+      <div class="perfil-err" id="perfil-err"></div>
+      <div class="perfil-ok"  id="perfil-ok">✓ Contraseña actualizada correctamente</div>
+      <div class="perfil-field">
+        <label>Contraseña actual</label>
+        <input id="perfil-pass-actual" type="password" placeholder="••••••••">
+      </div>
+      <div class="perfil-field">
+        <label>Nueva contraseña</label>
+        <input id="perfil-pass-nueva" type="password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="perfil-field">
+        <label>Confirmar nueva contraseña</label>
+        <input id="perfil-pass-confirmar" type="password" placeholder="Repetir nueva contraseña">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" onclick="cerrarSesion()">Cerrar sesión</button>
+      <button class="btn-edit"   onclick="closePerfilModal()">Cancelar</button>
+      <button class="btn-sec"    onclick="cambiarPassword()">✓ Actualizar contraseña</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Usuarios (solo admin) -->
+<div class="modal-overlay" id="usuariosOverlay" onclick="if(event.target===this)closeUsuariosModal()">
+  <div class="modal usuarios-modal">
+    <div class="modal-header">
+      <div><div class="modal-title">Gestión de usuarios</div><div class="modal-sub">Solo administrador</div></div>
+      <button class="modal-close" onclick="closeUsuariosModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="usuariosListBody">Cargando…</div>
+    </div>
+  </div>
 </div>
 
 <!-- Modal detalle -->
@@ -1002,6 +1077,7 @@ function mostrarDashboard() {
   document.getElementById('dashboardScreen').style.display = 'flex';
   document.getElementById('userNombre').textContent = usuarioActual.nombre.split(' ')[0];
   document.getElementById('userAvatar').textContent = usuarioActual.nombre.charAt(0).toUpperCase();
+  document.getElementById('btnUsuarios').style.display = usuarioActual.rol === 'admin' ? 'inline-block' : 'none';
   loadData();
   loadPMFilter();
   loadAuditoriaUsuarios();
@@ -1134,6 +1210,135 @@ function exportarAuditoria() {
   const fecha = new Date().toLocaleDateString('es-MX',{timeZone:'America/Mazatlan'}).replace(/\//g,'-');
   XLSX.utils.book_append_sheet(wb, ws, 'Auditoria');
   XLSX.writeFile(wb, `PDM_Auditoria_${fecha}.xlsx`);
+}
+
+
+// ── Perfil / Cambiar contraseña ───────────────────────────────
+function openPerfilModal() {
+  document.getElementById('perfilOverlay').classList.add('open');
+  document.getElementById('perfil-nombre').textContent = usuarioActual ? usuarioActual.nombre : '—';
+  document.getElementById('perfil-rol').textContent    = usuarioActual && usuarioActual.rol === 'admin' ? 'Super Administrador' : 'Usuario';
+  document.getElementById('perfil-pass-actual').value    = '';
+  document.getElementById('perfil-pass-nueva').value     = '';
+  document.getElementById('perfil-pass-confirmar').value = '';
+  document.getElementById('perfil-err').style.display = 'none';
+  document.getElementById('perfil-ok').style.display  = 'none';
+}
+function closePerfilModal() { document.getElementById('perfilOverlay').classList.remove('open'); }
+
+async function cambiarPassword() {
+  const actual     = document.getElementById('perfil-pass-actual').value;
+  const nueva      = document.getElementById('perfil-pass-nueva').value;
+  const confirmar  = document.getElementById('perfil-pass-confirmar').value;
+  const errEl      = document.getElementById('perfil-err');
+  const okEl       = document.getElementById('perfil-ok');
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+
+  if (!actual || !nueva || !confirmar) {
+    errEl.textContent = 'Complete todos los campos.'; errEl.style.display = 'block'; return;
+  }
+  if (nueva.length < 6) {
+    errEl.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.'; errEl.style.display = 'block'; return;
+  }
+  if (nueva !== confirmar) {
+    errEl.textContent = 'Las contraseñas no coinciden.'; errEl.style.display = 'block'; return;
+  }
+
+  // Verificar contraseña actual haciendo login
+  try {
+    const verRes = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre: usuarioActual.nombre, password: actual })
+    });
+    const verData = await verRes.json();
+    if (!verData.ok) {
+      errEl.textContent = 'La contraseña actual es incorrecta.'; errEl.style.display = 'block'; return;
+    }
+
+    // Cambiar contraseña
+    const res = await fetch(`${API_BASE}/api/auth/usuarios/${usuarioActual.id}/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: nueva })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+
+    okEl.style.display = 'block';
+    document.getElementById('perfil-pass-actual').value    = '';
+    document.getElementById('perfil-pass-nueva').value     = '';
+    document.getElementById('perfil-pass-confirmar').value = '';
+  } catch(e) {
+    errEl.textContent = 'Error al actualizar: ' + e.message; errEl.style.display = 'block';
+  }
+}
+
+// ── Panel de usuarios (admin) ─────────────────────────────────
+async function openUsuariosModal() {
+  document.getElementById('usuariosOverlay').classList.add('open');
+  await loadUsuarios();
+}
+function closeUsuariosModal() { document.getElementById('usuariosOverlay').classList.remove('open'); }
+
+async function loadUsuarios() {
+  try {
+    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`).then(r => r.json());
+    const el = document.getElementById('usuariosListBody');
+    el.innerHTML = data.map(u => `
+      <div class="usr-row ${u.activo ? '' : 'inactive'}">
+        <div>
+          <div class="usr-nombre">${u.nombre}</div>
+          <div class="usr-meta">
+            ${u.rol === 'admin' ? '⭐ Admin' : 'Usuario'} ·
+            ${u.tiene_password ? '🔒 Con contraseña' : '⚠️ Sin contraseña'} ·
+            Último acceso: ${u.last_login ? fmtDateTime(u.last_login) : 'Nunca'}
+          </div>
+        </div>
+        <div class="usr-actions">
+          <button class="btn-usr-reset" onclick="resetPassword(${u.id}, '${u.nombre.replace(/'/g,"\'")}')">
+            🔑 Reset
+          </button>
+          ${u.id !== (usuarioActual ? usuarioActual.id : 0) ? `
+          <button class="btn-usr-toggle ${u.activo ? 'btn-usr-active' : 'btn-usr-inactive'}"
+                  onclick="toggleUsuario(${u.id}, ${u.activo})">
+            ${u.activo ? '✓ Activo' : '✗ Inactivo'}
+          </button>` : '<span style="font-size:10px;color:var(--ink-mid)">(tú)</span>'}
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('usuariosListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar usuarios</div>';
+  }
+}
+
+async function resetPassword(id, nombre) {
+  const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 6 caracteres):`);
+  if (!nueva) return;
+  if (nueva.length < 6) { alert('La contraseña debe tener al menos 6 caracteres.'); return; }
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/usuarios/${id}/password`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: nueva })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error);
+    showToast(`Contraseña de ${nombre} actualizada`, 'Usuarios');
+    await loadUsuarios();
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function toggleUsuario(id, activo) {
+  try {
+    await fetch(`${API_BASE}/api/auth/usuarios/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activo: !activo })
+    });
+    await loadUsuarios();
+    showToast(`Usuario ${activo ? 'desactivado' : 'activado'}`, 'Usuarios');
+  } catch(e) { alert('Error: ' + e.message); }
 }
 
 initSesion();
