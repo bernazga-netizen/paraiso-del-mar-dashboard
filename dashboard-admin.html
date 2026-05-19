@@ -303,6 +303,18 @@
   .btn-usr-active   { background: #e8f5ee; color: var(--ok); border: 1px solid #b2d9c3; }
   .btn-usr-inactive { background: var(--dust); color: var(--ink-mid); border: 1px solid var(--border); }
 
+
+  /* ── Gráfica estadísticas ── */
+  .chart-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 3px; padding: 20px; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .chart-title { font-size: 11px; font-weight: bold; color: var(--navy); letter-spacing: 0.06em; text-transform: uppercase; }
+  .chart-legend { display: flex; gap: 16px; }
+  .chart-legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--ink-mid); }
+  .chart-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .chart-anio { display: flex; align-items: center; gap: 8px; }
+  .chart-anio select { border: 1px solid var(--border); padding: 4px 8px; font-family: Verdana, sans-serif; font-size: 11px; border-radius: 3px; outline: none; color: var(--ink); background: var(--dust); }
+  canvas#grafica { width: 100%; height: 280px; display: block; }
+
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); border: 1px solid var(--teal); color: var(--white); padding: 12px 18px; border-radius: 3px; font-size: 12px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all .3s ease; max-width: 300px; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast-title { color: var(--teal-lt); font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
@@ -465,6 +477,7 @@
     <div class="main-tabs">
       <button class="main-tab active" onclick="switchTab('inhouse', this)">📋 Registros</button>
       <button class="main-tab" onclick="switchTab('auditoria', this)">🔍 Auditoría</button>
+      <button class="main-tab" onclick="switchTab('estadisticas', this)">📊 Estadísticas</button>
     </div>
 
     <!-- Panel Registros -->
@@ -546,6 +559,36 @@
         </table>
       </div>
     </div><!-- /panel-auditoria -->
+
+
+    <!-- Panel Estadísticas -->
+    <div id="panel-estadisticas" class="tab-panel">
+      <div class="chart-wrap">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Actividad mensual — Check-ins, Check-outs y Ocupación</div>
+          </div>
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+            <div class="chart-legend">
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#007c89"></div>Check-ins</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#c87533"></div>Check-outs</div>
+              <div class="chart-legend-item"><div class="chart-legend-dot" style="background:#003660"></div>Ocupación</div>
+            </div>
+            <div class="chart-anio">
+              <label style="font-size:10px;color:var(--ink-mid);font-weight:bold">Año:</label>
+              <select id="chart-anio" onchange="loadGrafica()">
+                <option>2024</option>
+                <option>2025</option>
+                <option selected>2026</option>
+                <option>2027</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <canvas id="grafica"></canvas>
+        <div id="grafica-empty" style="display:none;text-align:center;padding:40px;color:var(--ink-mid);font-size:12px">Sin datos para el año seleccionado</div>
+      </div>
+    </div><!-- /panel-estadisticas -->
 
   </main>
 </div>
@@ -1140,6 +1183,7 @@ function switchTab(tab, btn) {
   btn.classList.add('active');
   document.getElementById('panel-' + tab).classList.add('active');
   if (tab === 'auditoria') loadAuditoria();
+  if (tab === 'estadisticas') loadGrafica();
 }
 
 // ── Auditoría ─────────────────────────────────────────────────
@@ -1340,6 +1384,128 @@ async function toggleUsuario(id, activo) {
     showToast(`Usuario ${activo ? 'desactivado' : 'activado'}`, 'Usuarios');
   } catch(e) { alert('Error: ' + e.message); }
 }
+
+
+// ── Gráfica estadísticas ──────────────────────────────────────
+let graficaData = null;
+
+async function loadGrafica() {
+  const anio = document.getElementById('chart-anio').value;
+  try {
+    const { data } = await fetch(`${API_BASE}/api/inhouse/estadisticas/mensuales?anio=${anio}`).then(r => r.json());
+    graficaData = data;
+    dibujarGrafica(data);
+  } catch(e) {
+    console.error('Error cargando estadísticas:', e);
+  }
+}
+
+function dibujarGrafica(data) {
+  const canvas = document.getElementById('grafica');
+  const emptyEl = document.getElementById('grafica-empty');
+  const ctx = canvas.getContext('2d');
+
+  // Ajustar resolución
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+  const W = rect.width;
+  const H = rect.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const tieneData = data.some(d => d.checkins > 0 || d.checkouts > 0 || d.ocupacion > 0);
+  if (!tieneData) {
+    emptyEl.style.display = 'block';
+    canvas.style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  canvas.style.display = 'block';
+
+  // Máximo
+  const maxVal = Math.max(...data.map(d => Math.max(d.checkins, d.checkouts, d.ocupacion)), 1);
+  const maxRound = Math.ceil(maxVal / 5) * 5 || 5;
+
+  // Márgenes
+  const ML = 40, MR = 16, MT = 16, MB = 40;
+  const gW = W - ML - MR;
+  const gH = H - MT - MB;
+
+  const colores = { checkins: '#007c89', checkouts: '#c87533', ocupacion: '#003660' };
+  const series  = ['checkins', 'checkouts', 'ocupacion'];
+  const nSeries = 3;
+  const barPad  = 4;
+  const groupW  = gW / 12;
+  const barW    = Math.max(4, (groupW - barPad * (nSeries + 1)) / nSeries);
+
+  // Fondo
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Líneas guía
+  ctx.strokeStyle = '#e5e0da';
+  ctx.lineWidth = 1;
+  const nLines = 5;
+  for (let i = 0; i <= nLines; i++) {
+    const y = MT + gH - (i / nLines) * gH;
+    ctx.beginPath(); ctx.moveTo(ML, y); ctx.lineTo(ML + gW, y); ctx.stroke();
+    const label = Math.round((i / nLines) * maxRound);
+    ctx.fillStyle = '#3d5a66';
+    ctx.font = `${9 * dpr / dpr}px Verdana`;
+    ctx.textAlign = 'right';
+    ctx.fillText(label, ML - 4, y + 3);
+  }
+
+  // Barras
+  data.forEach((mes, i) => {
+    const x0 = ML + i * groupW + barPad;
+    series.forEach((serie, si) => {
+      const val = mes[serie] || 0;
+      const barH = (val / maxRound) * gH;
+      const x = x0 + si * (barW + barPad / 2);
+      const y = MT + gH - barH;
+
+      ctx.fillStyle = colores[serie];
+      ctx.globalAlpha = 0.85;
+      // Borde redondeado arriba
+      const r = Math.min(3, barW / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + barW - r, y);
+      ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+      ctx.lineTo(x + barW, MT + gH);
+      ctx.lineTo(x, MT + gH);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+
+      // Valor encima de la barra si > 0
+      if (val > 0 && barH > 14) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#1a2e3a';
+        ctx.font = `bold ${8 * dpr / dpr}px Verdana`;
+        ctx.textAlign = 'center';
+        ctx.fillText(val, x + barW / 2, y - 3);
+      }
+    });
+    ctx.globalAlpha = 1;
+
+    // Etiqueta mes
+    ctx.fillStyle = '#3d5a66';
+    ctx.font = `${9 * dpr / dpr}px Verdana`;
+    ctx.textAlign = 'center';
+    ctx.fillText(mes.mes, ML + i * groupW + groupW / 2, H - MB + 14);
+  });
+}
+
+// Redibujar al cambiar tamaño
+window.addEventListener('resize', () => {
+  if (graficaData) dibujarGrafica(graficaData);
+});
 
 initSesion();
 setInterval(() => { if(usuarioActual) loadData(); }, 60000);
