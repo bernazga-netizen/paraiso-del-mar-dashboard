@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inhouse · Administración — Paraíso del Mar</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --teal:      #007c89;
@@ -108,6 +109,8 @@
   .filter-select:focus, .filter-input:focus { border-color: var(--teal); }
   .filter-input { width: 180px; }
   .filter-spacer { flex: 1; }
+  .btn-export { background: var(--emerald); color: var(--white); border: none; padding: 6px 14px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .btn-export:hover { background: #005528; }
 
   .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
   table { width: 100%; border-collapse: collapse; }
@@ -314,6 +317,7 @@
         <option value="">PM: Todos</option>
       </select>
       <div class="filter-spacer"></div>
+      <button class="btn-export" onclick="exportarExcel()">⬇ Excel</button>
       <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="loadData()">
     </div>
     <div class="table-wrap">
@@ -727,6 +731,59 @@ function fmtDate(d) {
   const clean = d.toString().substring(0, 10);
   const dt = new Date(clean + 'T12:00:00');
   return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ── Exportar Excel ───────────────────────────────────────────
+function exportarExcel() {
+  const rows = [];
+
+  // Encabezados
+  rows.push([
+    'Unidad', 'Huésped titular', 'Tipo', 'Check in', 'Check out',
+    'Personas', 'Property Manager', 'Estado', 'Email', 'Teléfono', 'Dirección'
+  ]);
+
+  // Datos de la tabla actual
+  const tbody = document.getElementById('tableBody');
+  const trs = tbody.querySelectorAll('tr[onclick]');
+
+  if (!trs.length) {
+    alert('No hay registros para exportar.');
+    return;
+  }
+
+  trs.forEach(tr => {
+    const tds = tr.querySelectorAll('td');
+    if (tds.length < 8) return;
+
+    rows.push([
+      tds[0].textContent.trim(),                          // Unidad
+      tds[1].textContent.trim(),                          // Huésped
+      tds[2].textContent.trim(),                          // Tipo
+      tds[3].textContent.trim(),                          // Check in
+      tds[4].textContent.trim(),                          // Check out
+      tds[5].textContent.trim(),                          // Personas
+      tds[6].textContent.trim(),                          // PM
+      tds[7].textContent.trim().replace(/[●◆○]/g,'').trim(), // Estado
+      '', '', ''                                          // Email, Tel, Dir (no en tabla)
+    ]);
+  });
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Ancho de columnas
+  ws['!cols'] = [
+    {wch:10},{wch:28},{wch:14},{wch:14},{wch:14},
+    {wch:9},{wch:20},{wch:10},{wch:28},{wch:16},{wch:35}
+  ];
+
+  // Nombre de la hoja con filtros aplicados
+  const estado_actual = document.querySelector('.tab.active')?.textContent?.trim() || 'Todos';
+  const fecha = new Date().toLocaleDateString('es-MX', { timeZone: 'America/Mazatlan' }).replace(/\//g,'-');
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Inhouse');
+  XLSX.writeFile(wb, `PDM_Inhouse_${estado_actual}_${fecha}.xlsx`);
 }
 
 // Cargar PMs en el filtro
