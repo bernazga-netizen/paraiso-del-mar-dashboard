@@ -310,6 +310,9 @@
         <option value="R">R · Renta</option>
         <option value="G">G · Invitado</option>
       </select>
+      <select class="filter-select" id="f-pm" onchange="loadData()">
+        <option value="">PM: Todos</option>
+      </select>
       <div class="filter-spacer"></div>
       <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="loadData()">
     </div>
@@ -439,9 +442,11 @@ async function loadData() {
     if (estado) params.set('estado', estado);
     const fe = document.getElementById('f-edificio').value;
     const ft = document.getElementById('f-tipo').value;
+    const fpm = document.getElementById('f-pm').value;
     const fq = document.getElementById('f-q').value;
     if (fe) params.set('edificio', fe);
     if (ft) params.set('tipo', ft);
+    if (fpm) params.set('pm', fpm);
     if (fq) params.set('q', fq);
 
     const [dataRes, oc] = await Promise.all([
@@ -724,7 +729,18 @@ function fmtDate(d) {
   return dt.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
 }
 
+// Cargar PMs en el filtro
+async function loadPMFilter() {
+  try {
+    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const sel = document.getElementById('f-pm');
+    sel.innerHTML = '<option value="">PM: Todos</option>' +
+      data.filter(p => p.activo).map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+  } catch(e) { console.warn('No se pudo cargar PMs en filtro:', e); }
+}
+
 loadData();
+loadPMFilter();
 setInterval(loadData, 60000);
 </script>
 </body>
