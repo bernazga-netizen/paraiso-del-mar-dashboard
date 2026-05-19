@@ -25,6 +25,7 @@
     --H:         #006b35;
     --R:         #007c89;
     --G:         #5a6fa8;
+    --P:         #7b4fa6;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -125,6 +126,7 @@
   .tipo-H { background: #e8f5ee; color: var(--H); border: 1px solid #b2d9c3; }
   .tipo-R { background: var(--teal-pale); color: var(--teal); border: 1px solid var(--border); }
   .tipo-G { background: #eef0f8; color: var(--G); border: 1px solid #c5cbe8; }
+  .tipo-P { background: #f4eefb; color: var(--P); border: 1px solid #d5b8f0; }
   .estado-activo { color: var(--ok); font-weight: bold; }
   .estado-futuro { color: var(--teal); font-weight: bold; }
   .estado-salida { color: var(--ink-mid); }
@@ -436,6 +438,16 @@
         </div>
         <div class="cat-personas" id="cat-G-per">—</div>
       </div>
+      <div class="cat-row" style="border-left:3px solid var(--P)">
+        <div class="cat-left">
+          <div class="cat-dot" style="background:var(--P)"></div>
+          <div>
+            <div class="cat-name">Residentes</div>
+            <div class="cat-unidades" id="cat-P-uni">— unidades</div>
+          </div>
+        </div>
+        <div class="cat-personas" id="cat-P-per">—</div>
+      </div>
     </div>
 
     <!-- FUTUROS -->
@@ -498,6 +510,7 @@
         <option value="H">H · Propietario</option>
         <option value="R">R · Renta</option>
         <option value="G">G · Invitado</option>
+        <option value="P">P · Residente</option>
       </select>
       <select class="filter-select" id="f-pm" onchange="loadData()">
         <option value="">PM: Todos</option>
@@ -673,6 +686,7 @@
             <option value="H">H · Propietario</option>
             <option value="R">R · Renta</option>
             <option value="G">G · Invitado</option>
+            <option value="P">P · Residente Permanente</option>
           </select>
         </div>
         <div class="edit-field"><label>Check in</label><input id="edit-fecha-in" type="date"></div>
@@ -781,7 +795,7 @@ function setEstado(val, btn) {
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Sin registros para los filtros seleccionados</td></tr>`; return; }
-  const tipos = { H:'Homeowner', R:'Renta', G:'Guest' };
+  const tipos = { H:'Homeowner', R:'Renta', G:'Guest', P:'Residente' };
   tbody.innerHTML = rows.map(r => {
     const estCls = `estado-${r.estado}`;
     const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
@@ -814,7 +828,7 @@ function renderKPIs(oc) {
   document.getElementById('kpi-futuros').textContent  = t.futuros          || '0';
 
   // Desglose por categoría — calculado desde por_edificio agrupado por tipo
-  const porTipo = { H: { personas: 0, unidades: 0 }, R: { personas: 0, unidades: 0 }, G: { personas: 0, unidades: 0 } };
+  const porTipo = { H: { personas: 0, unidades: 0 }, R: { personas: 0, unidades: 0 }, G: { personas: 0, unidades: 0 }, P: { personas: 0, unidades: 0 } };
   (oc.por_tipo_hoy || []).forEach(r => {
     if (porTipo[r.tipo]) {
       porTipo[r.tipo].personas = parseInt(r.personas_total) || 0;
@@ -822,7 +836,7 @@ function renderKPIs(oc) {
     }
   });
 
-  ['H','R','G'].forEach(tipo => {
+  ['H','R','G','P'].forEach(tipo => {
     const d = porTipo[tipo];
     document.getElementById(`cat-${tipo}-per`).textContent = d.personas;
     document.getElementById(`cat-${tipo}-uni`).textContent = `${d.unidades} unidad${d.unidades !== 1 ? 'es' : ''}`;
@@ -850,7 +864,7 @@ async function openModal(id) {
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
         <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
-        <div class="detail-field"><label>Tipo</label><p>${{H:'Homeowner',R:'Renta',G:'Guest'}[r.tipo] || r.tipo}</p></div>
+        <div class="detail-field"><label>Tipo</label><p>${{H:'Homeowner',R:'Renta',G:'Guest',P:'Residente Permanente'}[r.tipo] || r.tipo}</p></div>
       </div>
       <div class="detail-row">
         <div class="detail-field"><label>Check in</label><p>${fmtDate(r.fecha_ingreso)}</p></div>
