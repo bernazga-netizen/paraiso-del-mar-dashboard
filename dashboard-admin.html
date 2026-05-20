@@ -742,6 +742,16 @@
 
 <script>
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+
+const ADMIN_KEY = '8fK29xPqLmN4vR7sY2zAa91QwE';
+
+function adminHeaders(extra = {}) {
+  return {
+    'x-admin-key': ADMIN_KEY,
+    ...extra
+  };
+}
+
 let estado = 'activo', actualId = null, pmsCatalogo = [];
 
 // Clock
@@ -782,9 +792,14 @@ async function loadData() {
     if (ffin) params.set('fecha_fin', ffin);
 
     const [dataRes, oc] = await Promise.all([
-      fetch(`${API_BASE}/api/inhouse?${params}`).then(r => r.json()),
-      fetch(`${API_BASE}/api/inhouse/ocupacion`).then(r => r.json())
-    ]);
+  fetch(`${API_BASE}/api/inhouse?${params}`, {
+    headers: adminHeaders()
+  }).then(r => r.json()),
+
+  fetch(`${API_BASE}/api/inhouse/ocupacion`, {
+    headers: adminHeaders()
+  }).then(r => r.json())
+]);
     renderTable(dataRes.data || []);
     renderKPIs(oc);
   } catch(e) {
