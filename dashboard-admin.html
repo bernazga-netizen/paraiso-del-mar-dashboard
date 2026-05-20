@@ -515,6 +515,9 @@
       <select class="filter-select" id="f-pm" onchange="loadData()">
         <option value="">PM: Todos</option>
       </select>
+      <input class="filter-input" type="date" id="f-fecha-ini" onchange="onFechaChange()" style="width:130px" title="Activos desde">
+      <input class="filter-input" type="date" id="f-fecha-fin" onchange="onFechaChange()" style="width:130px" title="Activos hasta">
+      <button class="btn-edit" onclick="limpiarFechas()" id="btn-limpiar-fechas" style="display:none;padding:6px 10px;font-size:10px;letter-spacing:0;text-transform:none">✕ Fechas</button>
       <div class="filter-spacer"></div>
       <button class="btn-export" onclick="exportarExcel()">⬇ Excel</button>
       <input class="filter-input" id="f-q" placeholder="Buscar nombre o unidad…" oninput="loadData()">
@@ -771,6 +774,12 @@ async function loadData() {
     if (ft) params.set('tipo', ft);
     if (fpm) params.set('pm', fpm);
     if (fq) params.set('q', fq);
+
+    // Filtro de rango de fechas
+    const fini = document.getElementById('f-fecha-ini').value;
+    const ffin = document.getElementById('f-fecha-fin').value;
+    if (fini) params.set('fecha_inicio', fini);
+    if (ffin) params.set('fecha_fin', ffin);
 
     const [dataRes, oc] = await Promise.all([
       fetch(`${API_BASE}/api/inhouse?${params}`).then(r => r.json()),
@@ -1520,6 +1529,21 @@ function dibujarGrafica(data) {
 window.addEventListener('resize', () => {
   if (graficaData) dibujarGrafica(graficaData);
 });
+
+// ── Filtro por rango de fechas ────────────────────────────────
+function onFechaChange() {
+  const ini = document.getElementById('f-fecha-ini').value;
+  const fin = document.getElementById('f-fecha-fin').value;
+  document.getElementById('btn-limpiar-fechas').style.display = (ini || fin) ? 'inline-block' : 'none';
+  loadData();
+}
+
+function limpiarFechas() {
+  document.getElementById('f-fecha-ini').value = '';
+  document.getElementById('f-fecha-fin').value = '';
+  document.getElementById('btn-limpiar-fechas').style.display = 'none';
+  loadData();
+}
 
 initSesion();
 setInterval(() => { if(usuarioActual) loadData(); }, 60000);
