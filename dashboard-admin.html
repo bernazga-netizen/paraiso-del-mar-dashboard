@@ -1249,11 +1249,20 @@ async function loadAuditoria() {
   tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Cargando…</td></tr>`;
 
   try {
-    const { data } = await fetch(`${API_BASE}/api/historial?${params}`).then(r => r.json());
-    if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Sin registros de auditoría</td></tr>`;
-      return;
-    }
+  const { data } = await fetch(`${API_BASE}/api/historial?${params}`, {
+    headers: adminHeaders()
+  }).then(r => r.json());
+
+  if (!data.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="empty-state">
+          Sin registros de auditoría
+        </td>
+      </tr>
+    `;
+    return;
+  }
     tbody.innerHTML = data.map(h => `
       <tr class="audit-row-${h.accion}">
         <td style="white-space:nowrap;font-size:11px">${fmtDateTime(h.created_at)}</td>
