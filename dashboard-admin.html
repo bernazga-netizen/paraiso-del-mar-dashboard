@@ -685,7 +685,7 @@
       <div class="edit-grid">
         <div class="edit-field"><label>Unidad</label><input id="edit-unidad" type="text" placeholder="A-202"></div>
         <div class="edit-field"><label>Tipo</label>
-          <select id="edit-tipo">
+          <select id="edit-tipo" onchange="if(this.value==='P'){document.getElementById('edit-fecha-out').value=''}">
             <option value="H">H · Propietario</option>
             <option value="R">R · Renta</option>
             <option value="G">G · Invitado</option>
