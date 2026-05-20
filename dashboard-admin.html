@@ -746,8 +746,10 @@ const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
 const ADMIN_KEY = '8fK29xPqLmN4vR7sY2zAa91QwE';
 
 function adminHeaders(extra = {}) {
+  const token = sessionStorage.getItem('pdm_token');
+
   return {
-    'x-admin-key': ADMIN_KEY,
+    Authorization: `Bearer ${token}`,
     ...extra
   };
 }
@@ -880,76 +882,183 @@ function renderKPIs(oc) {
 // ── Modal detalle ─────────────────────────────────────────────
 async function openModal(id) {
   actualId = id;
+
   try {
-    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(x => x.json());
+    const res = await fetch(`${API_BASE}/api/inhouse/${id}`, {
+      headers: adminHeaders()
+    });
+
+    const payload = await res.json();
+
+    if (!res.ok || !payload.ok || !payload.data) {
+      throw new Error(payload.error || 'No se pudo cargar el registro');
+    }
+
+    const r = payload.data;
+
     document.getElementById('modalTitle').textContent = r.nombre_huesped;
-    document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
+    document.getElementById('modalSub').textContent =
+      `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
+
     const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
+
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
-        <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
-        <div class="detail-field"><label>Tipo</label><p>${{H:'Homeowner',R:'Renta',G:'Guest',P:'Residente Permanente'}[r.tipo] || r.tipo}</p></div>
+        <div class="detail-field">
+          <label>Unidad</label>
+          <p>${r.unidad}</p>
+        </div>
+        <div class="detail-field">
+          <label>Tipo</label>
+          <p>${{H:'Homeowner',R:'Renta',G:'Guest',P:'Residente Permanente'}[r.tipo] || r.tipo}</p>
+        </div>
       </div>
+
       <div class="detail-row">
-        <div class="detail-field"><label>Check in</label><p>${fmtDate(r.fecha_ingreso)}</p></div>
-        <div class="detail-field"><label>Check out</label><p>${r.fecha_salida ? fmtDate(r.fecha_salida) : 'Sin fecha'}</p></div>
+        <div class="detail-field">
+          <label>Check in</label>
+          <p>${fmtDate(r.fecha_ingreso)}</p>
+        </div>
+        <div class="detail-field">
+          <label>Check out</label>
+          <p>${r.fecha_salida ? fmtDate(r.fecha_salida) : 'Sin fecha'}</p>
+        </div>
       </div>
+
       <div class="detail-row">
-        <div class="detail-field"><label>Email</label><p>${r.email || '—'}</p></div>
-        <div class="detail-field"><label>Teléfono</label><p>${r.telefono || '—'}</p></div>
+        <div class="detail-field">
+          <label>Email</label>
+          <p>${r.email || '—'}</p>
+        </div>
+        <div class="detail-field">
+          <label>Teléfono</label>
+          <p>${r.telefono || '—'}</p>
+        </div>
       </div>
-      <div class="detail-field"><label>Dirección</label><p>${r.direccion || '—'}</p></div>
-      <div class="detail-field"><label>Total personas</label><p>${r.num_personas}</p></div>
-      ${acomps.length ? `<div class="detail-field"><label>Huéspedes adicionales</label>
-        <div class="acomp-list">${acomps.map(n => `<span class="acomp-chip">${typeof n === 'object' ? n.nombre : n}</span>`).join('')}</div></div>` : ''}
-      ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${r.notas}</p></div>` : ''}
-      ${r.pdf_firmado_url
-        ? `<div class="detail-field"><label>Documento firmado</label>
-            <button class="btn-sec" onclick="downloadPdf('${r.id}','${r.unidad}')">📄 Descargar PDF firmado</button></div>`
-        : `<div style="font-size:11px;color:var(--ink-mid)">Sin PDF adjunto</div>`}
+
+      <div class="detail-field">
+        <label>Dirección</label>
+        <p>${r.direccion || '—'}</p>
+      </div>
+
+      <div class="detail-field">
+        <label>Total personas</label>
+        <p>${r.num_personas}</p>
+      </div>
+
+      ${acomps.length ? `
+        <div class="detail-field">
+          <label>Huéspedes adicionales</label>
+          <div class="acomp-list">
+            ${acomps.map(n =>
+              `<span class="acomp-chip">${typeof n === 'object' ? n.nombre : n}</span>`
+            ).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      ${r.notas ? `
+        <div class="detail-field">
+          <label>Notas</label>
+          <p>${r.notas}</p>
+        </div>
+      ` : ''}
+
+      ${r.pdf_firmado_url ? `
+        <div class="detail-field">
+          <label>Documento firmado</label>
+          <button class="btn-sec" onclick="downloadPdf('${r.id}','${r.unidad}')">
+            📄 Descargar PDF firmado
+          </button>
+        </div>
+      ` : `
+        <div style="font-size:11px;color:var(--ink-mid)">
+          Sin PDF adjunto
+        </div>
+      `}
     `;
+
     document.getElementById('modalOverlay').classList.add('open');
-  } catch(e) { console.error(e); }
+
+  } catch(e) {
+    alert('Error al cargar registro: ' + e.message);
+  }
 }
 
 function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); actualId = null; }
 
 async function deleteActual() {
-  if (!actualId || !confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  if (
+    !actualId ||
+    !confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')
+  ) return;
+
   try {
-    await fetch(`${API_BASE}/api/inhouse/${actualId}?usuario_nombre=${encodeURIComponent(usuarioActual ? usuarioActual.nombre : 'Administración')}`, { method: 'DELETE' });
-    closeModal(); loadData();
+    const res = await fetch(
+      `${API_BASE}/api/inhouse/${actualId}?usuario_nombre=${encodeURIComponent(
+        usuarioActual ? usuarioActual.nombre : 'Administración'
+      )}`,
+      {
+        method: 'DELETE',
+        headers: adminHeaders()
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'No se pudo eliminar');
+    }
+
+    closeModal();
+    loadData();
     showToast('Registro eliminado', 'Acción completada');
-  } catch(e) { alert('Error: ' + e.message); }
+
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
 }
 
 // ── Modal editar ──────────────────────────────────────────────
 async function openEditModal() {
   if (!actualId) return;
+
   try {
-    const { data: pms } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const { data: pms } = await fetch(`${API_BASE}/api/inhouse/managers`, {
+      headers: adminHeaders()
+    }).then(r => r.json());
+
     pmsCatalogo = pms.filter(p => p.activo);
+
     const selPm = document.getElementById('edit-pm');
-    selPm.innerHTML = '<option value="">— Sin PM —</option>' +
+    selPm.innerHTML =
+      '<option value="">— Sin PM —</option>' +
       pmsCatalogo.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
-    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`).then(x => x.json());
+    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`, {
+      headers: adminHeaders()
+    }).then(x => x.json());
+
     document.getElementById('editSub').textContent      = `${r.unidad} · ${r.nombre_huesped}`;
     document.getElementById('edit-unidad').value        = r.unidad || '';
     document.getElementById('edit-tipo').value          = r.tipo || 'R';
     document.getElementById('edit-fecha-in').value      = r.fecha_ingreso ? r.fecha_ingreso.toString().substring(0,10) : '';
-    document.getElementById('edit-fecha-out').value     = r.fecha_salida  ? r.fecha_salida.toString().substring(0,10)  : '';
+    document.getElementById('edit-fecha-out').value     = r.fecha_salida ? r.fecha_salida.toString().substring(0,10) : '';
     document.getElementById('edit-nombre').value        = r.nombre_huesped || '';
-    document.getElementById('edit-email').value         = r.email    || '';
+    document.getElementById('edit-email').value         = r.email || '';
     document.getElementById('edit-telefono').value      = r.telefono || '';
     document.getElementById('edit-direccion').value     = r.direccion || '';
     document.getElementById('edit-personas').value      = r.num_personas || 1;
     document.getElementById('edit-notas').value         = r.notas || '';
+
     if (r.property_manager_id) selPm.value = r.property_manager_id;
 
     document.getElementById('modalOverlay').classList.remove('open');
     document.getElementById('editOverlay').classList.add('open');
-  } catch(e) { alert('Error al cargar el registro: ' + e.message); }
+
+  } catch(e) {
+    alert('Error al cargar el registro: ' + e.message);
+  }
 }
 
 function closeEditModal() { document.getElementById('editOverlay').classList.remove('open'); }
@@ -976,10 +1085,12 @@ async function guardarEdicion() {
   }
   try {
     const res = await fetch(`${API_BASE}/api/inhouse/${actualId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+  method: 'PUT',
+  headers: adminHeaders({
+    'Content-Type': 'application/json'
+  }),
+  body: JSON.stringify(payload)
+});
     if (!res.ok) {
       const errData = await res.json().catch(() => null);
       if (errData && errData.codigo === 'TRASLAPE_FECHAS') {
@@ -1006,61 +1117,126 @@ function closePMModal() { document.getElementById('pmOverlay').classList.remove(
 
 async function loadPMs() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`, {
+      headers: adminHeaders()
+    }).then(r => r.json());
+
     const el = document.getElementById('pmListBody');
-    if (!data.length) { el.innerHTML = '<div style="color:var(--ink-mid);font-size:11px">Sin PMs registrados</div>'; return; }
+
+    if (!data.length) {
+      el.innerHTML = '<div style="color:var(--ink-mid);font-size:11px">Sin PMs registrados</div>';
+      return;
+    }
+
     el.innerHTML = data.map(pm => `
       <div class="pm-row ${pm.activo ? '' : 'inactive'}">
         <div>
           <div class="pm-name">${pm.nombre}</div>
-          <div class="pm-contact">${pm.email || ''}${pm.email && pm.telefono ? ' · ' : ''}${pm.telefono || ''}${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}</div>
+          <div class="pm-contact">
+            ${pm.email || ''}
+            ${pm.email && pm.telefono ? ' · ' : ''}
+            ${pm.telefono || ''}
+            ${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}
+          </div>
         </div>
-        <button class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}" onclick="togglePM(${pm.id}, ${pm.activo})">
+
+        <button
+          class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}"
+          onclick="togglePM(${pm.id}, ${pm.activo})">
           ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
         </button>
-      </div>`).join('');
-  } catch(e) { document.getElementById('pmListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar PMs</div>'; }
-}
+      </div>
+    `).join('');
 
+  } catch(e) {
+    document.getElementById('pmListBody').innerHTML =
+      '<div style="color:red;font-size:11px">Error al cargar PMs</div>';
+  }
+}
 async function agregarPM() {
   const nombre = document.getElementById('pm-nombre').value.trim();
-  const email  = document.getElementById('pm-email').value.trim();
+  const email = document.getElementById('pm-email').value.trim();
   const telefono = document.getElementById('pm-telefono').value.trim();
-  if (!nombre) { document.getElementById('pm-nombre').focus(); return; }
+
+  if (!nombre) {
+    document.getElementById('pm-nombre').focus();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/inhouse/managers`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, email, telefono })
+      method: 'POST',
+      headers: adminHeaders({
+        'Content-Type': 'application/json'
+      }),
+      body: JSON.stringify({
+        nombre,
+        email,
+        telefono
+      })
     });
+
     if (!res.ok) throw new Error(await res.text());
+
     document.getElementById('pm-nombre').value = '';
     document.getElementById('pm-email').value = '';
     document.getElementById('pm-telefono').value = '';
+
     await loadPMs();
+
     showToast(`PM "${nombre}" agregado correctamente`, 'Property Manager');
-  } catch(e) { alert('Error al agregar PM: ' + e.message); }
+
+  } catch(e) {
+    alert('Error al agregar PM: ' + e.message);
+  }
 }
 
 async function togglePM(id, activo) {
   try {
-    await fetch(`${API_BASE}/api/inhouse/managers/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activo: !activo })
+    const res = await fetch(`${API_BASE}/api/inhouse/managers/${id}`, {
+      method: 'PUT',
+      headers: adminHeaders({
+        'Content-Type': 'application/json'
+      }),
+      body: JSON.stringify({
+        activo: !activo
+      })
     });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'No se pudo actualizar');
+    }
+
     await loadPMs();
-    showToast(`PM ${activo ? 'desactivado' : 'activado'}`, 'Property Manager');
-  } catch(e) { alert('Error: ' + e.message); }
+
+    showToast(
+      `PM ${activo ? 'desactivado' : 'activado'}`,
+      'Property Manager'
+    );
+
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
 }
 
 async function downloadPdf(id, unidad) {
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`, {
+      headers: adminHeaders()
+    }).then(r => r.json());
+
     if (!data.pdf_firmado_url) return;
+
     const a = document.createElement('a');
     a.href = data.pdf_firmado_url;
-    a.download = `PDM_Registro_${unidad.replace(/[^a-zA-Z0-9]/g,'')}.pdf`;
+    a.download = `PDM_Registro_${unidad.replace(/[^a-zA-Z0-9]/g, '')}.pdf`;
     a.click();
-  } catch(e) { console.error(e); }
+
+  } catch(e) {
+    console.error(e);
+  }
 }
 
 function showToast(msg, title = 'Aviso') {
@@ -1134,11 +1310,22 @@ function exportarExcel() {
 // Cargar PMs en el filtro
 async function loadPMFilter() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`, {
+      headers: adminHeaders()
+    }).then(r => r.json());
+
     const sel = document.getElementById('f-pm');
-    sel.innerHTML = '<option value="">PM: Todos</option>' +
-      data.filter(p => p.activo).map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
-  } catch(e) { console.warn('No se pudo cargar PMs en filtro:', e); }
+
+    sel.innerHTML =
+      '<option value="">PM: Todos</option>' +
+      data
+        .filter(p => p.activo)
+        .map(p => `<option value="${p.id}">${p.nombre}</option>`)
+        .join('');
+
+  } catch(e) {
+    console.warn('No se pudo cargar PMs en filtro:', e);
+  }
 }
 
 
@@ -1147,10 +1334,16 @@ let usuarioActual = null;
 
 function initSesion() {
   const saved = sessionStorage.getItem('pdm_usuario');
-  if (saved) {
+  const token = sessionStorage.getItem('pdm_token');
+
+  if (saved && token) {
     usuarioActual = JSON.parse(saved);
     mostrarDashboard();
+    return;
   }
+
+  sessionStorage.removeItem('pdm_usuario');
+  sessionStorage.removeItem('pdm_token');
 }
 
 function mostrarDashboard() {
@@ -1191,10 +1384,20 @@ async function doLogin() {
       errEl.textContent = data.error || 'Usuario o contraseña incorrectos.';
       errEl.style.display = 'block';
     } else {
-      usuarioActual = data.usuario;
-      sessionStorage.setItem('pdm_usuario', JSON.stringify(usuarioActual));
-      mostrarDashboard();
-    }
+  usuarioActual = data.usuario;
+
+  sessionStorage.setItem(
+    'pdm_usuario',
+    JSON.stringify(usuarioActual)
+  );
+
+  sessionStorage.setItem(
+    'pdm_token',
+    data.token
+  );
+
+  mostrarDashboard();
+}
   } catch(e) {
     errEl.textContent = 'Error de conexión. Intente de nuevo.';
     errEl.style.display = 'block';
@@ -1206,8 +1409,12 @@ async function doLogin() {
 
 function cerrarSesion() {
   if (!confirm('¿Cerrar sesión?')) return;
+
   sessionStorage.removeItem('pdm_usuario');
+  sessionStorage.removeItem('pdm_token');
+
   usuarioActual = null;
+
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('login-password').value = '';
@@ -1227,10 +1434,16 @@ function switchTab(tab, btn) {
 // ── Auditoría ─────────────────────────────────────────────────
 async function loadAuditoriaUsuarios() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`, {
+      headers: adminHeaders()
+    }).then(r => r.json());
+
     const sel = document.getElementById('aud-usuario');
-    sel.innerHTML = '<option value="">Usuario: Todos</option>' +
+
+    sel.innerHTML =
+      '<option value="">Usuario: Todos</option>' +
       data.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
+
   } catch(e) {}
 }
 
@@ -1369,15 +1582,73 @@ async function cambiarPassword() {
 }
 
 // ── Panel de usuarios (admin) ─────────────────────────────────
+
+async function loadUsuarios() {
+  try {
+    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`, {
+      headers: adminHeaders()
+    }).then(r => r.json());
+
+    const el = document.getElementById('usuariosListBody');
+
+    if (!data || !data.length) {
+      el.innerHTML = `
+        <div style="color:var(--ink-mid);font-size:11px">
+          Sin usuarios registrados
+        </div>
+      `;
+      return;
+    }
+
+    el.innerHTML = data.map(u => `
+      <div class="usr-row ${u.activo ? '' : 'inactive'}">
+        <div>
+          <div class="usr-nombre">${u.nombre}</div>
+          <div class="usr-meta">
+            ${u.rol === 'admin' ? '⭐ Admin' : 'Usuario'} ·
+            ${u.tiene_password ? '🔒 Con contraseña' : '⚠️ Sin contraseña'} ·
+            Último acceso: ${u.last_login ? fmtDateTime(u.last_login) : 'Nunca'}
+          </div>
+        </div>
+
+        <div class="usr-actions">
+          <button
+            class="btn-usr-reset"
+            onclick="resetPassword(${u.id}, '${u.nombre.replace(/'/g, "\\'")}')">
+            🔑 Reset
+          </button>
+
+          ${
+            u.id !== (usuarioActual ? usuarioActual.id : 0)
+              ? `
+                <button
+                  class="btn-usr-toggle ${u.activo ? 'btn-usr-active' : 'btn-usr-inactive'}"
+                  onclick="toggleUsuario(${u.id}, ${u.activo})">
+                  ${u.activo ? '✓ Activo' : '✗ Inactivo'}
+                </button>
+              `
+              : `<span style="font-size:10px;color:var(--ink-mid)">(tú)</span>`
+          }
+        </div>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    document.getElementById('usuariosListBody').innerHTML = `
+      <div style="color:red;font-size:11px">
+        Error al cargar usuarios
+      </div>
+    `;
+  }
+}
+
 async function openUsuariosModal() {
   document.getElementById('usuariosOverlay').classList.add('open');
   await loadUsuarios();
 }
-function closeUsuariosModal() { document.getElementById('usuariosOverlay').classList.remove('open'); }
-
-fetch(`${API_BASE}/api/auth/usuarios`, {
-  headers: adminHeaders()
-})
+function closeUsuariosModal() { 
+  document.getElementById('usuariosOverlay').classList.remove('open'); 
+}
 
 async function resetPassword(id, nombre) {
   const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 6 caracteres):`);
@@ -1414,14 +1685,26 @@ async function resetPassword(id, nombre) {
 
 async function toggleUsuario(id, activo) {
   try {
-    await fetch(`${API_BASE}/api/auth/usuarios/${id}`, {
+    const res = await fetch(`${API_BASE}/api/auth/usuarios/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders({
+        'Content-Type': 'application/json'
+      }),
       body: JSON.stringify({ activo: !activo })
     });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'No se pudo actualizar');
+    }
+
     await loadUsuarios();
     showToast(`Usuario ${activo ? 'desactivado' : 'activado'}`, 'Usuarios');
-  } catch(e) { alert('Error: ' + e.message); }
+
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
 }
 
 
@@ -1430,10 +1713,18 @@ let graficaData = null;
 
 async function loadGrafica() {
   const anio = document.getElementById('chart-anio').value;
+
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/estadisticas/mensuales?anio=${anio}`).then(r => r.json());
+    const { data } = await fetch(
+      `${API_BASE}/api/inhouse/estadisticas/mensuales?anio=${anio}`,
+      {
+        headers: adminHeaders()
+      }
+    ).then(r => r.json());
+
     graficaData = data;
     dibujarGrafica(data);
+
   } catch(e) {
     console.error('Error cargando estadísticas:', e);
   }
