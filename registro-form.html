@@ -195,17 +195,17 @@
         </div>
         <div class="row row-2">
           <div class="field">
-            <label>Correo electrónico · Email</label>
+            <label>Correo electrónico · Email <span class="req" id="req-email">*</span></label>
             <input id="email" type="email" placeholder="email@example.com">
           </div>
           <div class="field">
-            <label>Teléfono · Telephone</label>
+            <label>Teléfono · Telephone <span class="req" id="req-telefono">*</span></label>
             <input id="telefono" type="tel" placeholder="+1 555 000 0000">
           </div>
         </div>
         <div class="row row-1">
           <div class="field">
-            <label>Dirección · Address</label>
+            <label>Dirección · Address <span class="req" id="req-direccion" style="display:none">*</span></label>
             <input id="direccion" type="text" placeholder="Street, City, State, Country, Postal Code">
           </div>
         </div>
@@ -322,7 +322,23 @@ async function loadManagers() {
 loadManagers();
 
 const urlPm = new URLSearchParams(window.location.search).get('pm');
-if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = urlPm; }, 500);
+if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = parseInt(urlPm) || ''; }, 500);
+
+// ── Validación dinámica por tipo ─────────────────────────────
+// H: email y teléfono obligatorios, dirección opcional
+// R y G: los tres obligatorios
+function actualizarCamposRequeridos() {
+  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  const dirReq = tipo === 'R' || tipo === 'G';
+  document.getElementById('req-email').style.display     = 'inline';
+  document.getElementById('req-telefono').style.display  = 'inline';
+  document.getElementById('req-direccion').style.display = dirReq ? 'inline' : 'none';
+}
+
+document.querySelectorAll('input[name="tipo"]').forEach(r => {
+  r.addEventListener('change', actualizarCamposRequeridos);
+});
+actualizarCamposRequeridos(); // inicializar según tipo por defecto (R)
 
 // ── Guests grid ──────────────────────────────────────────────
 const grid = document.getElementById('guestsGrid');
@@ -502,19 +518,35 @@ function mostrarError(msg, detalle) {
 document.getElementById('regForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  // Ocultar errores anteriores
   document.getElementById('status-err').style.display = 'none';
 
-  // 1. Campos requeridos
+  // 1. Campos base requeridos
   let valid = true;
   ['unidad','nombre_huesped','fecha_ingreso'].forEach(id => {
     const el = document.getElementById(id);
     if (!el.value.trim()) { el.classList.add('error'); valid = false; }
     else el.classList.remove('error');
   });
-  if (!valid) return;
 
-  // 2. Validación de fechas
+  // 2. Campos de contacto según tipo
+  const tipoSel = document.querySelector('input[name="tipo"]:checked').value;
+  const camposContacto = ['email', 'telefono']; // obligatorios para H, R y G
+  if (tipoSel === 'R' || tipoSel === 'G') camposContacto.push('direccion'); // también dirección para R y G
+
+  camposContacto.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add('error'); valid = false; }
+    else el.classList.remove('error');
+  });
+
+  if (!valid) {
+    mostrarError('Por favor complete todos los campos obligatorios · Please fill in all required fields.', null);
+    const firstError = document.querySelector('input.error');
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // 3. Validación de fechas
   const fechaIn  = document.getElementById('fecha_ingreso').value;
   const fechaOut = document.getElementById('fecha_salida').value;
   if (fechaOut && fechaOut <= fechaIn) {
@@ -524,7 +556,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   document.getElementById('fecha_salida').classList.remove('error');
 
-  // 3. Firma
+  // 4. Firma
   if (!hasFirma) {
     document.getElementById('firmaWrap').style.borderColor = 'var(--err)';
     alert('Por favor firme el formulario antes de enviar.\nPlease sign the form before submitting.');
@@ -532,7 +564,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   }
   document.getElementById('firmaWrap').style.borderColor = 'var(--border)';
 
-  // 4. Reglamento
+  // 5. Reglamento
   if (!document.getElementById('acepta_reglamento').checked) {
     alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
     return;
@@ -544,12 +576,11 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     if (v) acompanantes.push(v);
   }
 
-  const tipo = document.querySelector('input[name="tipo"]:checked').value;
   const firmaDataURL = canvas.toDataURL('image/png');
 
   const payload = {
     unidad:              document.getElementById('unidad').value.trim(),
-    tipo,
+    tipo:                tipoSel,
     property_manager_id: document.getElementById('property_manager_id').value || null,
     nombre_huesped:      document.getElementById('nombre_huesped').value.trim(),
     email:               document.getElementById('email').value.trim(),
@@ -583,7 +614,6 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       body: JSON.stringify(payload)
     });
 
-    // ── Manejo de errores del servidor ────────────────────────
     if (!res.ok) {
       const errBody = await res.json().catch(() => null);
       if (errBody && errBody.codigo === 'TRASLAPE_FECHAS') {
