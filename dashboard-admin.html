@@ -1349,11 +1349,13 @@ async function cambiarPassword() {
     }
 
     // Cambiar contraseña
-    const res = await fetch(`${API_BASE}/api/auth/usuarios/${usuarioActual.id}/password`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: nueva })
-    });
+ const res = await fetch(`${API_BASE}/api/auth/usuarios/${usuarioActual.id}/password`, {
+  method: 'PUT',
+  headers: adminHeaders({
+    'Content-Type': 'application/json'
+  }),
+  body: JSON.stringify({ password: nueva })
+});
     const data = await res.json();
     if (!data.ok) throw new Error(data.error);
 
@@ -1373,52 +1375,42 @@ async function openUsuariosModal() {
 }
 function closeUsuariosModal() { document.getElementById('usuariosOverlay').classList.remove('open'); }
 
-async function loadUsuarios() {
-  try {
-    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`).then(r => r.json());
-    const el = document.getElementById('usuariosListBody');
-    el.innerHTML = data.map(u => `
-      <div class="usr-row ${u.activo ? '' : 'inactive'}">
-        <div>
-          <div class="usr-nombre">${u.nombre}</div>
-          <div class="usr-meta">
-            ${u.rol === 'admin' ? '⭐ Admin' : 'Usuario'} ·
-            ${u.tiene_password ? '🔒 Con contraseña' : '⚠️ Sin contraseña'} ·
-            Último acceso: ${u.last_login ? fmtDateTime(u.last_login) : 'Nunca'}
-          </div>
-        </div>
-        <div class="usr-actions">
-          <button class="btn-usr-reset" onclick="resetPassword(${u.id}, '${u.nombre.replace(/'/g,"\'")}')">
-            🔑 Reset
-          </button>
-          ${u.id !== (usuarioActual ? usuarioActual.id : 0) ? `
-          <button class="btn-usr-toggle ${u.activo ? 'btn-usr-active' : 'btn-usr-inactive'}"
-                  onclick="toggleUsuario(${u.id}, ${u.activo})">
-            ${u.activo ? '✓ Activo' : '✗ Inactivo'}
-          </button>` : '<span style="font-size:10px;color:var(--ink-mid)">(tú)</span>'}
-        </div>
-      </div>`).join('');
-  } catch(e) {
-    document.getElementById('usuariosListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar usuarios</div>';
-  }
-}
+fetch(`${API_BASE}/api/auth/usuarios`, {
+  headers: adminHeaders()
+})
 
 async function resetPassword(id, nombre) {
   const nueva = prompt(`Nueva contraseña para ${nombre} (mínimo 6 caracteres):`);
   if (!nueva) return;
-  if (nueva.length < 6) { alert('La contraseña debe tener al menos 6 caracteres.'); return; }
+
+  if (nueva.length < 6) {
+    alert('La contraseña debe tener al menos 6 caracteres.');
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/auth/usuarios/${id}/password`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: nueva })
+      headers: adminHeaders({
+        'Content-Type': 'application/json'
+      }),
+      body: JSON.stringify({
+        password: nueva
+      })
     });
+
     const data = await res.json();
+
     if (!data.ok) throw new Error(data.error);
+
     showToast(`Contraseña de ${nombre} actualizada`, 'Usuarios');
     await loadUsuarios();
-  } catch(e) { alert('Error: ' + e.message); }
+
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
 }
+
 
 async function toggleUsuario(id, activo) {
   try {
