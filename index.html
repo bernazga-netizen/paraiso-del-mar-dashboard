@@ -5,176 +5,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Control de Acceso — Paraíso del Mar</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: Verdana, Geneva, sans-serif; font-size: 12px; background: #667eea; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #667eea; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: #1a237e; color: white; padding: 30px; text-align: center; border-radius: 10px; margin-bottom: 20px; position: relative; }
+        .header h1 { font-size: 32px; }
+        .header p { margin-top: 6px; font-size: 14px; opacity: .85; }
+        .btn-logout-header { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.15); color: white; border: 1px solid rgba(255,255,255,.3); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-logout-header:hover { background: rgba(255,255,255,.25); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { background: white; color: #1a237e; padding: 15px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; border: 2px solid #1a237e; }
+        .tab.active { background: #1a237e; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .controles { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .controles label { font-weight: bold; color: #1a237e; font-size: 14px; }
+        .controles input, .controles select { padding: 10px; border: 2px solid #1a237e; border-radius: 5px; font-size: 14px; }
+        .controles button { background: #1a237e; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .controles button:hover { background: #0d47a1; }
+        .btn-excel { background: #4caf50; }
+        .btn-excel:hover { background: #388e3c; }
+        .btn-limpiar { background: #ff9800; }
+        .btn-limpiar:hover { background: #f57c00; }
+        .filtros-section { background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 2px solid #1a237e; }
+        .filtros-title { font-weight: bold; color: #1a237e; margin-bottom: 10px; font-size: 16px; }
+        .filtros-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .filtro-group { display: flex; flex-direction: column; gap: 5px; }
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi { background: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .kpi-numero { font-size: 36px; font-weight: bold; color: #1a237e; }
+        .kpi-label { font-size: 12px; color: #666; margin-top: 5px; }
+        .tabla { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .tabla h2 { color: #1a237e; margin-bottom: 15px; border-bottom: 2px solid #1a237e; padding-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f5f5f5; padding: 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #ddd; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; }
+        .error { background: #f44336; color: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+        .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #1a237e; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .grafica { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        canvas { max-height: 300px; }
+        .badge-filtro { background: #1a237e; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; display: inline-block; margin: 5px; }
 
         /* ── Login ── */
-        .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #003660; }
-        .login-box { background: #fff; border-radius: 4px; width: 100%; max-width: 380px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+        .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #003660; margin: -20px; }
+        .login-box { background: white; border-radius: 4px; width: 100%; max-width: 380px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
         .login-header { background: #003660; padding: 28px 28px 20px; text-align: center; border-bottom: 3px solid #007c89; }
         .login-header svg { width: 48px; height: 48px; margin-bottom: 10px; }
-        .login-title { font-size: 16px; font-weight: bold; color: #fff; letter-spacing: 0.1em; text-transform: uppercase; }
-        .login-sub   { font-size: 10px; color: #71aeb7; letter-spacing: 0.14em; margin-top: 4px; }
-        .login-body  { padding: 24px 28px 28px; }
+        .login-title { font-size: 16px; font-weight: bold; color: white; letter-spacing: 0.1em; text-transform: uppercase; }
+        .login-sub { font-size: 10px; color: #71aeb7; letter-spacing: 0.14em; margin-top: 4px; }
+        .login-body { padding: 24px 28px 28px; }
         .login-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
         .login-field label { font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; color: #3d5a66; }
         .login-field select, .login-field input {
             border: 1px solid #c2d8dd; background: #f2efec;
-            padding: 10px 12px; font-family: Verdana, sans-serif;
+            padding: 10px 12px; font-family: Arial, sans-serif;
             font-size: 13px; color: #1a2e3a; border-radius: 3px;
             outline: none; transition: border-color .15s; width: 100%;
         }
-        .login-field select:focus, .login-field input:focus { border-color: #007c89; background: #fff; }
+        .login-field select:focus, .login-field input:focus { border-color: #007c89; background: white; }
         .login-err { color: #c0392b; font-size: 11px; margin-bottom: 10px; display: none; padding: 8px 12px; background: #fdf0ef; border-radius: 3px; }
-        .btn-login {
-            width: 100%; background: #007c89; color: #fff; border: none;
-            padding: 12px; font-family: Verdana, sans-serif; font-size: 11px;
-            font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase;
-            border-radius: 3px; cursor: pointer; transition: background .15s;
-        }
+        .btn-login { width: 100%; background: #007c89; color: white; border: none; padding: 12px; font-family: Arial, sans-serif; font-size: 12px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: background .15s; }
         .btn-login:hover { background: #003660; }
         .btn-login:disabled { opacity: .5; cursor: not-allowed; }
-
-        /* ── Dashboard ── */
-        #dashboardScreen { display: none; flex-direction: column; min-height: 100vh; }
-        .topbar { background: #003660; border-bottom: 3px solid #007c89; padding: 0; }
-        .topbar-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; gap: 16px; }
-        .brand-text { font-size: 14px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; color: #fff; }
-        .brand-sub  { font-size: 9px; color: #71aeb7; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 2px; }
-        .topbar-right { display: flex; align-items: center; gap: 10px; }
-        .user-pill { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); border-radius: 20px; padding: 4px 12px; font-size: 10px; color: #71aeb7; }
-        .user-avatar { width: 20px; height: 20px; border-radius: 50%; background: #007c89; color: #fff; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        .btn-logout { background: transparent; color: #71aeb7; border: 1px solid rgba(113,174,183,.4); padding: 7px 14px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: all .15s; }
-        .btn-logout:hover { background: rgba(113,174,183,.1); border-color: #71aeb7; }
-
-        /* ── Main content ── */
-        .main { padding: 24px; max-width: 1400px; margin: 0 auto; width: 100%; }
-
-        .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-        .tab { background: rgba(255,255,255,.15); color: #fff; padding: 10px 24px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; letter-spacing: .06em; border: 1px solid rgba(255,255,255,.2); transition: all .15s; }
-        .tab.active { background: #fff; color: #003660; border-color: #fff; }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .controles { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border: 1px solid #c2d8dd; }
-        .controles label { font-weight: bold; color: #003660; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
-        .controles input, .controles select { padding: 8px 10px; border: 1px solid #c2d8dd; border-radius: 3px; font-family: Verdana, sans-serif; font-size: 12px; outline: none; background: #f2efec; }
-        .controles input:focus, .controles select:focus { border-color: #007c89; background: #fff; }
-        .btn-primary { background: #003660; color: #fff; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: .1em; text-transform: uppercase; transition: background .15s; }
-        .btn-primary:hover { background: #007c89; }
-        .btn-excel { background: #006b35; color: #fff; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: .1em; text-transform: uppercase; }
-        .btn-excel:hover { background: #005528; }
-        .btn-clear { background: #f2efec; color: #3d5a66; border: 1px solid #c2d8dd; padding: 8px 16px; border-radius: 3px; cursor: pointer; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; }
-        .btn-clear:hover { background: #e5e0da; }
-
-        .filtros-section { background: #e8f4f6; padding: 14px 18px; border-radius: 4px; margin-bottom: 16px; border: 1px solid #c2d8dd; border-left: 3px solid #007c89; }
-        .filtros-title { font-weight: bold; color: #007c89; margin-bottom: 10px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
-        .filtros-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
-        .filtro-group { display: flex; flex-direction: column; gap: 4px; }
-        .filtro-group label { font-size: 9px; font-weight: bold; letter-spacing: .12em; text-transform: uppercase; color: #3d5a66; }
-        .filtro-group select, .filtro-group input { padding: 7px 10px; border: 1px solid #c2d8dd; border-radius: 3px; font-family: Verdana, sans-serif; font-size: 11px; background: #fff; outline: none; }
-        .badge-filtro { background: #003660; color: #fff; padding: 3px 10px; border-radius: 10px; font-size: 10px; display: inline-block; margin: 3px; }
-
-        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
-        .kpi { background: #fff; padding: 18px 16px; border-radius: 4px; text-align: center; border: 1px solid #c2d8dd; }
-        .kpi-numero { font-size: 34px; font-weight: bold; color: #003660; line-height: 1; }
-        .kpi-label { font-size: 10px; color: #3d5a66; margin-top: 5px; letter-spacing: .06em; text-transform: uppercase; }
-
-        .tabla { background: #fff; padding: 0; border-radius: 4px; margin: 16px 0; border: 1px solid #c2d8dd; overflow: hidden; }
-        .tabla-header { background: #003660; padding: 12px 16px; }
-        .tabla-header h2 { color: #fff; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f2efec; padding: 10px 12px; text-align: left; font-weight: bold; border-bottom: 2px solid #c2d8dd; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #3d5a66; }
-        td { padding: 10px 12px; border-bottom: 1px solid #e5e0da; font-size: 12px; color: #1a2e3a; }
-        tbody tr:hover { background: #e8f4f6; }
-        tbody tr:last-child td { border-bottom: none; }
-
-        .error-msg { background: #fdf0ef; color: #c0392b; padding: 16px 20px; border-radius: 4px; margin: 16px 0; text-align: center; border: 1px solid #e8c0c0; font-size: 12px; }
-        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #c2d8dd; border-top: 2px solid #007c89; border-radius: 50%; animation: spin 1s linear infinite; vertical-align: middle; margin-right: 6px; }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-
-        .grafica { background: #fff; padding: 20px; border-radius: 4px; margin: 16px 0; border: 1px solid #c2d8dd; }
-        .grafica h2 { color: #003660; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 14px; }
-        canvas { max-height: 280px; }
-
-        .empty-state { text-align: center; padding: 40px; color: #3d5a66; font-size: 12px; }
     </style>
 </head>
 <body>
 
-<!-- ── LOGIN ── -->
-<div id="loginScreen" class="login-screen">
-    <div class="login-box">
-        <div class="login-header">
-            <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="26" cy="26" r="25" stroke="#71aeb7" stroke-width="1"/>
-                <path d="M26 38 V20" stroke="#71aeb7" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M26 22 Q20 14 12 16 Q18 18 22 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-                <path d="M26 22 Q32 14 40 16 Q34 18 30 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-                <path d="M26 26 Q19 20 13 23 Q19 23 23 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-                <path d="M26 26 Q33 20 39 23 Q33 23 29 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-                <path d="M16 41 Q21 38 26 40 Q31 38 36 41" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-            </svg>
-            <div class="login-title">Paraíso del Mar</div>
-            <div class="login-sub">Dashboard de Control de Acceso</div>
-        </div>
-        <div class="login-body">
-            <div class="login-field">
-                <label>Usuario</label>
-                <select id="loginNombre">
-                    <option value="">— Seleccionar —</option>
-                </select>
+    <!-- ── LOGIN ── -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <div class="login-header">
+                <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="26" cy="26" r="25" stroke="#71aeb7" stroke-width="1"/>
+                    <path d="M26 38 V20" stroke="#71aeb7" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M26 22 Q20 14 12 16 Q18 18 22 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                    <path d="M26 22 Q32 14 40 16 Q34 18 30 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                    <path d="M26 26 Q19 20 13 23 Q19 23 23 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+                    <path d="M26 26 Q33 20 39 23 Q33 23 29 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+                    <path d="M16 41 Q21 38 26 40 Q31 38 36 41" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
+                </svg>
+                <div class="login-title">Paraíso del Mar</div>
+                <div class="login-sub">Dashboard de Control de Acceso</div>
             </div>
-            <div class="login-field">
-                <label>Contraseña</label>
-                <input id="loginPassword" type="password" placeholder="••••••••"
-                       onkeydown="if(event.key==='Enter') doLogin()">
-            </div>
-            <div class="login-err" id="loginError"></div>
-            <button class="btn-login" id="btnLogin" onclick="doLogin()">Ingresar</button>
-        </div>
-    </div>
-</div>
-
-<!-- ── DASHBOARD ── -->
-<div id="dashboardScreen">
-    <div class="topbar">
-        <div class="topbar-inner">
-            <div>
-                <div class="brand-text">Paraíso del Mar</div>
-                <div class="brand-sub">Dashboard de Control de Acceso</div>
-            </div>
-            <div class="topbar-right">
-                <div class="user-pill">
-                    <div class="user-avatar" id="userAvatar">?</div>
-                    <span id="userNombre">—</span>
+            <div class="login-body">
+                <div class="login-field">
+                    <label>Usuario</label>
+                    <select id="loginNombre">
+                        <option value="">— Seleccionar —</option>
+                    </select>
                 </div>
-                <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+                <div class="login-field">
+                    <label>Contraseña</label>
+                    <input id="loginPassword" type="password" placeholder="••••••••"
+                           onkeydown="if(event.key==='Enter') doLogin()">
+                </div>
+                <div class="login-err" id="loginError"></div>
+                <button class="btn-login" id="btnLogin" onclick="doLogin()">Ingresar</button>
             </div>
         </div>
     </div>
 
-    <div class="main">
-        <div class="tabs">
-            <div class="tab active" onclick="cambiarTab('estadisticas', this)">📈 Estadísticas</div>
-            <div class="tab" onclick="cambiarTab('auditoria', this)">📋 Auditoría</div>
+    <!-- ── DASHBOARD ── -->
+    <div id="dashboardScreen" style="display:none">
+    <div class="container">
+        <div class="header">
+            <h1>📊 PARAÍSO DEL MAR</h1>
+            <p>Dashboard de Control de Acceso</p>
+            <button class="btn-logout-header" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
         </div>
 
-        <!-- TAB ESTADÍSTICAS -->
+        <div class="tabs">
+            <div class="tab active" onclick="cambiarTab('estadisticas')">📈 ESTADÍSTICAS</div>
+            <div class="tab" onclick="cambiarTab('auditoria')">📋 AUDITORÍA</div>
+        </div>
+
+        <!-- TAB: ESTADÍSTICAS -->
         <div id="tab-estadisticas" class="tab-content active">
             <div class="controles">
-                <label>Fecha:</label>
+                <label>📅 Fecha:</label>
                 <input type="date" id="fechaInput">
-                <button class="btn-primary" onclick="cargar()">↺ Actualizar</button>
-                <button class="btn-excel" onclick="exportarExcel()">⬇ Exportar Excel</button>
+                <button onclick="cargar()">🔄 ACTUALIZAR</button>
+                <button class="btn-excel" onclick="exportarExcel()">📥 EXPORTAR EXCEL</button>
             </div>
 
             <div class="filtros-section">
-                <div class="filtros-title">🔍 Filtros avanzados</div>
+                <div class="filtros-title">🔍 FILTROS AVANZADOS</div>
                 <div class="filtros-row">
                     <div class="filtro-group">
-                        <label>Tipo de Persona</label>
+                        <label>Tipo de Persona:</label>
                         <select id="filtroTipo">
                             <option value="">Todos</option>
                             <option value="Dueño">Dueño</option>
@@ -187,7 +146,7 @@
                         </select>
                     </div>
                     <div class="filtro-group">
-                        <label>Acceso</label>
+                        <label>Acceso:</label>
                         <select id="filtroAcceso">
                             <option value="">Todos</option>
                             <option value="Muelle Principal">Muelle Principal</option>
@@ -196,52 +155,52 @@
                         </select>
                     </div>
                     <div class="filtro-group">
-                        <label>Hora Desde</label>
+                        <label>Hora Desde:</label>
                         <input type="time" id="filtroHoraDesde">
                     </div>
                     <div class="filtro-group">
-                        <label>Hora Hasta</label>
+                        <label>Hora Hasta:</label>
                         <input type="time" id="filtroHoraHasta">
                     </div>
                     <div class="filtro-group">
                         <label>&nbsp;</label>
-                        <button class="btn-primary" onclick="aplicarFiltros()">✓ Aplicar</button>
+                        <button onclick="aplicarFiltros()">✓ APLICAR</button>
                     </div>
                     <div class="filtro-group">
                         <label>&nbsp;</label>
-                        <button class="btn-clear" onclick="limpiarFiltros()">✕ Limpiar</button>
+                        <button class="btn-limpiar" onclick="limpiarFiltros()">✕ LIMPIAR</button>
                     </div>
                 </div>
-                <div id="filtrosActivos" style="margin-top:8px"></div>
+                <div id="filtrosActivos" style="margin-top: 10px;"></div>
             </div>
 
             <div id="contenido">
-                <p style="text-align:center;color:#fff;padding:40px;font-size:13px">
+                <p style="text-align: center; color: white; font-size: 18px;">
                     <span class="spinner"></span> Cargando...
                 </p>
             </div>
         </div>
 
-        <!-- TAB AUDITORÍA -->
+        <!-- TAB: AUDITORÍA -->
         <div id="tab-auditoria" class="tab-content">
             <div class="controles">
-                <label>Desde:</label>
+                <label>📅 Desde:</label>
                 <input type="date" id="auditoriaFechaInicio">
-                <label>Hasta:</label>
+                <label>📅 Hasta:</label>
                 <input type="date" id="auditoriaFechaFin">
-                <button class="btn-primary" onclick="cargarAuditoria()">↺ Buscar</button>
-                <button class="btn-excel" onclick="exportarAuditoriaExcel()">⬇ Exportar</button>
+                <button onclick="cargarAuditoria()">🔄 BUSCAR</button>
+                <button class="btn-excel" onclick="exportarAuditoriaExcel()">📥 EXPORTAR</button>
             </div>
 
             <div class="filtros-section">
-                <div class="filtros-title">🔍 Filtros de auditoría</div>
+                <div class="filtros-title">🔍 FILTROS DE AUDITORÍA</div>
                 <div class="filtros-row">
                     <div class="filtro-group">
-                        <label>Usuario</label>
-                        <input type="text" id="auditoriaUsuario" placeholder="Nombre del usuario" style="width:180px">
+                        <label>Usuario:</label>
+                        <input type="text" id="auditoriaUsuario" placeholder="Nombre del usuario">
                     </div>
                     <div class="filtro-group">
-                        <label>Tipo</label>
+                        <label>Tipo:</label>
                         <select id="auditoriaTipo">
                             <option value="">Todos</option>
                             <option value="Dueño">Dueño</option>
@@ -254,7 +213,7 @@
                         </select>
                     </div>
                     <div class="filtro-group">
-                        <label>Acceso</label>
+                        <label>Acceso:</label>
                         <select id="auditoriaAcceso">
                             <option value="">Todos</option>
                             <option value="Muelle Principal">Muelle Principal</option>
@@ -266,391 +225,370 @@
             </div>
 
             <div id="contenidoAuditoria">
-                <p class="empty-state" style="color:#fff">Selecciona un rango de fechas y presiona Buscar</p>
+                <p style="text-align: center; color: white; font-size: 18px;">
+                    Selecciona un rango de fechas y presiona BUSCAR
+                </p>
             </div>
         </div>
-    </div><!-- /main -->
-</div><!-- /dashboardScreen -->
+    </div><!-- /container -->
+    </div><!-- /dashboardScreen -->
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<script>
-    const API = 'https://paraiso-del-mar-backend.onrender.com';
-    let usuarioActual  = null;
-    let datosActuales  = null;
-    let datosFiltrados = null;
-    let chartInstance  = null;
-    let datosAuditoria = [];
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script>
+        const API = 'https://paraiso-del-mar-backend.onrender.com';
+        let datosActuales  = null;
+        let datosFiltrados = null;
+        let chartInstance  = null;
+        let datosAuditoria = [];
+        let usuarioActual  = null;
 
-    // ── Auth ──────────────────────────────────────────────────────
-    function authHeaders() {
-        const token = sessionStorage.getItem('pdm_token');
-        return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
-    }
+        // ── Auth ──────────────────────────────────────────────────
+        function authHeaders() {
+            const token = sessionStorage.getItem('pdm_acceso_token');
+            return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+        }
 
-    // Cargar lista de usuarios en el select
-    async function cargarUsuarios() {
-        try {
-            const res  = await fetch(`${API}/api/auth/usuarios`);
-            const data = await res.json();
-            const sel  = document.getElementById('loginNombre');
-            if (data.ok && data.data) {
-                data.data.filter(u => u.activo).forEach(u => {
-                    const opt = document.createElement('option');
-                    opt.value       = u.nombre;
-                    opt.textContent = u.nombre;
-                    sel.appendChild(opt);
+        // Cargar lista de usuarios en el select desde endpoint público
+        async function cargarUsuarios() {
+            try {
+                const res  = await fetch(`${API}/api/auth/usuarios-publico`);
+                const data = await res.json();
+                const sel  = document.getElementById('loginNombre');
+                if (data.ok && data.data) {
+                    data.data.forEach(u => {
+                        const opt = document.createElement('option');
+                        opt.value       = u.nombre;
+                        opt.textContent = u.nombre;
+                        sel.appendChild(opt);
+                    });
+                }
+            } catch(e) {
+                console.warn('No se pudo cargar lista de usuarios:', e);
+            }
+        }
+
+        async function doLogin() {
+            const nombre   = document.getElementById('loginNombre').value;
+            const password = document.getElementById('loginPassword').value;
+            const errEl    = document.getElementById('loginError');
+            const btn      = document.getElementById('btnLogin');
+            errEl.style.display = 'none';
+
+            if (!nombre || !password) {
+                errEl.textContent = 'Selecciona usuario e ingresa contraseña.';
+                errEl.style.display = 'block'; return;
+            }
+
+            btn.disabled    = true;
+            btn.textContent = 'Verificando…';
+
+            try {
+                const res  = await fetch(`${API}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, password })
+                });
+                const data = await res.json();
+
+                if (res.ok && data.token) {
+                    usuarioActual = data.usuario;
+                    sessionStorage.setItem('pdm_acceso_token',   data.token);
+                    sessionStorage.setItem('pdm_acceso_usuario', JSON.stringify(data.usuario));
+                    mostrarDashboard();
+                } else {
+                    errEl.textContent = data.error || 'Usuario o contraseña incorrectos.';
+                    errEl.style.display = 'block';
+                }
+            } catch(e) {
+                errEl.textContent = 'Error de conexión con el servidor.';
+                errEl.style.display = 'block';
+            } finally {
+                btn.disabled    = false;
+                btn.textContent = 'Ingresar';
+            }
+        }
+
+        function mostrarDashboard() {
+            document.getElementById('loginScreen').style.display    = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+            inicializarFechas();
+            cargar();
+        }
+
+        function cerrarSesion() {
+            sessionStorage.removeItem('pdm_acceso_token');
+            sessionStorage.removeItem('pdm_acceso_usuario');
+            usuarioActual = null;
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display     = 'flex';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginError').style.display = 'none';
+        }
+
+        function inicializarFechas() {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaInput').value        = hoy;
+            document.getElementById('auditoriaFechaFin').value = hoy;
+            const hace7 = new Date();
+            hace7.setDate(hace7.getDate() - 7);
+            document.getElementById('auditoriaFechaInicio').value = hace7.toISOString().split('T')[0];
+        }
+
+        // Al cargar: si ya hay sesión activa saltar login
+        window.addEventListener('load', () => {
+            cargarUsuarios();
+            const saved = sessionStorage.getItem('pdm_acceso_usuario');
+            if (saved && sessionStorage.getItem('pdm_acceso_token')) {
+                usuarioActual = JSON.parse(saved);
+                mostrarDashboard();
+            }
+        });
+
+        // ── Tabs ──────────────────────────────────────────────────
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            if (tab === 'estadisticas') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('tab-estadisticas').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('tab-auditoria').classList.add('active');
+            }
+        }
+
+        // ── Estadísticas (sin JWT) ────────────────────────────────
+        async function cargar() {
+            try {
+                const fecha = document.getElementById('fechaInput').value;
+                const res   = await fetch(`${API}/api/estadisticas/${fecha}`);
+                const data  = await res.json();
+                datosActuales  = data;
+                datosFiltrados = data;
+                aplicarFiltros();
+            } catch (e) {
+                document.getElementById('contenido').innerHTML =
+                    `<div class="error">❌ Error: No se puede conectar a ${API}</div>`;
+            }
+        }
+
+        // ── Auditoría (con JWT) ───────────────────────────────────
+        async function cargarAuditoria() {
+            try {
+                const fechaInicio = document.getElementById('auditoriaFechaInicio').value;
+                const fechaFin    = document.getElementById('auditoriaFechaFin').value;
+                const usuario     = document.getElementById('auditoriaUsuario').value;
+                const tipo        = document.getElementById('auditoriaTipo').value;
+                const acceso      = document.getElementById('auditoriaAcceso').value;
+
+                let url = `${API}/api/auditoria?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                if (usuario) url += `&usuario_captura=${encodeURIComponent(usuario)}`;
+                if (tipo)    url += `&tipo_persona=${encodeURIComponent(tipo)}`;
+                if (acceso)  url += `&acceso=${encodeURIComponent(acceso)}`;
+
+                const res = await fetch(url, { headers: authHeaders() });
+                if (res.status === 401 || res.status === 403) { cerrarSesion(); return; }
+
+                datosAuditoria = await res.json();
+
+                if (datosAuditoria.length === 0) {
+                    document.getElementById('contenidoAuditoria').innerHTML =
+                        '<p style="text-align:center;color:white;font-size:18px">No se encontraron registros</p>';
+                    return;
+                }
+
+                let html = '<div class="tabla"><h2>📋 Histórico de Registros (Últimos 500)</h2>';
+                html += '<table><tr><th>Fecha</th><th>Hora</th><th>Acceso</th><th>Tipo</th><th>Cantidad</th><th>Usuario</th><th>Timestamp</th></tr>';
+
+                datosAuditoria.forEach(r => {
+                    const ts = new Date(r.timestamp);
+                    html += `<tr>
+                        <td>${r.fecha}</td>
+                        <td>${r.hora}</td>
+                        <td>${r.acceso}</td>
+                        <td>${r.tipo_persona}</td>
+                        <td style="text-align:right">${r.cantidad}</td>
+                        <td>${r.usuario_captura}</td>
+                        <td>${ts.toLocaleDateString('es-MX')} ${ts.toLocaleTimeString('es-MX')}</td>
+                    </tr>`;
+                });
+
+                html += '</table></div>';
+                document.getElementById('contenidoAuditoria').innerHTML = html;
+
+            } catch (e) {
+                document.getElementById('contenidoAuditoria').innerHTML =
+                    `<div class="error">❌ Error: No se puede conectar a ${API}</div>`;
+            }
+        }
+
+        // ── Filtros ───────────────────────────────────────────────
+        function aplicarFiltros() {
+            if (!datosActuales) return;
+
+            const filtroTipo      = document.getElementById('filtroTipo').value;
+            const filtroAcceso    = document.getElementById('filtroAcceso').value;
+            const filtroHoraDesde = document.getElementById('filtroHoraDesde').value;
+            const filtroHoraHasta = document.getElementById('filtroHoraHasta').value;
+
+            let badgesHTML = '';
+            if (filtroTipo)      badgesHTML += `<span class="badge-filtro">Tipo: ${filtroTipo}</span>`;
+            if (filtroAcceso)    badgesHTML += `<span class="badge-filtro">Acceso: ${filtroAcceso}</span>`;
+            if (filtroHoraDesde) badgesHTML += `<span class="badge-filtro">Desde: ${filtroHoraDesde}</span>`;
+            if (filtroHoraHasta) badgesHTML += `<span class="badge-filtro">Hasta: ${filtroHoraHasta}</span>`;
+            document.getElementById('filtrosActivos').innerHTML = badgesHTML;
+
+            datosFiltrados = JSON.parse(JSON.stringify(datosActuales));
+
+            if (filtroTipo || filtroAcceso) {
+                if (datosFiltrados.detalladoPorAccesoYTipo) {
+                    datosFiltrados.detalladoPorAccesoYTipo = datosFiltrados.detalladoPorAccesoYTipo.filter(d => {
+                        if (filtroTipo   && d.tipo_persona !== filtroTipo)   return false;
+                        if (filtroAcceso && d.acceso       !== filtroAcceso) return false;
+                        return true;
+                    });
+                    const tm = {}, am = {};
+                    datosFiltrados.detalladoPorAccesoYTipo.forEach(d => {
+                        tm[d.tipo_persona] = (tm[d.tipo_persona] || 0) + parseInt(d.total);
+                        am[d.acceso]       = (am[d.acceso]       || 0) + parseInt(d.total);
+                    });
+                    datosFiltrados.porTipo   = Object.keys(tm).map(tipo_persona => ({ tipo_persona, total: tm[tipo_persona] }));
+                    datosFiltrados.porAcceso = Object.keys(am).map(acceso       => ({ acceso,        total: am[acceso] }));
+                }
+            }
+
+            if ((filtroHoraDesde || filtroHoraHasta) && datosFiltrados.porHora) {
+                datosFiltrados.porHora = datosFiltrados.porHora.filter(h => {
+                    const hora = h.hora.substring(0, 5);
+                    if (filtroHoraDesde && hora < filtroHoraDesde) return false;
+                    if (filtroHoraHasta && hora > filtroHoraHasta) return false;
+                    return true;
                 });
             }
-        } catch(e) {
-            // Si falla, dejamos el select vacío — el usuario puede escribir igual
-            console.warn('No se pudo cargar lista de usuarios:', e);
-        }
-    }
 
-    async function doLogin() {
-        const nombre   = document.getElementById('loginNombre').value;
-        const password = document.getElementById('loginPassword').value;
-        const errEl    = document.getElementById('loginError');
-        const btn      = document.getElementById('btnLogin');
-        errEl.style.display = 'none';
+            datosFiltrados.total = datosFiltrados.detalladoPorAccesoYTipo
+                ? datosFiltrados.detalladoPorAccesoYTipo.reduce((sum, d) => sum + parseInt(d.total), 0)
+                : datosFiltrados.total;
 
-        if (!nombre || !password) {
-            errEl.textContent = 'Selecciona usuario e ingresa contraseña.';
-            errEl.style.display = 'block'; return;
+            mostrarDatos();
         }
 
-        btn.disabled    = true;
-        btn.textContent = 'Verificando…';
+        function limpiarFiltros() {
+            document.getElementById('filtroTipo').value      = '';
+            document.getElementById('filtroAcceso').value    = '';
+            document.getElementById('filtroHoraDesde').value = '';
+            document.getElementById('filtroHoraHasta').value = '';
+            document.getElementById('filtrosActivos').innerHTML = '';
+            datosFiltrados = datosActuales;
+            mostrarDatos();
+        }
 
-        try {
-            const res  = await fetch(`${API}/api/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, password })
+        function mostrarDatos() {
+            const data = datosFiltrados;
+            let html = '<div class="kpi-container">';
+            html += `<div class="kpi"><div class="kpi-numero">${data.total}</div><div class="kpi-label">TOTAL</div></div>`;
+
+            if (data.detalladoPorAccesoYTipo?.length > 0) {
+                ['Muelle Principal','Base 4','Base 1'].forEach(nombreAcceso => {
+                    const tot = data.detalladoPorAccesoYTipo
+                        .filter(d => d.acceso === nombreAcceso)
+                        .reduce((sum, d) => sum + parseInt(d.total), 0);
+                    if (tot > 0) html += `<div class="kpi"><div class="kpi-numero">${tot}</div><div class="kpi-label">${nombreAcceso}</div></div>`;
+                });
+            } else if (data.porAcceso) {
+                data.porAcceso.forEach(a => {
+                    html += `<div class="kpi"><div class="kpi-numero">${a.total}</div><div class="kpi-label">${a.acceso}</div></div>`;
+                });
+            }
+            html += '</div>';
+
+            if (data.porHora?.length > 0) {
+                html += '<div class="grafica"><h2>📈 Ingresos por Hora</h2><canvas id="chartHora"></canvas></div>';
+            }
+            if (data.porTipo?.length > 0) {
+                html += '<div class="tabla"><h2>Por Tipo de Persona</h2><table><tr><th>Tipo</th><th style="text-align:right">Cantidad</th></tr>';
+                data.porTipo.forEach(t => { html += `<tr><td>${t.tipo_persona}</td><td style="text-align:right">${t.total}</td></tr>`; });
+                html += '</table></div>';
+            }
+            if (data.porAcceso?.length > 0) {
+                html += '<div class="tabla"><h2>Por Acceso</h2><table><tr><th>Acceso</th><th style="text-align:right">Cantidad</th></tr>';
+                data.porAcceso.forEach(a => { html += `<tr><td>${a.acceso}</td><td style="text-align:right">${a.total}</td></tr>`; });
+                html += '</table></div>';
+            }
+            if (data.detalladoPorAccesoYTipo?.length > 0) {
+                html += '<div class="tabla"><h2>Detalle por Acceso y Tipo</h2><table><tr><th>Acceso</th><th>Tipo</th><th style="text-align:right">Cantidad</th></tr>';
+                data.detalladoPorAccesoYTipo.forEach(d => {
+                    html += `<tr><td>${d.acceso}</td><td>${d.tipo_persona}</td><td style="text-align:right">${d.total}</td></tr>`;
+                });
+                html += '</table></div>';
+            }
+
+            document.getElementById('contenido').innerHTML = html;
+            if (data.porHora?.length > 0) setTimeout(() => crearGrafica(data.porHora), 100);
+        }
+
+        function crearGrafica(porHora) {
+            const ctx = document.getElementById('chartHora');
+            if (!ctx) return;
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: porHora.map(h => h.hora.substring(0, 5)),
+                    datasets: [{ label: 'Ingresos', data: porHora.map(h => h.total),
+                        borderColor: '#1a237e', backgroundColor: 'rgba(26,35,126,0.1)', tension: 0.4, fill: true }]
+                },
+                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
             });
-            const data = await res.json();
-
-            if (res.ok && data.token) {
-                usuarioActual = data.usuario;
-                sessionStorage.setItem('pdm_token',   data.token);
-                sessionStorage.setItem('pdm_usuario', JSON.stringify(data.usuario));
-                mostrarDashboard();
-            } else {
-                errEl.textContent = data.error || 'Usuario o contraseña incorrectos.';
-                errEl.style.display = 'block';
-            }
-        } catch(e) {
-            errEl.textContent = 'Error de conexión con el servidor.';
-            errEl.style.display = 'block';
-        } finally {
-            btn.disabled    = false;
-            btn.textContent = 'Ingresar';
         }
-    }
 
-    function mostrarDashboard() {
-        document.getElementById('loginScreen').style.display    = 'none';
-        document.getElementById('dashboardScreen').style.display = 'flex';
-        document.getElementById('userNombre').textContent = usuarioActual.nombre.split(' ')[0];
-        document.getElementById('userAvatar').textContent = usuarioActual.nombre.charAt(0).toUpperCase();
-        inicializarFechas();
-        cargar();
-    }
-
-    function cerrarSesion() {
-        sessionStorage.removeItem('pdm_token');
-        sessionStorage.removeItem('pdm_usuario');
-        usuarioActual = null;
-        document.getElementById('dashboardScreen').style.display = 'none';
-        document.getElementById('loginScreen').style.display     = 'flex';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('loginError').style.display = 'none';
-    }
-
-    // ── Init ──────────────────────────────────────────────────────
-    function inicializarFechas() {
-        const hoy = new Date().toISOString().split('T')[0];
-        document.getElementById('fechaInput').value        = hoy;
-        document.getElementById('auditoriaFechaFin').value = hoy;
-        const hace7 = new Date();
-        hace7.setDate(hace7.getDate() - 7);
-        document.getElementById('auditoriaFechaInicio').value = hace7.toISOString().split('T')[0];
-    }
-
-    window.addEventListener('load', () => {
-        cargarUsuarios();
-        const saved = sessionStorage.getItem('pdm_usuario');
-        if (saved && sessionStorage.getItem('pdm_token')) {
-            usuarioActual = JSON.parse(saved);
-            mostrarDashboard();
-        }
-    });
-
-    // ── Tabs ──────────────────────────────────────────────────────
-    function cambiarTab(tab, btn) {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById('tab-' + tab).classList.add('active');
-    }
-
-    // ── Estadísticas (sin JWT) ────────────────────────────────────
-    async function cargar() {
-        try {
+        // ── Exportar ──────────────────────────────────────────────
+        function exportarExcel() {
+            if (!datosFiltrados) { alert('No hay datos para exportar'); return; }
             const fecha = document.getElementById('fechaInput').value;
-            const res   = await fetch(`${API}/api/estadisticas/${fecha}`);
-            const data  = await res.json();
-            datosActuales  = data;
-            datosFiltrados = data;
-            aplicarFiltros();
-        } catch(e) {
-            document.getElementById('contenido').innerHTML =
-                `<div class="error-msg">✕ Error: No se puede conectar a ${API}</div>`;
-        }
-    }
-
-    // ── Auditoría (con JWT) ───────────────────────────────────────
-    async function cargarAuditoria() {
-        try {
-            const fi      = document.getElementById('auditoriaFechaInicio').value;
-            const ff      = document.getElementById('auditoriaFechaFin').value;
-            const usuario = document.getElementById('auditoriaUsuario').value;
-            const tipo    = document.getElementById('auditoriaTipo').value;
-            const acceso  = document.getElementById('auditoriaAcceso').value;
-
-            let url = `${API}/api/auditoria?fecha_inicio=${fi}&fecha_fin=${ff}`;
-            if (usuario) url += `&usuario_captura=${encodeURIComponent(usuario)}`;
-            if (tipo)    url += `&tipo_persona=${encodeURIComponent(tipo)}`;
-            if (acceso)  url += `&acceso=${encodeURIComponent(acceso)}`;
-
-            const res = await fetch(url, { headers: authHeaders() });
-
-            if (res.status === 401 || res.status === 403) { cerrarSesion(); return; }
-
-            datosAuditoria = await res.json();
-
-            if (!datosAuditoria.length) {
-                document.getElementById('contenidoAuditoria').innerHTML =
-                    '<p class="empty-state" style="color:#fff">No se encontraron registros</p>';
-                return;
+            const wb = XLSX.utils.book_new();
+            const resumen = [
+                ['PARAÍSO DEL MAR - Reporte de Ingresos'], ['Fecha:', fecha],
+                ['Total General:', datosFiltrados.total], [''], ['Por Acceso'], ['Acceso','Cantidad']
+            ];
+            datosFiltrados.porAcceso?.forEach(a => resumen.push([a.acceso, a.total]));
+            resumen.push([''], ['Por Tipo de Persona'], ['Tipo','Cantidad']);
+            datosFiltrados.porTipo?.forEach(t => resumen.push([t.tipo_persona, t.total]));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
+            if (datosFiltrados.detalladoPorAccesoYTipo?.length > 0) {
+                const det = [['Acceso','Tipo de Persona','Cantidad']];
+                datosFiltrados.detalladoPorAccesoYTipo.forEach(d => det.push([d.acceso, d.tipo_persona, d.total]));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(det), 'Detalle');
             }
+            if (datosFiltrados.porHora?.length > 0) {
+                const ph = [['Hora','Cantidad']];
+                datosFiltrados.porHora.forEach(h => ph.push([h.hora, h.total]));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ph), 'Por Hora');
+            }
+            XLSX.writeFile(wb, `Paraiso_del_Mar_${fecha}.xlsx`);
+        }
 
-            let html = `<div class="tabla">
-                <div class="tabla-header"><h2>📋 Histórico de Registros (Últimos 500)</h2></div>
-                <table><thead><tr>
-                    <th>Fecha</th><th>Hora</th><th>Acceso</th><th>Tipo</th>
-                    <th style="text-align:right">Cantidad</th><th>Usuario</th><th>Timestamp</th>
-                </tr></thead><tbody>`;
-
+        function exportarAuditoriaExcel() {
+            if (!datosAuditoria.length) { alert('No hay datos de auditoría para exportar'); return; }
+            const wb  = XLSX.utils.book_new();
+            const fi  = document.getElementById('auditoriaFechaInicio').value;
+            const ff  = document.getElementById('auditoriaFechaFin').value;
+            const data = [
+                ['PARAÍSO DEL MAR - Auditoría de Registros'],
+                ['Desde:', fi], ['Hasta:', ff], [''],
+                ['Fecha','Hora','Acceso','Tipo','Cantidad','Usuario','Timestamp']
+            ];
             datosAuditoria.forEach(r => {
                 const ts = new Date(r.timestamp);
-                html += `<tr>
-                    <td>${r.fecha}</td>
-                    <td>${r.hora}</td>
-                    <td>${r.acceso}</td>
-                    <td>${r.tipo_persona}</td>
-                    <td style="text-align:right;font-weight:bold">${r.cantidad}</td>
-                    <td>${r.usuario_captura}</td>
-                    <td style="font-size:11px;color:#3d5a66">${ts.toLocaleDateString('es-MX')} ${ts.toLocaleTimeString('es-MX')}</td>
-                </tr>`;
+                data.push([r.fecha, r.hora, r.acceso, r.tipo_persona, r.cantidad, r.usuario_captura,
+                    `${ts.toLocaleDateString('es-MX')} ${ts.toLocaleTimeString('es-MX')}`]);
             });
-
-            html += '</tbody></table></div>';
-            document.getElementById('contenidoAuditoria').innerHTML = html;
-
-        } catch(e) {
-            document.getElementById('contenidoAuditoria').innerHTML =
-                `<div class="error-msg">✕ Error: No se puede conectar a ${API}</div>`;
-        }
-    }
-
-    // ── Filtros ───────────────────────────────────────────────────
-    function aplicarFiltros() {
-        if (!datosActuales) return;
-
-        const filtroTipo      = document.getElementById('filtroTipo').value;
-        const filtroAcceso    = document.getElementById('filtroAcceso').value;
-        const filtroHoraDesde = document.getElementById('filtroHoraDesde').value;
-        const filtroHoraHasta = document.getElementById('filtroHoraHasta').value;
-
-        let badges = '';
-        if (filtroTipo)      badges += `<span class="badge-filtro">Tipo: ${filtroTipo}</span>`;
-        if (filtroAcceso)    badges += `<span class="badge-filtro">Acceso: ${filtroAcceso}</span>`;
-        if (filtroHoraDesde) badges += `<span class="badge-filtro">Desde: ${filtroHoraDesde}</span>`;
-        if (filtroHoraHasta) badges += `<span class="badge-filtro">Hasta: ${filtroHoraHasta}</span>`;
-        document.getElementById('filtrosActivos').innerHTML = badges;
-
-        datosFiltrados = JSON.parse(JSON.stringify(datosActuales));
-
-        if (filtroTipo || filtroAcceso) {
-            datosFiltrados.detalladoPorAccesoYTipo = datosFiltrados.detalladoPorAccesoYTipo.filter(d => {
-                if (filtroTipo   && d.tipo_persona !== filtroTipo)   return false;
-                if (filtroAcceso && d.acceso       !== filtroAcceso) return false;
-                return true;
-            });
-            const tm = {}, am = {};
-            datosFiltrados.detalladoPorAccesoYTipo.forEach(d => {
-                tm[d.tipo_persona] = (tm[d.tipo_persona] || 0) + parseInt(d.total);
-                am[d.acceso]       = (am[d.acceso]       || 0) + parseInt(d.total);
-            });
-            datosFiltrados.porTipo   = Object.entries(tm).map(([tipo_persona, total]) => ({ tipo_persona, total }));
-            datosFiltrados.porAcceso = Object.entries(am).map(([acceso, total])       => ({ acceso, total }));
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Auditoría');
+            XLSX.writeFile(wb, `Auditoria_${fi}_a_${ff}.xlsx`);
         }
 
-        if ((filtroHoraDesde || filtroHoraHasta) && datosFiltrados.porHora) {
-            datosFiltrados.porHora = datosFiltrados.porHora.filter(h => {
-                const hora = h.hora.substring(0, 5);
-                if (filtroHoraDesde && hora < filtroHoraDesde) return false;
-                if (filtroHoraHasta && hora > filtroHoraHasta) return false;
-                return true;
-            });
-        }
-
-        datosFiltrados.total = datosFiltrados.detalladoPorAccesoYTipo
-            ? datosFiltrados.detalladoPorAccesoYTipo.reduce((s, d) => s + parseInt(d.total), 0)
-            : datosFiltrados.total;
-
-        mostrarDatos();
-    }
-
-    function limpiarFiltros() {
-        ['filtroTipo','filtroAcceso','filtroHoraDesde','filtroHoraHasta'].forEach(id => {
-            document.getElementById(id).value = '';
-        });
-        document.getElementById('filtrosActivos').innerHTML = '';
-        datosFiltrados = datosActuales;
-        mostrarDatos();
-    }
-
-    // ── Render ────────────────────────────────────────────────────
-    function mostrarDatos() {
-        const data = datosFiltrados;
-        let html = '<div class="kpi-container">';
-        html += `<div class="kpi"><div class="kpi-numero">${data.total}</div><div class="kpi-label">Total</div></div>`;
-
-        if (data.detalladoPorAccesoYTipo?.length > 0) {
-            ['Muelle Principal','Base 4','Base 1'].forEach(nombre => {
-                const tot = data.detalladoPorAccesoYTipo
-                    .filter(d => d.acceso === nombre)
-                    .reduce((s, d) => s + parseInt(d.total), 0);
-                if (tot > 0) html += `<div class="kpi"><div class="kpi-numero">${tot}</div><div class="kpi-label">${nombre}</div></div>`;
-            });
-        } else if (data.porAcceso) {
-            data.porAcceso.forEach(a => {
-                html += `<div class="kpi"><div class="kpi-numero">${a.total}</div><div class="kpi-label">${a.acceso}</div></div>`;
-            });
-        }
-        html += '</div>';
-
-        if (data.porHora?.length > 0) {
-            html += '<div class="grafica"><h2>📈 Ingresos por hora</h2><canvas id="chartHora"></canvas></div>';
-        }
-
-        if (data.porTipo?.length > 0) {
-            html += `<div class="tabla"><div class="tabla-header"><h2>Por Tipo de Persona</h2></div>
-                <table><thead><tr><th>Tipo</th><th style="text-align:right">Cantidad</th></tr></thead><tbody>`;
-            data.porTipo.forEach(t => {
-                html += `<tr><td>${t.tipo_persona}</td><td style="text-align:right;font-weight:bold">${t.total}</td></tr>`;
-            });
-            html += '</tbody></table></div>';
-        }
-
-        if (data.porAcceso?.length > 0) {
-            html += `<div class="tabla"><div class="tabla-header"><h2>Por Acceso</h2></div>
-                <table><thead><tr><th>Acceso</th><th style="text-align:right">Cantidad</th></tr></thead><tbody>`;
-            data.porAcceso.forEach(a => {
-                html += `<tr><td>${a.acceso}</td><td style="text-align:right;font-weight:bold">${a.total}</td></tr>`;
-            });
-            html += '</tbody></table></div>';
-        }
-
-        if (data.detalladoPorAccesoYTipo?.length > 0) {
-            html += `<div class="tabla"><div class="tabla-header"><h2>Detalle por Acceso y Tipo</h2></div>
-                <table><thead><tr><th>Acceso</th><th>Tipo</th><th style="text-align:right">Cantidad</th></tr></thead><tbody>`;
-            data.detalladoPorAccesoYTipo.forEach(d => {
-                html += `<tr><td>${d.acceso}</td><td>${d.tipo_persona}</td><td style="text-align:right;font-weight:bold">${d.total}</td></tr>`;
-            });
-            html += '</tbody></table></div>';
-        }
-
-        document.getElementById('contenido').innerHTML = html;
-        if (data.porHora?.length > 0) setTimeout(() => crearGrafica(data.porHora), 100);
-    }
-
-    function crearGrafica(porHora) {
-        const ctx = document.getElementById('chartHora');
-        if (!ctx) return;
-        if (chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: porHora.map(h => h.hora.substring(0, 5)),
-                datasets: [{
-                    label: 'Ingresos',
-                    data: porHora.map(h => h.total),
-                    borderColor: '#007c89',
-                    backgroundColor: 'rgba(0,124,137,0.08)',
-                    tension: 0.4, fill: true, pointBackgroundColor: '#003660'
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: true,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, grid: { color: '#e5e0da' } } }
-            }
-        });
-    }
-
-    // ── Exportar ──────────────────────────────────────────────────
-    function exportarExcel() {
-        if (!datosFiltrados) { alert('No hay datos para exportar'); return; }
-        const fecha = document.getElementById('fechaInput').value;
-        const wb = XLSX.utils.book_new();
-        const resumen = [
-            ['PARAÍSO DEL MAR — Dashboard de Control de Acceso'],
-            ['Fecha:', fecha], ['Total:', datosFiltrados.total], [''],
-            ['Por Acceso'], ['Acceso','Cantidad']
-        ];
-        datosFiltrados.porAcceso?.forEach(a => resumen.push([a.acceso, a.total]));
-        resumen.push([''], ['Por Tipo de Persona'], ['Tipo','Cantidad']);
-        datosFiltrados.porTipo?.forEach(t => resumen.push([t.tipo_persona, t.total]));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
-
-        if (datosFiltrados.detalladoPorAccesoYTipo?.length > 0) {
-            const det = [['Acceso','Tipo de Persona','Cantidad']];
-            datosFiltrados.detalladoPorAccesoYTipo.forEach(d => det.push([d.acceso, d.tipo_persona, d.total]));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(det), 'Detalle');
-        }
-        if (datosFiltrados.porHora?.length > 0) {
-            const ph = [['Hora','Cantidad']];
-            datosFiltrados.porHora.forEach(h => ph.push([h.hora, h.total]));
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ph), 'Por Hora');
-        }
-        XLSX.writeFile(wb, `PDM_Acceso_${fecha}.xlsx`);
-    }
-
-    function exportarAuditoriaExcel() {
-        if (!datosAuditoria.length) { alert('No hay datos de auditoría para exportar'); return; }
-        const fi = document.getElementById('auditoriaFechaInicio').value;
-        const ff = document.getElementById('auditoriaFechaFin').value;
-        const wb = XLSX.utils.book_new();
-        const data = [
-            ['PARAÍSO DEL MAR — Auditoría de Registros de Acceso'],
-            ['Desde:', fi], ['Hasta:', ff], [''],
-            ['Fecha','Hora','Acceso','Tipo','Cantidad','Usuario','Timestamp']
-        ];
-        datosAuditoria.forEach(r => {
-            const ts = new Date(r.timestamp);
-            data.push([r.fecha, r.hora, r.acceso, r.tipo_persona, r.cantidad, r.usuario_captura,
-                `${ts.toLocaleDateString('es-MX')} ${ts.toLocaleTimeString('es-MX')}`]);
-        });
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Auditoría');
-        XLSX.writeFile(wb, `PDM_Auditoria_Acceso_${fi}_${ff}.xlsx`);
-    }
-
-    // Auto-refresh cada 30 seg
-    setInterval(() => { if (sessionStorage.getItem('pdm_token')) cargar(); }, 30000);
-</script>
+        setInterval(() => { if (sessionStorage.getItem('pdm_acceso_token')) cargar(); }, 30000);
+    </script>
 </body>
 </html>
