@@ -742,6 +742,13 @@
 
 <script>
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+function authHeaders() {
+  const token = sessionStorage.getItem('pdm_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+}
 let estado = 'activo', actualId = null, pmsCatalogo = [];
 
 // Clock
@@ -782,8 +789,8 @@ async function loadData() {
     if (ffin) params.set('fecha_fin', ffin);
 
     const [dataRes, oc] = await Promise.all([
-      fetch(`${API_BASE}/api/inhouse?${params}`).then(r => r.json()),
-      fetch(`${API_BASE}/api/inhouse/ocupacion`).then(r => r.json())
+      fetch(`${API_BASE}/api/inhouse?${params}`, { headers: authHeaders() }).then(r => r.json()),
+      fetch(`${API_BASE}/api/inhouse/ocupacion`, { headers: authHeaders() }).then(r => r.json())
     ]);
     renderTable(dataRes.data || []);
     renderKPIs(oc);
@@ -866,7 +873,7 @@ function renderKPIs(oc) {
 async function openModal(id) {
   actualId = id;
   try {
-    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(x => x.json());
+    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${id}`, { headers: authHeaders() }).then(x => x.json());
     document.getElementById('modalTitle').textContent = r.nombre_huesped;
     document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
     const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
@@ -902,7 +909,7 @@ function closeModal() { document.getElementById('modalOverlay').classList.remove
 async function deleteActual() {
   if (!actualId || !confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
   try {
-    await fetch(`${API_BASE}/api/inhouse/${actualId}?usuario_nombre=${encodeURIComponent(usuarioActual ? usuarioActual.nombre : 'Administración')}`, { method: 'DELETE' });
+    await fetch(`${API_BASE}/api/inhouse/${actualId}?usuario_nombre=${encodeURIComponent(usuarioActual ? usuarioActual.nombre : 'Administración')}`, { method: 'DELETE', headers: authHeaders() });
     closeModal(); loadData();
     showToast('Registro eliminado', 'Acción completada');
   } catch(e) { alert('Error: ' + e.message); }
@@ -912,13 +919,13 @@ async function deleteActual() {
 async function openEditModal() {
   if (!actualId) return;
   try {
-    const { data: pms } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const { data: pms } = await fetch(`${API_BASE}/api/inhouse/managers`, { headers: authHeaders() }).then(r => r.json());
     pmsCatalogo = pms.filter(p => p.activo);
     const selPm = document.getElementById('edit-pm');
     selPm.innerHTML = '<option value="">— Sin PM —</option>' +
       pmsCatalogo.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
-    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`).then(x => x.json());
+    const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`, { headers: authHeaders() }).then(x => x.json());
     document.getElementById('editSub').textContent      = `${r.unidad} · ${r.nombre_huesped}`;
     document.getElementById('edit-unidad').value        = r.unidad || '';
     document.getElementById('edit-tipo').value          = r.tipo || 'R';
@@ -962,7 +969,7 @@ async function guardarEdicion() {
   try {
     const res = await fetch(`${API_BASE}/api/inhouse/${actualId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
@@ -991,7 +998,7 @@ function closePMModal() { document.getElementById('pmOverlay').classList.remove(
 
 async function loadPMs() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`, { headers: authHeaders() }).then(r => r.json());
     const el = document.getElementById('pmListBody');
     if (!data.length) { el.innerHTML = '<div style="color:var(--ink-mid);font-size:11px">Sin PMs registrados</div>'; return; }
     el.innerHTML = data.map(pm => `
@@ -1014,7 +1021,7 @@ async function agregarPM() {
   if (!nombre) { document.getElementById('pm-nombre').focus(); return; }
   try {
     const res = await fetch(`${API_BASE}/api/inhouse/managers`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: authHeaders(),
       body: JSON.stringify({ nombre, email, telefono })
     });
     if (!res.ok) throw new Error(await res.text());
@@ -1029,7 +1036,7 @@ async function agregarPM() {
 async function togglePM(id, activo) {
   try {
     await fetch(`${API_BASE}/api/inhouse/managers/${id}`, {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      method: 'PUT', headers: authHeaders(),
       body: JSON.stringify({ activo: !activo })
     });
     await loadPMs();
@@ -1039,7 +1046,7 @@ async function togglePM(id, activo) {
 
 async function downloadPdf(id, unidad) {
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/${id}`, { headers: authHeaders() }).then(r => r.json());
     if (!data.pdf_firmado_url) return;
     const a = document.createElement('a');
     a.href = data.pdf_firmado_url;
@@ -1119,7 +1126,7 @@ function exportarExcel() {
 // Cargar PMs en el filtro
 async function loadPMFilter() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/managers`, { headers: authHeaders() }).then(r => r.json());
     const sel = document.getElementById('f-pm');
     sel.innerHTML = '<option value="">PM: Todos</option>' +
       data.filter(p => p.activo).map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
@@ -1178,6 +1185,7 @@ async function doLogin() {
     } else {
       usuarioActual = data.usuario;
       sessionStorage.setItem('pdm_usuario', JSON.stringify(usuarioActual));
+      sessionStorage.setItem('pdm_token', data.token);
       mostrarDashboard();
     }
   } catch(e) {
@@ -1192,6 +1200,7 @@ async function doLogin() {
 function cerrarSesion() {
   if (!confirm('¿Cerrar sesión?')) return;
   sessionStorage.removeItem('pdm_usuario');
+  sessionStorage.removeItem('pdm_token');
   usuarioActual = null;
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
@@ -1212,7 +1221,7 @@ function switchTab(tab, btn) {
 // ── Auditoría ─────────────────────────────────────────────────
 async function loadAuditoriaUsuarios() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`, { headers: authHeaders() }).then(r => r.json());
     const sel = document.getElementById('aud-usuario');
     sel.innerHTML = '<option value="">Usuario: Todos</option>' +
       data.map(u => `<option value="${u.id}">${u.nombre}</option>`).join('');
@@ -1234,7 +1243,7 @@ async function loadAuditoria() {
   tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Cargando…</td></tr>`;
 
   try {
-    const { data } = await fetch(`${API_BASE}/api/historial?${params}`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/historial?${params}`, { headers: authHeaders() }).then(r => r.json());
     if (!data.length) {
       tbody.innerHTML = `<tr><td colspan="8" class="empty-state">Sin registros de auditoría</td></tr>`;
       return;
@@ -1327,7 +1336,7 @@ async function cambiarPassword() {
     // Cambiar contraseña
     const res = await fetch(`${API_BASE}/api/auth/usuarios/${usuarioActual.id}/password`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ password: nueva })
     });
     const data = await res.json();
@@ -1351,7 +1360,7 @@ function closeUsuariosModal() { document.getElementById('usuariosOverlay').class
 
 async function loadUsuarios() {
   try {
-    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/auth/usuarios`, { headers: authHeaders() }).then(r => r.json());
     const el = document.getElementById('usuariosListBody');
     el.innerHTML = data.map(u => `
       <div class="usr-row ${u.activo ? '' : 'inactive'}">
@@ -1386,7 +1395,7 @@ async function resetPassword(id, nombre) {
   try {
     const res = await fetch(`${API_BASE}/api/auth/usuarios/${id}/password`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ password: nueva })
     });
     const data = await res.json();
@@ -1400,7 +1409,7 @@ async function toggleUsuario(id, activo) {
   try {
     await fetch(`${API_BASE}/api/auth/usuarios/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ activo: !activo })
     });
     await loadUsuarios();
@@ -1415,7 +1424,7 @@ let graficaData = null;
 async function loadGrafica() {
   const anio = document.getElementById('chart-anio').value;
   try {
-    const { data } = await fetch(`${API_BASE}/api/inhouse/estadisticas/mensuales?anio=${anio}`).then(r => r.json());
+    const { data } = await fetch(`${API_BASE}/api/inhouse/estadisticas/mensuales?anio=${anio}`, { headers: authHeaders() }).then(r => r.json());
     graficaData = data;
     dibujarGrafica(data);
   } catch(e) {
