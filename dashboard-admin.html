@@ -320,6 +320,23 @@
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy); border: 1px solid var(--teal); color: var(--white); padding: 12px 18px; border-radius: 3px; font-size: 12px; z-index: 300; transform: translateY(80px); opacity: 0; transition: all .3s ease; max-width: 300px; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast-title { color: var(--teal-lt); font-size: 9px; font-weight: bold; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 4px; }
+
+  /* ── Historial de Ocupación ── */
+  .hist-filters {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 3px; padding: 14px 16px; margin-bottom: 16px;
+  }
+  .hist-filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .hist-filter-group label { font-size: 9px; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mid); }
+  .btn-hist-buscar { background: var(--navy); color: var(--white); border: none; padding: 8px 16px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .btn-hist-buscar:hover { background: var(--navy-lt); }
+  .btn-hist-limpiar { background: #e8eaed; color: var(--ink-mid); border: 1px solid var(--border); padding: 8px 14px; font-family: Verdana, sans-serif; font-size: 10px; font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 3px; cursor: pointer; transition: background .15s; white-space: nowrap; }
+  .btn-hist-limpiar:hover { background: var(--dust-dk); }
+  .hist-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .hist-summary-card { background: var(--white); border: 1px solid var(--border); border-radius: 3px; padding: 10px 16px; flex: 1; min-width: 130px; }
+  .hist-summary-val { font-size: 26px; font-weight: bold; color: var(--navy); line-height: 1; }
+  .hist-summary-lbl { font-size: 10px; color: var(--ink-mid); margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -490,6 +507,7 @@
       <button class="main-tab active" onclick="switchTab('inhouse', this)">📋 Registros</button>
       <button class="main-tab" onclick="switchTab('auditoria', this)">🔍 Auditoría</button>
       <button class="main-tab" onclick="switchTab('estadisticas', this)">📊 Estadísticas</button>
+      <button class="main-tab" onclick="switchTab('historial', this)">📁 Historial de Ocupación</button>
     </div>
 
     <!-- Panel Registros -->
@@ -605,6 +623,89 @@
         <div id="grafica-empty" style="display:none;text-align:center;padding:40px;color:var(--ink-mid);font-size:12px">Sin datos para el año seleccionado</div>
       </div>
     </div><!-- /panel-estadisticas -->
+
+    <!-- Panel Historial de Ocupación -->
+    <div id="panel-historial" class="tab-panel">
+      <div class="hist-filters">
+        <div class="hist-filter-group">
+          <label>Tipo de propiedad</label>
+          <select class="filter-select" id="hist-tipo-prop" onchange="onHistorialTipoChange()">
+            <option value="">Todos</option>
+            <option value="casas">Casas</option>
+            <option value="condos">Condos</option>
+          </select>
+        </div>
+        <div class="hist-filter-group" id="hist-edificio-wrap" style="display:none">
+          <label>Edificio</label>
+          <select class="filter-select" id="hist-edificio" onchange="onHistorialEdificioChange()">
+            <option value="">— Seleccionar —</option>
+            <option>A</option><option>B</option><option>C</option>
+            <option>D</option><option>E</option><option>F</option>
+          </select>
+        </div>
+        <div class="hist-filter-group">
+          <label>Unidad</label>
+          <select class="filter-select" id="hist-unidad">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="hist-filter-group">
+          <label>Tipo de huésped</label>
+          <select class="filter-select" id="hist-tipo-huesped">
+            <option value="">Todos</option>
+            <option value="H">Huésped (H)</option>
+            <option value="P">Propietario (P)</option>
+          </select>
+        </div>
+        <div class="hist-filter-group">
+          <label>Desde</label>
+          <input class="filter-select" type="date" id="hist-desde" style="padding:6px 8px">
+        </div>
+        <div class="hist-filter-group">
+          <label>Hasta</label>
+          <input class="filter-select" type="date" id="hist-hasta" style="padding:6px 8px">
+        </div>
+        <div style="display:flex;gap:6px;align-self:flex-end">
+          <button class="btn-hist-buscar" onclick="buscarHistorial()">🔍 Buscar</button>
+          <button class="btn-hist-limpiar" onclick="limpiarHistorial()">✕ Limpiar</button>
+        </div>
+      </div>
+
+      <div id="hist-summary" style="display:none" class="hist-summary">
+        <div class="hist-summary-card" style="border-left:3px solid var(--navy)">
+          <div class="hist-summary-val" id="hist-sum-total">0</div>
+          <div class="hist-summary-lbl">Registros encontrados</div>
+        </div>
+        <div class="hist-summary-card" style="border-left:3px solid var(--teal)">
+          <div class="hist-summary-val" id="hist-sum-noches">0</div>
+          <div class="hist-summary-lbl">Noches acumuladas</div>
+        </div>
+        <div class="hist-summary-card" style="border-left:3px solid var(--H)">
+          <div class="hist-summary-val" id="hist-sum-huesped">0</div>
+          <div class="hist-summary-lbl">Huéspedes</div>
+        </div>
+        <div class="hist-summary-card" style="border-left:3px solid var(--P)">
+          <div class="hist-summary-val" id="hist-sum-propietario">0</div>
+          <div class="hist-summary-lbl">Propietarios</div>
+        </div>
+      </div>
+
+      <div id="hist-table-wrap" style="display:none" class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Unidad</th><th>Edificio</th><th>Tipo</th><th>Nombre</th>
+              <th>Fecha ingreso</th><th>Fecha salida</th><th>Noches</th>
+              <th>Personas</th><th>Property Manager</th><th>Registrado por</th><th>Notas</th>
+            </tr>
+          </thead>
+          <tbody id="hist-body"></tbody>
+        </table>
+      </div>
+      <div id="hist-empty" style="display:none" class="table-wrap">
+        <div class="empty-state">No se encontraron registros con los filtros seleccionados</div>
+      </div>
+    </div><!-- /panel-historial -->
 
   </main>
 </div>
@@ -1552,6 +1653,153 @@ function limpiarFechas() {
   document.getElementById('f-fecha-fin').value = '';
   document.getElementById('btn-limpiar-fechas').style.display = 'none';
   loadData();
+}
+
+// ── Historial de Ocupación ────────────────────────────────────
+const HIST_UNIDADES = {
+  casas: [1,2,3,4,5,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,
+          56,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,
+          79,80,81,82,83,101,102,103,104,105,106,107,108,109,110,111,112,113,
+          244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,260,
+          261,262,263,276,277,278,279,280,281,282,283,284,285].map(String),
+  condos: {
+    A: ['A-101','A-102','A-103','A-104','A-201','A-202','A-203','A-204',
+        'A-301','A-302','A-303','A-304','A-401','A-402','A-403','A-404',
+        'A-501','A-502'],
+    B: ['B-101','B-102','B-103','B-104','B-201','B-202','B-203','B-204',
+        'B-301','B-302','B-303','B-304','B-401','B-402','B-403','B-404',
+        'B-501','B-502','B-503','B-504','B-601','B-602'],
+    C: ['C-101','C-102','C-103','C-104','C-201','C-202','C-203','C-204',
+        'C-301','C-302','C-303','C-304','C-401','C-402','C-403','C-404',
+        'C-501','C-502','C-503','C-504','C-601','C-602'],
+    D: ['D-101','D-102','D-103','D-104','D-201','D-202','D-203','D-204',
+        'D-301','D-302','D-303','D-304','D-401','D-402','D-403','D-404',
+        'D-501','D-502','D-503','D-504','D-601','D-602'],
+    E: ['E-101','E-102','E-103','E-104','E-201','E-202','E-203','E-204',
+        'E-301','E-302','E-303','E-304','E-401','E-402','E-403','E-404',
+        'E-501','E-502'],
+    F: ['F-101','F-102','F-103','F-104','F-201','F-202','F-203','F-204',
+        'F-301','F-302','F-303','F-304','F-401','F-402','F-403','F-404',
+        'F-501','F-502'],
+  }
+};
+
+function onHistorialTipoChange() {
+  const tipo = document.getElementById('hist-tipo-prop').value;
+  const edificioWrap = document.getElementById('hist-edificio-wrap');
+  const edificioSel  = document.getElementById('hist-edificio');
+  const unidadSel    = document.getElementById('hist-unidad');
+
+  edificioSel.value = '';
+  if (tipo === 'condos') {
+    edificioWrap.style.display = '';
+    unidadSel.innerHTML = '<option value="">Todas</option>';
+  } else if (tipo === 'casas') {
+    edificioWrap.style.display = 'none';
+    unidadSel.innerHTML = '<option value="">Todas</option>' +
+      HIST_UNIDADES.casas.map(u => `<option value="${u}">${u}</option>`).join('');
+  } else {
+    edificioWrap.style.display = 'none';
+    unidadSel.innerHTML = '<option value="">Todas</option>';
+  }
+}
+
+function onHistorialEdificioChange() {
+  const edificio  = document.getElementById('hist-edificio').value;
+  const unidadSel = document.getElementById('hist-unidad');
+  if (edificio && HIST_UNIDADES.condos[edificio]) {
+    unidadSel.innerHTML = '<option value="">Todas</option>' +
+      HIST_UNIDADES.condos[edificio].map(u => `<option value="${u}">${u}</option>`).join('');
+  } else {
+    unidadSel.innerHTML = '<option value="">Todas</option>';
+  }
+}
+
+async function buscarHistorial() {
+  const tipoProp    = document.getElementById('hist-tipo-prop').value;
+  const edificio    = document.getElementById('hist-edificio').value;
+  const unidad      = document.getElementById('hist-unidad').value;
+  const tipoHuesped = document.getElementById('hist-tipo-huesped').value;
+  const desde       = document.getElementById('hist-desde').value;
+  const hasta       = document.getElementById('hist-hasta').value;
+
+  const params = new URLSearchParams();
+  if (tipoHuesped) params.set('tipo', tipoHuesped);
+  if (desde) params.set('desde', desde);
+  if (hasta) params.set('hasta', hasta);
+
+  if (tipoProp === 'casas') {
+    if (unidad) params.set('unidad', unidad);
+  } else if (tipoProp === 'condos') {
+    if (edificio) params.set('edificio', edificio);
+    if (unidad) params.set('unidad', unidad);
+  } else {
+    if (unidad)   params.set('unidad', unidad);
+    if (edificio) params.set('edificio', edificio);
+  }
+
+  const histBody  = document.getElementById('hist-body');
+  const tableWrap = document.getElementById('hist-table-wrap');
+  const emptyEl   = document.getElementById('hist-empty');
+  const summaryEl = document.getElementById('hist-summary');
+
+  tableWrap.style.display = '';
+  emptyEl.style.display   = 'none';
+  summaryEl.style.display = 'none';
+  histBody.innerHTML = `<tr><td colspan="11" class="empty-state">Buscando…</td></tr>`;
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/inhouse/historial-ocupacion?${params}`, { headers: authHeaders() });
+    const json = await res.json();
+    const data = Array.isArray(json) ? json : (json.data || []);
+
+    if (!data.length) {
+      tableWrap.style.display = 'none';
+      emptyEl.style.display   = '';
+      return;
+    }
+
+    const totalNoches = data.reduce((acc, r) => acc + (parseInt(r.noches) || 0), 0);
+    document.getElementById('hist-sum-total').textContent       = data.length;
+    document.getElementById('hist-sum-noches').textContent      = totalNoches;
+    document.getElementById('hist-sum-huesped').textContent     = data.filter(r => r.tipo === 'H').length;
+    document.getElementById('hist-sum-propietario').textContent = data.filter(r => r.tipo === 'P').length;
+    summaryEl.style.display = '';
+
+    histBody.innerHTML = data.map(r => {
+      const tipoLabel = r.tipo === 'H' ? 'Huésped' : r.tipo === 'P' ? 'Propietario' : (r.tipo || '—');
+      const tipoCls   = r.tipo === 'H' ? 'tipo-H' : r.tipo === 'P' ? 'tipo-P' : '';
+      return `
+        <tr>
+          <td class="primary">${r.unidad || '—'}</td>
+          <td>${r.edificio || '—'}</td>
+          <td>${tipoCls ? `<span class="tipo-badge ${tipoCls}">${tipoLabel}</span>` : tipoLabel}</td>
+          <td class="primary">${r.nombre_huesped || '—'}</td>
+          <td>${fmtDate(r.fecha_ingreso)}</td>
+          <td>${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--ink-mid);font-size:10px">Sin fecha</span>'}</td>
+          <td style="text-align:center;font-weight:bold">${r.noches != null ? r.noches : '—'}</td>
+          <td style="text-align:center">${r.num_personas || '—'}</td>
+          <td>${r.property_manager || '<span style="color:var(--ink-mid)">—</span>'}</td>
+          <td style="font-size:11px">${r.registrado_por || r.usuario_nombre || '<span style="color:var(--ink-mid)">—</span>'}</td>
+          <td style="font-size:11px;color:var(--ink-mid)">${r.notas || '—'}</td>
+        </tr>`;
+    }).join('');
+  } catch(e) {
+    histBody.innerHTML = `<tr><td colspan="11" class="empty-state">Error al consultar el historial</td></tr>`;
+  }
+}
+
+function limpiarHistorial() {
+  document.getElementById('hist-tipo-prop').value    = '';
+  document.getElementById('hist-edificio').value     = '';
+  document.getElementById('hist-tipo-huesped').value = '';
+  document.getElementById('hist-desde').value        = '';
+  document.getElementById('hist-hasta').value        = '';
+  document.getElementById('hist-edificio-wrap').style.display  = 'none';
+  document.getElementById('hist-unidad').innerHTML   = '<option value="">Todas</option>';
+  document.getElementById('hist-table-wrap').style.display = 'none';
+  document.getElementById('hist-empty').style.display     = 'none';
+  document.getElementById('hist-summary').style.display   = 'none';
 }
 
 initSesion();
