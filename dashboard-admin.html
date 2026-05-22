@@ -1751,7 +1751,7 @@ async function buscarHistorial() {
   try {
     const res  = await fetch(`${API_BASE}/api/inhouse/historial-ocupacion?${params}`, { headers: authHeaders() });
     const json = await res.json();
-    const data = Array.isArray(json) ? json : (json.data || []);
+    const data = Array.isArray(json) ? json : (json.registros || json.data || []);
 
     if (!data.length) {
       tableWrap.style.display = 'none';
