@@ -784,7 +784,24 @@
     </div>
     <div class="modal-body">
       <div class="edit-grid">
-        <div class="edit-field"><label>Unidad</label><input id="edit-unidad" type="text" placeholder="A-202"></div>
+        <div class="edit-field full">
+          <label>Unidad</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <select id="edit-unidad-tipo-prop" onchange="onEditUnidadTipoPropChange()">
+              <option value="">— Tipo propiedad —</option>
+              <option value="casas">Casas</option>
+              <option value="condos">Condos</option>
+            </select>
+            <select id="edit-unidad-edificio" onchange="onEditUnidadEdificioChange()" style="display:none">
+              <option value="">— Edificio —</option>
+              <option>A</option><option>B</option><option>C</option>
+              <option>D</option><option>E</option><option>F</option>
+            </select>
+            <select id="edit-unidad-num">
+              <option value="">— Seleccione tipo —</option>
+            </select>
+          </div>
+        </div>
         <div class="edit-field"><label>Tipo</label>
           <select id="edit-tipo" onchange="if(this.value==='P'){document.getElementById('edit-fecha-out').value=''}">
             <option value="H">H · Propietario</option>
@@ -1027,8 +1044,21 @@ async function openEditModal() {
       pmsCatalogo.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
 
     const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`, { headers: authHeaders() }).then(x => x.json());
-    document.getElementById('editSub').textContent      = `${r.unidad} · ${r.nombre_huesped}`;
-    document.getElementById('edit-unidad').value        = r.unidad || '';
+    document.getElementById('editSub').textContent = `${r.unidad} · ${r.nombre_huesped}`;
+    // Poblar dropdowns de unidad a partir del valor existente
+    const existingUnidad = r.unidad || '';
+    if (/^[A-F]-\d+$/.test(existingUnidad)) {
+      const edif = existingUnidad.charAt(0);
+      document.getElementById('edit-unidad-tipo-prop').value = 'condos';
+      onEditUnidadTipoPropChange();
+      document.getElementById('edit-unidad-edificio').value = edif;
+      onEditUnidadEdificioChange();
+      document.getElementById('edit-unidad-num').value = existingUnidad;
+    } else {
+      document.getElementById('edit-unidad-tipo-prop').value = 'casas';
+      onEditUnidadTipoPropChange();
+      document.getElementById('edit-unidad-num').value = existingUnidad;
+    }
     document.getElementById('edit-tipo').value          = r.tipo || 'R';
     document.getElementById('edit-fecha-in').value      = r.fecha_ingreso ? r.fecha_ingreso.toString().substring(0,10) : '';
     document.getElementById('edit-fecha-out').value     = r.fecha_salida  ? r.fecha_salida.toString().substring(0,10)  : '';
@@ -1049,8 +1079,12 @@ function closeEditModal() { document.getElementById('editOverlay').classList.rem
 
 async function guardarEdicion() {
   if (!actualId) return;
+  const editTipoProp  = document.getElementById('edit-unidad-tipo-prop').value;
+  const editEdificio  = document.getElementById('edit-unidad-edificio').value;
+  const editUnidadNum = document.getElementById('edit-unidad-num').value;
   const payload = {
-    unidad:              document.getElementById('edit-unidad').value.trim(),
+    unidad:              editUnidadNum,
+    edificio:            editTipoProp === 'condos' ? editEdificio : '',
     tipo:                document.getElementById('edit-tipo').value,
     fecha_ingreso:       document.getElementById('edit-fecha-in').value  || null,
     fecha_salida:        document.getElementById('edit-fecha-out').value || null,
@@ -1653,6 +1687,36 @@ function limpiarFechas() {
   document.getElementById('f-fecha-fin').value = '';
   document.getElementById('btn-limpiar-fechas').style.display = 'none';
   loadData();
+}
+
+// ── Dropdowns de unidad (modal de edición) ───────────────────
+function onEditUnidadTipoPropChange() {
+  const tipo       = document.getElementById('edit-unidad-tipo-prop').value;
+  const edificioEl = document.getElementById('edit-unidad-edificio');
+  const numEl      = document.getElementById('edit-unidad-num');
+  edificioEl.value = '';
+  if (tipo === 'condos') {
+    edificioEl.style.display = '';
+    numEl.innerHTML = '<option value="">— Seleccione edificio —</option>';
+  } else if (tipo === 'casas') {
+    edificioEl.style.display = 'none';
+    numEl.innerHTML = '<option value="">— Seleccionar —</option>' +
+      HIST_UNIDADES.casas.map(u => `<option value="${u}">${u}</option>`).join('');
+  } else {
+    edificioEl.style.display = 'none';
+    numEl.innerHTML = '<option value="">— Seleccione tipo —</option>';
+  }
+}
+
+function onEditUnidadEdificioChange() {
+  const edificio = document.getElementById('edit-unidad-edificio').value;
+  const numEl    = document.getElementById('edit-unidad-num');
+  if (edificio && HIST_UNIDADES.condos[edificio]) {
+    numEl.innerHTML = '<option value="">— Seleccionar —</option>' +
+      HIST_UNIDADES.condos[edificio].map(u => `<option value="${u}">${u}</option>`).join('');
+  } else {
+    numEl.innerHTML = '<option value="">— Seleccione edificio —</option>';
+  }
 }
 
 // ── Historial de Ocupación ────────────────────────────────────
