@@ -1843,7 +1843,7 @@ async function buscarHistorial() {
           <td>${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--ink-mid);font-size:10px">Sin fecha</span>'}</td>
           <td style="text-align:center;font-weight:bold">${r.noches != null ? r.noches : '—'}</td>
           <td style="text-align:center">${r.num_personas || '—'}</td>
-          <td>${r.property_manager || '<span style="color:var(--ink-mid)">—</span>'}</td>
+          <td>${r.property_manager_nombre || '<span style="color:var(--ink-mid)">—</span>'}</td>
           <td style="font-size:11px">${r.registrado_por || r.usuario_nombre || '<span style="color:var(--ink-mid)">—</span>'}</td>
           <td style="font-size:11px;color:var(--ink-mid)">${r.notas || '—'}</td>
         </tr>`;
