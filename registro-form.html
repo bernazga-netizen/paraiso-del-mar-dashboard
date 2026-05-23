@@ -409,14 +409,23 @@ const urlPm = new URLSearchParams(window.location.search).get('pm');
 if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = parseInt(urlPm) || ''; }, 500);
 
 // ── Validación dinámica por tipo ─────────────────────────────
-// H: email y teléfono obligatorios, dirección opcional
-// R y G: los tres obligatorios
+// H (Propietario): solo nombre obligatorio; email, telefono y dirección opcionales
+// R y G: email, telefono y dirección obligatorios
 function actualizarCamposRequeridos() {
   const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  const esPropietario = tipo === 'H';
   const dirReq = tipo === 'R' || tipo === 'G';
-  document.getElementById('req-email').style.display     = 'inline';
-  document.getElementById('req-telefono').style.display  = 'inline';
+
+  document.getElementById('req-email').style.display     = esPropietario ? 'none' : 'inline';
+  document.getElementById('req-telefono').style.display  = esPropietario ? 'none' : 'inline';
   document.getElementById('req-direccion').style.display = dirReq ? 'inline' : 'none';
+
+  const optTxt = ' (optional · opcional)';
+  document.getElementById('email').placeholder    = esPropietario ? 'email@example.com' + optTxt : 'email@example.com';
+  document.getElementById('telefono').placeholder = esPropietario ? '+1 555 000 0000' + optTxt    : '+1 555 000 0000';
+  document.getElementById('direccion').placeholder = esPropietario
+    ? 'Street, City, State, Country, Postal Code' + optTxt
+    : 'Street, City, State, Country, Postal Code';
 }
 
 document.querySelectorAll('input[name="tipo"]').forEach(r => {
@@ -624,8 +633,9 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 
   // 2. Campos de contacto según tipo
   const tipoSel = document.querySelector('input[name="tipo"]:checked').value;
-  const camposContacto = ['email', 'telefono']; // obligatorios para H, R y G
-  if (tipoSel === 'R' || tipoSel === 'G') camposContacto.push('direccion'); // también dirección para R y G
+  // H (Propietario): solo nombre obligatorio; email, telefono y dirección son opcionales
+  const camposContacto = tipoSel === 'H' ? [] : ['email', 'telefono'];
+  if (tipoSel === 'R' || tipoSel === 'G') camposContacto.push('direccion');
 
   camposContacto.forEach(id => {
     const el = document.getElementById(id);
