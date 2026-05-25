@@ -529,11 +529,12 @@ function renderCalendario() {
   const mesInicio = new Date(currentYear, currentMonth, 1);
   const mesFin    = new Date(currentYear, currentMonth, diasEnMes);
 
-  // Filtrar por mes
+  // Filtrar por mes (permanentes tipo P con fecha_salida null siempre se muestran)
   let registros = todosRegistros.filter(r => {
-    if (!r.fecha_ingreso || !r.fecha_salida) return false;
+    if (!r.fecha_ingreso) return false;
     const entrada = new Date(r.fecha_ingreso.substring(0,10) + 'T00:00:00');
-    const salida  = new Date(r.fecha_salida.substring(0,10)  + 'T00:00:00');
+    if (!r.fecha_salida) return entrada <= mesFin; // permanente: visible desde su ingreso
+    const salida = new Date(r.fecha_salida.substring(0,10) + 'T00:00:00');
     return entrada <= mesFin && salida >= mesInicio;
   });
 
@@ -625,12 +626,18 @@ function renderCalendario() {
       if (!cellsDiv) return;
       grupos[edificio][unidad].forEach(r => {
         const entrada = new Date(r.fecha_ingreso.substring(0,10) + 'T00:00:00');
-        const salida  = new Date(r.fecha_salida.substring(0,10)  + 'T00:00:00');
+        // Permanentes sin fecha_salida: bloque cubre todo el mes
+        const salida  = r.fecha_salida
+          ? new Date(r.fecha_salida.substring(0,10) + 'T00:00:00')
+          : null;
 
         let diaInicio = (entrada.getFullYear() === currentYear && entrada.getMonth() === currentMonth)
           ? entrada.getDate() : 1;
-        let diaFin    = (salida.getFullYear()  === currentYear && salida.getMonth()  === currentMonth)
-          ? salida.getDate()  : diasEnMes;
+        let diaFin = diasEnMes; // default para permanentes
+        if (salida) {
+          diaFin = (salida.getFullYear() === currentYear && salida.getMonth() === currentMonth)
+            ? salida.getDate() : diasEnMes;
+        }
 
         diaInicio = Math.max(1, diaInicio);
         diaFin    = Math.min(diasEnMes, diaFin);
