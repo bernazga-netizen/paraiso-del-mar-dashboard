@@ -532,8 +532,8 @@ function renderCalendario() {
   // Filtrar por mes
   let registros = todosRegistros.filter(r => {
     if (!r.fecha_ingreso || !r.fecha_salida) return false;
-    const entrada = new Date(r.fecha_ingreso + 'T00:00:00');
-    const salida  = new Date(r.fecha_salida  + 'T00:00:00');
+    const entrada = new Date(r.fecha_ingreso.substring(0,10) + 'T00:00:00');
+    const salida  = new Date(r.fecha_salida.substring(0,10)  + 'T00:00:00');
     return entrada <= mesFin && salida >= mesInicio;
   });
 
@@ -624,8 +624,8 @@ function renderCalendario() {
       const cellsDiv = document.getElementById(`cells-${san(edificio)}-${san(unidad)}`);
       if (!cellsDiv) return;
       grupos[edificio][unidad].forEach(r => {
-        const entrada = new Date(r.fecha_ingreso + 'T00:00:00');
-        const salida  = new Date(r.fecha_salida  + 'T00:00:00');
+        const entrada = new Date(r.fecha_ingreso.substring(0,10) + 'T00:00:00');
+        const salida  = new Date(r.fecha_salida.substring(0,10)  + 'T00:00:00');
 
         let diaInicio = (entrada.getFullYear() === currentYear && entrada.getMonth() === currentMonth)
           ? entrada.getDate() : 1;
