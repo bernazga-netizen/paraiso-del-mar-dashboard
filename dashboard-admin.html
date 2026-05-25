@@ -124,8 +124,8 @@
   td.primary { color: var(--ink); font-weight: bold; }
   .tipo-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: bold; }
   .tipo-H { background: #e8f5ee; color: var(--H); border: 1px solid #b2d9c3; }
-  .tipo-R { background: var(--teal-pale); color: var(--teal); border: 1px solid var(--border); }
-  .tipo-G { background: #eef0f8; color: var(--G); border: 1px solid #c5cbe8; }
+  .tipo-badge.tipo-G { background: #e8f4f6; color: #007c89; border: 1px solid #71aeb7; }
+  .tipo-badge.tipo-R { background: #f0f4e8; color: #4a6741; border: 1px solid #8aab7a; }
   .tipo-P { background: #f4eefb; color: var(--P); border: 1px solid #d5b8f0; }
   .estado-activo { color: var(--ok); font-weight: bold; }
   .estado-futuro { color: var(--teal); font-weight: bold; }
@@ -1824,13 +1824,13 @@ async function buscarHistorial() {
     summaryEl.style.display = '';
 
     histBody.innerHTML = data.map(r => {
-      const tipoLabel = r.tipo === 'H' ? 'Huésped' : r.tipo === 'P' ? 'Propietario' : (r.tipo || '—');
-      const tipoCls   = r.tipo === 'H' ? 'tipo-H' : r.tipo === 'P' ? 'tipo-P' : '';
+      const tipoLabel = t => ({ 'H': 'Huésped', 'P': 'Propietario', 'G': 'Invitado', 'R': 'Residente' }[t] || t);
+      const tipoCls   = t => ({ 'H': 'tipo-H', 'P': 'tipo-P', 'G': 'tipo-G', 'R': 'tipo-R' }[t] || '');
       return `
         <tr>
           <td class="primary">${r.unidad || '—'}</td>
           <td>${r.edificio || '—'}</td>
-          <td>${tipoCls ? `<span class="tipo-badge ${tipoCls}">${tipoLabel}</span>` : tipoLabel}</td>
+          <td>${tipoCls(r.tipo) ? `<span class="tipo-badge ${tipoCls(r.tipo)}">${tipoLabel(r.tipo)}</span>` : (r.tipo || '—')}</td>
           <td class="primary">${r.nombre_huesped || '—'}</td>
           <td>${fmtDate(r.fecha_ingreso)}</td>
           <td>${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--ink-mid);font-size:10px">Sin fecha</span>'}</td>
