@@ -454,7 +454,7 @@
 <script>
 // ─── CONFIGURACIÓN ───────────────────────────────────────────────
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
-const TOKEN_KEY = 'authToken';
+const TOKEN_KEY = 'pdm_token';
 
 // ─── ESTADO ──────────────────────────────────────────────────────
 let currentYear, currentMonth;
@@ -494,7 +494,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── CARGA DE DATOS ───────────────────────────────────────────────
 async function cargarRegistros() {
   try {
-    const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
+    const token = sessionStorage.getItem(TOKEN_KEY) || '';
     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
 
     const res = await fetch(`${API_BASE}/api/inhouse?limit=1000`, { headers });
