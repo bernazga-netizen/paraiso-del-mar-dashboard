@@ -474,7 +474,7 @@ async function cargarRegistros() {
   document.getElementById('calContainer').innerHTML =
     '<div class="estado-msg"><div class="spinner"></div><br>Cargando registros…</div>';
   try {
-    const res  = await fetch(`${API_BASE}/api/inhouse?limit=2000`, { headers: authHeaders() });
+    const res  = await fetch(`${API_BASE}/api/inhouse?limit=2000&estado=`, { headers: authHeaders() });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     todosRegistros = Array.isArray(data) ? data : (data.registros || data.data || []);
