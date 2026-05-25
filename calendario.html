@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de Ocupación — Paraíso del Mar</title>
+<style>
+  :root {
+    --teal:      #007c89;
+    --teal-lt:   #71aeb7;
+    --teal-pale: #e8f4f6;
+    --navy:      #003660;
+    --navy-lt:   #0a4a7a;
+    --emerald:   #006b35;
+    --dust:      #f2efec;
+    --white:     #ffffff;
+    --ink:       #1a2e3a;
+    --ink-mid:   #3d5a66;
+    --border:    #c2d8dd;
+    --ok:        #006b35;
+    --warn:      #c87533;
+
+    --col-width: 38px;
+    --row-height: 42px;
+    --label-width: 150px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--dust);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    color: var(--white);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .header h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .header-logo {
+    font-size: 13px;
+    color: var(--teal-lt);
+    font-weight: 400;
+  }
+  .btn-back {
+    background: rgba(255,255,255,0.12);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.2); }
+
+  /* TOOLBAR */
+  .toolbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .nav-month {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-nav {
+    background: var(--teal-pale);
+    border: 1px solid var(--border);
+    color: var(--teal);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .btn-nav:hover { background: var(--teal-pale); border-color: var(--teal); }
+  .month-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+    min-width: 160px;
+    text-align: center;
+    text-transform: capitalize;
+  }
+  .btn-hoy {
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-hoy:hover { background: var(--navy-lt); }
+
+  .filter-grupo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .filter-grupo label {
+    font-size: 13px;
+    color: var(--ink-mid);
+  }
+  .filter-grupo select {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--white);
+    cursor: pointer;
+  }
+
+  /* LEYENDA */
+  .leyenda {
+    padding: 8px 24px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .leyenda-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--ink-mid);
+  }
+  .leyenda-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+
+  /* CONTENEDOR CALENDARIO */
+  .cal-wrapper {
+    padding: 20px 24px;
+    overflow-x: auto;
+  }
+
+  .cal-container {
+    display: inline-block;
+    min-width: 100%;
+    background: var(--white);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,54,96,0.07);
+  }
+
+  /* HEADER DÍAS */
+  .cal-header {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    background: var(--navy);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .cal-header-label {
+    width: var(--label-width);
+    min-width: var(--label-width);
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+  }
+  .cal-days-header {
+    display: flex;
+    flex: 1;
+  }
+  .day-header {
+    width: var(--col-width);
+    min-width: var(--col-width);
+    text-align: center;
+    padding: 6px 2px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .day-header .day-num {
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    display: block;
+    line-height: 1.2;
+  }
+  .day-header.hoy {
+    background: var(--teal);
+  }
+  .day-header.hoy .day-num { color: white; }
+  .day-header.weekend { background: rgba(255,255,255,0.05); }
+
+  /* GRUPO EDIFICIO */
+  .edificio-grupo {}
+  .edificio-label {
+    background: var(--teal-pale);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+  }
+  .edificio-label-text {
+    width: var(--label-width);
+    min-width: var(--label-width);
+    padding: 7px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .edificio-days-strip {
+    flex: 1;
+    height: 28px;
+    display: flex;
+  }
+  .edificio-day-cell {
+    width: var(--col-width);
+    min-width: var(--col-width);
+    border-right: 1px solid var(--border);
+    background: var(--teal-pale);
+    flex-shrink: 0;
+  }
+  .edificio-day-cell.weekend { background: #dceef1; }
+
+  /* FILA UNIDAD */
+  .unidad-row {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    height: var(--row-height);
+    position: relative;
+  }
+  .unidad-row:last-child { border-bottom: none; }
+  .unidad-row:hover { background: #fafefe; }
+  .unidad-label {
+    width: var(--label-width);
+    min-width: var(--label-width);
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    border-right: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    background: var(--white);
+    position: sticky;
+    left: 0;
+    z-index: 5;
+  }
+  .unidad-cells {
+    display: flex;
+    flex: 1;
+    position: relative;
+    height: 100%;
+  }
+  .day-cell {
+    width: var(--col-width);
+    min-width: var(--col-width);
+    border-right: 1px solid #edf4f6;
+    height: 100%;
+    flex-shrink: 0;
+    transition: background 0.1s;
+  }
+  .day-cell.weekend { background: #fafafa; }
+  .day-cell.hoy { background: #e8f7f9; }
+
+  /* BLOQUES DE RESERVA */
+  .reserva-block {
+    position: absolute;
+    top: 5px;
+    height: calc(var(--row-height) - 10px);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    transition: opacity 0.15s, box-shadow 0.15s;
+    z-index: 3;
+  }
+  .reserva-block:hover {
+    opacity: 0.92;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* COLORES POR TIPO */
+  .tipo-V  { background: linear-gradient(90deg, #007c89, #009aaa); } /* Venta */
+  .tipo-R  { background: linear-gradient(90deg, #003660, #0a4a7a); } /* Renta */
+  .tipo-PM { background: linear-gradient(90deg, #5a3e8a, #7a56b8); } /* Property Manager */
+  .tipo-O  { background: linear-gradient(90deg, #b05020, #d06030); } /* Otro */
+
+  /* TOOLTIP */
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: var(--ink);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 1.6;
+    z-index: 1000;
+    max-width: 220px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    pointer-events: none;
+  }
+  .tooltip.visible { display: block; }
+  .tooltip-nombre { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .tooltip-row { color: rgba(255,255,255,0.8); }
+
+  /* LOADING / ERROR */
+  .estado-msg {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--ink-mid);
+    font-size: 14px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SIN DATOS */
+  .sin-datos {
+    padding: 40px;
+    text-align: center;
+    color: var(--ink-mid);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    :root { --col-width: 30px; --label-width: 110px; }
+    .toolbar { padding: 10px 12px; }
+    .cal-wrapper { padding: 12px; }
+    .header { padding: 0 12px; }
+    .header h1 { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-logo">Paraíso del Mar</div>
+      <h1>Calendario de Ocupación</h1>
+    </div>
+  </div>
+  <a href="index.html" class="btn-back">← Menú</a>
+</div>
+
+<div class="toolbar">
+  <div class="nav-month">
+    <button class="btn-nav" id="btnPrev">‹</button>
+    <span class="month-label" id="monthLabel">—</span>
+    <button class="btn-nav" id="btnNext">›</button>
+  </div>
+  <button class="btn-hoy" id="btnHoy">Hoy</button>
+
+  <div class="filter-grupo">
+    <label>Edificio:</label>
+    <select id="filtroEdificio">
+      <option value="">Todos</option>
+    </select>
+  </div>
+</div>
+
+<div class="leyenda">
+  <div class="leyenda-item">
+    <div class="leyenda-dot tipo-V" style="background:#007c89"></div> Venta
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-dot tipo-R" style="background:#003660"></div> Renta
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-dot" style="background:#5a3e8a"></div> Property Manager
+  </div>
+  <div class="leyenda-item">
+    <div class="leyenda-dot" style="background:#b05020"></div> Otro
+  </div>
+</div>
+
+<div class="cal-wrapper">
+  <div id="calContainer" class="cal-container">
+    <div class="estado-msg">
+      <div class="spinner"></div><br>Cargando reservaciones…
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-nombre" id="tt-nombre"></div>
+  <div class="tooltip-row" id="tt-fechas"></div>
+  <div class="tooltip-row" id="tt-tipo"></div>
+  <div class="tooltip-row" id="tt-personas"></div>
+</div>
+
+<script>
+// ─── CONFIGURACIÓN ───────────────────────────────────────────────
+const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+const TOKEN_KEY = 'authToken';
+
+// ─── ESTADO ──────────────────────────────────────────────────────
+let currentYear, currentMonth;
+let todosRegistros = [];
+let filtroEdificio = '';
+
+// ─── INIT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const hoy = new Date();
+  currentYear  = hoy.getFullYear();
+  currentMonth = hoy.getMonth();
+
+  document.getElementById('btnPrev').addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendario();
+  });
+  document.getElementById('btnNext').addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendario();
+  });
+  document.getElementById('btnHoy').addEventListener('click', () => {
+    const h = new Date();
+    currentYear = h.getFullYear();
+    currentMonth = h.getMonth();
+    renderCalendario();
+  });
+  document.getElementById('filtroEdificio').addEventListener('change', e => {
+    filtroEdificio = e.target.value;
+    renderCalendario();
+  });
+
+  cargarRegistros();
+});
+
+// ─── CARGA DE DATOS ───────────────────────────────────────────────
+async function cargarRegistros() {
+  try {
+    const token = localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || '';
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+    const res = await fetch(`${API_BASE}/api/inhouse?limit=1000`, { headers });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Acepta array directo o {registros: [...]}
+    todosRegistros = Array.isArray(data) ? data : (data.registros || data.data || []);
+
+    poblarFiltroEdificio();
+    renderCalendario();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('calContainer').innerHTML =
+      `<div class="estado-msg">⚠️ No se pudieron cargar los datos.<br><small>${err.message}</small></div>`;
+  }
+}
+
+function poblarFiltroEdificio() {
+  const sel = document.getElementById('filtroEdificio');
+  const edificios = [...new Set(todosRegistros.map(r => r.edificio).filter(Boolean))].sort();
+  edificios.forEach(e => {
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e;
+    sel.appendChild(opt);
+  });
+}
+
+// ─── RENDER PRINCIPAL ─────────────────────────────────────────────
+function renderCalendario() {
+  const container = document.getElementById('calContainer');
+  const hoy = new Date();
+  const diasEnMes = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Actualizar label mes
+  const label = new Date(currentYear, currentMonth, 1)
+    .toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
+  document.getElementById('monthLabel').textContent =
+    label.charAt(0).toUpperCase() + label.slice(1);
+
+  // Filtrar registros relevantes al mes actual
+  const mesInicio = new Date(currentYear, currentMonth, 1);
+  const mesFin    = new Date(currentYear, currentMonth, diasEnMes);
+
+  let registros = todosRegistros.filter(r => {
+    if (!r.fecha_ingreso || !r.fecha_salida) return false;
+    const entrada = new Date(r.fecha_ingreso + 'T00:00:00');
+    const salida  = new Date(r.fecha_salida  + 'T00:00:00');
+    return entrada <= mesFin && salida >= mesInicio;
+  });
+
+  if (filtroEdificio) {
+    registros = registros.filter(r => r.edificio === filtroEdificio);
+  }
+
+  // Agrupar por edificio → unidad
+  const grupos = {};
+  registros.forEach(r => {
+    const ed = r.edificio || 'Sin edificio';
+    const un = r.unidad   || 'Sin unidad';
+    if (!grupos[ed]) grupos[ed] = {};
+    if (!grupos[ed][un]) grupos[ed][un] = [];
+    grupos[ed][un].push(r);
+  });
+
+  // También mostrar unidades sin registros este mes
+  todosRegistros.forEach(r => {
+    if (filtroEdificio && r.edificio !== filtroEdificio) return;
+    const ed = r.edificio || 'Sin edificio';
+    const un = r.unidad   || 'Sin unidad';
+    if (!grupos[ed]) grupos[ed] = {};
+    if (!grupos[ed][un]) grupos[ed][un] = [];
+  });
+
+  if (Object.keys(grupos).length === 0) {
+    container.innerHTML = '<div class="sin-datos">Sin registros para este período.</div>';
+    return;
+  }
+
+  // ── Construir HTML ──
+  let html = '';
+
+  // Header días
+  html += `<div class="cal-header">
+    <div class="cal-header-label">Unidad</div>
+    <div class="cal-days-header">`;
+
+  for (let d = 1; d <= diasEnMes; d++) {
+    const fecha = new Date(currentYear, currentMonth, d);
+    const dow   = fecha.getDay(); // 0=dom, 6=sab
+    const esHoy = fecha.toDateString() === hoy.toDateString();
+    const esFin = dow === 0 || dow === 6;
+    const dayName = fecha.toLocaleDateString('es-MX', { weekday: 'short' }).substring(0,2);
+    html += `<div class="day-header${esHoy ? ' hoy' : ''}${esFin ? ' weekend' : ''}">
+      <span class="day-num">${d}</span>
+      ${dayName}
+    </div>`;
+  }
+  html += `</div></div>`;
+
+  // Edificios y unidades
+  Object.keys(grupos).sort().forEach(edificio => {
+    // Cabecera edificio
+    html += `<div class="edificio-grupo">
+      <div class="edificio-label">
+        <div class="edificio-label-text">${edificio}</div>
+        <div class="edificio-days-strip">`;
+    for (let d = 1; d <= diasEnMes; d++) {
+      const dow = new Date(currentYear, currentMonth, d).getDay();
+      html += `<div class="edificio-day-cell${(dow===0||dow===6) ? ' weekend' : ''}"></div>`;
+    }
+    html += `</div></div>`;
+
+    // Filas por unidad
+    const unidades = Object.keys(grupos[edificio]).sort();
+    unidades.forEach(unidad => {
+      const regsUnidad = grupos[edificio][unidad];
+      html += `<div class="unidad-row" data-unidad="${unidad}">
+        <div class="unidad-label">${unidad}</div>
+        <div class="unidad-cells" id="cells-${sanitize(edificio)}-${sanitize(unidad)}">`;
+
+      for (let d = 1; d <= diasEnMes; d++) {
+        const fecha = new Date(currentYear, currentMonth, d);
+        const dow   = fecha.getDay();
+        const esHoy = fecha.toDateString() === hoy.toDateString();
+        html += `<div class="day-cell${esHoy ? ' hoy' : ''}${(dow===0||dow===6) ? ' weekend' : ''}"></div>`;
+      }
+
+      html += `</div></div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+
+  // ── Pintar bloques de reserva ──
+  Object.keys(grupos).sort().forEach(edificio => {
+    Object.keys(grupos[edificio]).sort().forEach(unidad => {
+      const cellsDiv = document.getElementById(`cells-${sanitize(edificio)}-${sanitize(unidad)}`);
+      if (!cellsDiv) return;
+
+      grupos[edificio][unidad].forEach(r => {
+        const entrada = new Date(r.fecha_ingreso + 'T00:00:00');
+        const salida  = new Date(r.fecha_salida  + 'T00:00:00');
+
+        // Clamp al mes visible
+        const inicio = Math.max(1, entrada.getDate() - (entrada.getMonth() === currentMonth && entrada.getFullYear() === currentYear ? 0 : -1));
+        const fin    = Math.min(diasEnMes, salida.getDate() - (salida.getMonth() === currentMonth && salida.getFullYear() === currentYear ? 0 : diasEnMes - diasEnMes));
+
+        // Calcular día inicio real en este mes
+        let diaInicio = 1;
+        let diaFin    = diasEnMes;
+
+        if (entrada.getFullYear() === currentYear && entrada.getMonth() === currentMonth) {
+          diaInicio = entrada.getDate();
+        }
+        if (salida.getFullYear() === currentYear && salida.getMonth() === currentMonth) {
+          diaFin = salida.getDate();
+        }
+
+        diaInicio = Math.max(1, diaInicio);
+        diaFin    = Math.min(diasEnMes, diaFin);
+
+        if (diaInicio > diaFin) return;
+
+        const colW   = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-width')) || 38;
+        const left   = (diaInicio - 1) * colW + 2;
+        const width  = (diaFin - diaInicio + 1) * colW - 4;
+
+        const tipo   = (r.tipo || 'O').trim().toUpperCase();
+        const clases = tipo === 'V' ? 'tipo-V' : tipo === 'R' ? 'tipo-R' : tipo === 'PM' ? 'tipo-PM' : 'tipo-O';
+
+        const bloque = document.createElement('div');
+        bloque.className = `reserva-block ${clases}`;
+        bloque.style.left  = `${left}px`;
+        bloque.style.width = `${width}px`;
+        bloque.textContent = r.nombre_huesped || '—';
+        bloque.dataset.id  = r.id;
+
+        // Tooltip
+        bloque.addEventListener('mouseenter', e => mostrarTooltip(e, r));
+        bloque.addEventListener('mousemove',  e => moverTooltip(e));
+        bloque.addEventListener('mouseleave', ocultarTooltip);
+
+        cellsDiv.appendChild(bloque);
+      });
+    });
+  });
+}
+
+// ─── TOOLTIP ──────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function mostrarTooltip(e, r) {
+  document.getElementById('tt-nombre').textContent   = r.nombre_huesped || '—';
+  document.getElementById('tt-fechas').textContent   =
+    `${formatFecha(r.fecha_ingreso)} → ${formatFecha(r.fecha_salida)}`;
+  document.getElementById('tt-tipo').textContent     =
+    `Tipo: ${tipoLabel(r.tipo)} · ${r.num_personas || 1} persona(s)`;
+  document.getElementById('tt-personas').textContent =
+    r.notas ? `Notas: ${r.notas}` : '';
+  tooltip.classList.add('visible');
+  moverTooltip(e);
+}
+function moverTooltip(e) {
+  const x = e.clientX + 14;
+  const y = e.clientY - 10;
+  tooltip.style.left = `${Math.min(x, window.innerWidth - 240)}px`;
+  tooltip.style.top  = `${y}px`;
+}
+function ocultarTooltip() { tooltip.classList.remove('visible'); }
+
+// ─── UTILS ────────────────────────────────────────────────────────
+function sanitize(str) {
+  return str.replace(/[^a-zA-Z0-9]/g, '_');
+}
+function formatFecha(f) {
+  if (!f) return '—';
+  const [y,m,d] = f.split('-');
+  return `${d}/${m}/${y}`;
+}
+function tipoLabel(t) {
+  const m = { V:'Venta', R:'Renta', PM:'Property Manager' };
+  return m[(t||'').trim().toUpperCase()] || 'Otro';
+}
+</script>
+</body>
+</html>
