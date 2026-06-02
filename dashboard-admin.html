@@ -922,7 +922,8 @@ function setEstado(val, btn) {
 function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Sin registros para los filtros seleccionados</td></tr>`; return; }
-  const tipos = { H:'Homeowner', R:'Renta', G:'Guest', P:'Residente' };
+  // ── CAMBIO: etiquetas de tipo en español ──
+  const tipos = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente' };
   tbody.innerHTML = rows.map(r => {
     const estCls = `estado-${r.estado}`;
     const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
@@ -988,10 +989,12 @@ async function openModal(id) {
     document.getElementById('modalTitle').textContent = r.nombre_huesped;
     document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
     const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
+    // ── CAMBIO: etiquetas de tipo en español ──
+    const tipoLabels = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente Permanente' };
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
         <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
-        <div class="detail-field"><label>Tipo</label><p>${{H:'Homeowner',R:'Renta',G:'Guest',P:'Residente Permanente'}[r.tipo] || r.tipo}</p></div>
+        <div class="detail-field"><label>Tipo</label><p>${tipoLabels[r.tipo] || r.tipo}</p></div>
       </div>
       <div class="detail-row">
         <div class="detail-field"><label>Check in</label><p>${fmtDate(r.fecha_ingreso)}</p></div>
