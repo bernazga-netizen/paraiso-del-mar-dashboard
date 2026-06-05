@@ -602,56 +602,36 @@ async function generarPDF(data, firmaDataURL) {
 }
 
 // ── Descarga / apertura del PDF según plataforma ─────────────
-// iOS Safari bloquea link.click() con data: URIs y también puede bloquear
-// window.open() si se llama desde dentro de async/await (pierde el contexto
-// del gesto del usuario). Estrategia:
-//   1. En iOS: abrir window.open() ANTES del fetch (vinculado al tap del usuario)
-//              y luego escribir el PDF ahí. Si falla, mostrar botón manual.
-//   2. En otros: link.click() normal.
-function entregarPDF(pdfDataURI, filename) {
+// iOS Safari bloquea link.click() con data: URIs.
+// Solución: Web Share API nativa — abre el menú de iOS para guardar
+// en Archivos, compartir por WhatsApp, correo, etc.
+// Android / Desktop: link.click() normal.
+async function entregarPDF(pdfDataURI, filename) {
   if (isIOS) {
-    // Intentar abrir en nueva pestaña (ya fue abierta antes del fetch en el submit)
-    // Si pdfWindow todavía existe y está abierta, escribir el PDF
-    if (window._pdfWindow && !window._pdfWindow.closed) {
+    // Convertir data URI a Blob/File para Web Share API
+    const fetchRes = await fetch(pdfDataURI);
+    const blob = await fetchRes.blob();
+    const file = new File([blob], filename, { type: 'application/pdf' });
+
+    // Web Share API — abre el menú nativo de iOS
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        window._pdfWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>${filename}</title>
-              <style>
-                * { margin: 0; padding: 0; box-sizing: border-box; }
-                body { background: #1a2e3a; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-                .bar { width: 100%; background: #003660; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
-                .bar span { color: #71aeb7; font-family: Verdana, sans-serif; font-size: 11px; letter-spacing: 0.1em; }
-                .bar a { color: white; font-family: Verdana, sans-serif; font-size: 11px; font-weight: bold;
-                          background: #007c89; padding: 6px 14px; border-radius: 3px; text-decoration: none; }
-                iframe { width: 100%; flex: 1; border: none; min-height: calc(100vh - 48px); }
-              </style>
-            </head>
-            <body>
-              <div class="bar">
-                <span>Paraíso del Mar · PDF Registro</span>
-                <a href="${pdfDataURI}" download="${filename}">Guardar PDF</a>
-              </div>
-              <iframe src="${pdfDataURI}"></iframe>
-            </body>
-          </html>
-        `);
-        window._pdfWindow = null;
-        return; // éxito — salir
-      } catch(e) {
-        // La ventana fue bloqueada o cerrada — caer al fallback
-        window._pdfWindow = null;
+        await navigator.share({
+          title: 'Registro Paraíso del Mar',
+          text: 'PDF de registro firmado',
+          files: [file]
+        });
+        return; // éxito
+      } catch(err) {
+        // El usuario canceló el share — no es error
+        if (err.name === 'AbortError') return;
       }
     }
-    // Fallback iOS: mostrar botón manual en la página
+
+    // Fallback si Web Share no está disponible: botón manual en página
     const fallbackEl = document.getElementById('pdf-fallback');
     const fallbackLink = document.getElementById('pdf-fallback-link');
     fallbackLink.href = pdfDataURI;
-    fallbackLink.download = filename;
     fallbackEl.style.display = 'block';
   } else {
     // Android / Desktop: descarga directa
@@ -676,11 +656,6 @@ function mostrarError(msg, detalle) {
     detalleEl.style.display = 'none';
   }
   errEl.style.display = 'block';
-  // Cerrar la ventana PDF vacía si se abrió en iOS y hubo error
-  if (window._pdfWindow && !window._pdfWindow.closed) {
-    window._pdfWindow.close();
-    window._pdfWindow = null;
-  }
   window.scrollTo(0, 0);
 }
 
@@ -748,31 +723,6 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   if (!document.getElementById('acepta_reglamento').checked) {
     alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
     return;
-  }
-
-  // ── IMPORTANTE: abrir ventana iOS AQUÍ, antes del async ──────
-  // Safari solo acepta window.open() vinculado directamente al evento del usuario.
-  // Si se llama después de un await, el popup blocker lo cancela.
-  if (isIOS) {
-    window._pdfWindow = window.open('', '_blank');
-    // Escribir placeholder mientras se procesa
-    if (window._pdfWindow) {
-      window._pdfWindow.document.write(`
-        <!DOCTYPE html><html><head><meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Generando PDF…</title>
-        <style>
-          body { font-family: Verdana, sans-serif; background: #003660; color: #71aeb7;
-                 display: flex; align-items: center; justify-content: center;
-                 min-height: 100vh; margin: 0; flex-direction: column; gap: 16px; }
-          .dot { width: 12px; height: 12px; background: #007c89; border-radius: 50%;
-                 animation: pulse 1s ease-in-out infinite; }
-          @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
-          p { font-size: 13px; letter-spacing: 0.08em; }
-        </style></head>
-        <body><div class="dot"></div><p>Generando PDF…</p></body></html>
-      `);
-    }
   }
 
   const acompanantes = [];
@@ -845,7 +795,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     window.scrollTo(0, 0);
 
     const pdfFilename = `PDM_Registro_${payload.unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
-    entregarPDF(pdfDataURI, pdfFilename);
+    await entregarPDF(pdfDataURI, pdfFilename);
 
   } catch(err) {
     mostrarError('Error de conexión. Por favor verifique su internet e intente de nuevo.');
