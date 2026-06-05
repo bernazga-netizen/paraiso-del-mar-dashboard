@@ -259,6 +259,16 @@
         <div class="legal-text">
           He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia.<br><br>
           <em>I have read and agree to abide by the rules and regulations of Paraiso del Mar. I acknowledge that breaking these rules may cause the loss of my time in the property. I also take full responsibility for any damage I or any of my guests may cause during my stay.</em>
+          <div id="reglamento-links" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
+            <span style="font-size:11px; font-weight:bold; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-mid);">Leer reglamento · Read regulations:</span>
+            <div style="margin-top:8px; display:flex; gap:10px; flex-wrap:wrap;">
+              <a id="link-reglamento-es" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:var(--white);padding:6px 14px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.08em;text-decoration:none;">📄 Español</a>
+              <a id="link-reglamento-en" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:var(--white);padding:6px 14px;border-radius:3px;font-size:11px;font-weight:bold;letter-spacing:0.08em;text-decoration:none;">📄 English</a>
+            </div>
+            <div id="reglamento-unavailable" style="display:none; margin-top:8px; font-size:11px; color:var(--ink-mid); font-style:italic;">
+              Reglamento disponible próximamente · Regulations coming soon
+            </div>
+          </div>
         </div>
         <div class="check-group">
           <label class="check-item">
@@ -384,6 +394,50 @@ function onUnidadTipoPropChange() {
     edificioWrap.style.display = 'none';
     numSel.innerHTML = '<option value="">— Seleccione tipo —</option>';
     numSel.disabled  = true;
+  }
+  actualizarLinksReglamento(tipo);
+}
+
+// ── Links de reglamento dinámicos ────────────────────────────
+// Polygon A = Casas, Polygon B = Condos
+// Los PDFs viven en /docs/ dentro del mismo repo de Vercel
+const REGLAMENTOS = {
+  casas: {
+    es: '/docs/reglamento-casas-es.pdf',
+    en: '/docs/reglamento-casas-en.pdf',
+    disponible: true
+  },
+  condos: {
+    es: '/docs/reglamento-condos-es.pdf',
+    en: '/docs/reglamento-condos-en.pdf',
+    disponible: false  // cambiar a true cuando se suban los PDFs de Polygon B
+  }
+};
+
+function actualizarLinksReglamento(tipoProp) {
+  const linksEl       = document.getElementById('reglamento-links');
+  const linkEs        = document.getElementById('link-reglamento-es');
+  const linkEn        = document.getElementById('link-reglamento-en');
+  const unavailableEl = document.getElementById('reglamento-unavailable');
+
+  if (!tipoProp) {
+    linksEl.style.display = 'none';
+    return;
+  }
+
+  linksEl.style.display = 'block';
+  const reg = REGLAMENTOS[tipoProp];
+
+  if (reg && reg.disponible) {
+    linkEs.href            = reg.es;
+    linkEn.href            = reg.en;
+    linkEs.style.display   = 'inline-flex';
+    linkEn.style.display   = 'inline-flex';
+    unavailableEl.style.display = 'none';
+  } else {
+    linkEs.style.display        = 'none';
+    linkEn.style.display        = 'none';
+    unavailableEl.style.display = 'block';
   }
 }
 
