@@ -39,6 +39,12 @@
   .status-box.err { background: #fdf0ef; border-left: 4px solid var(--err); color: var(--err); }
   .status-box.err .err-detalle { font-size: 11px; margin-top: 6px; opacity: .8; }
 
+  /* PDF fallback box para iOS */
+  .pdf-fallback { display: none; margin-top: 16px; background: var(--teal-pale); border: 1px solid var(--border); border-radius: 3px; padding: 16px 20px; text-align: center; }
+  .pdf-fallback p { font-size: 12px; color: var(--ink-mid); margin-bottom: 12px; line-height: 1.6; }
+  .pdf-fallback a { display: inline-block; background: var(--teal); color: var(--white); padding: 10px 24px; border-radius: 3px; font-size: 11px; font-weight: bold; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; }
+  .pdf-fallback a:hover { background: var(--navy); }
+
   .section { background: var(--white); border: 1px solid var(--border); border-radius: 3px; margin-bottom: 16px; overflow: hidden; }
   .section-header { background: var(--navy); padding: 10px 20px; display: flex; align-items: center; gap: 10px; }
   .section-num { width: 20px; height: 20px; background: var(--teal); color: var(--white); font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
@@ -121,6 +127,14 @@
 
   <div id="status-ok" class="status-box ok">
     ✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.
+    <!-- Box de descarga manual para iOS (se muestra solo si el open automático falla) -->
+    <div class="pdf-fallback" id="pdf-fallback">
+      <p>
+        En iPhone/iPad, toca el botón para abrir tu PDF firmado.<br>
+        <em>On iPhone/iPad, tap the button to open your signed PDF.</em>
+      </p>
+      <a id="pdf-fallback-link" href="#" target="_blank">Ver / descargar PDF</a>
+    </div>
   </div>
   <div id="status-err" class="status-box err">
     <div id="err-msg">Error al enviar el registro. Por favor intente de nuevo o contacte a administración.</div>
@@ -317,6 +331,11 @@
 <script>
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
 
+// ── Detección de iOS ──────────────────────────────────────────
+// Detecta iPhone, iPad (incluyendo iPads con iPadOS 13+ que reportan como Mac)
+const isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 // ── Catálogo de unidades ──────────────────────────────────────
 const FORM_UNIDADES = {
   casas: [1,2,3,4,5,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,
@@ -401,8 +420,6 @@ const urlPm = new URLSearchParams(window.location.search).get('pm');
 if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = parseInt(urlPm) || ''; }, 500);
 
 // ── Validación dinámica por tipo ─────────────────────────────
-// H (Propietario): solo nombre obligatorio; email, telefono y dirección opcionales
-// R y G: email, telefono y dirección obligatorios
 function actualizarCamposRequeridos() {
   const tipo = document.querySelector('input[name="tipo"]:checked').value;
   const esPropietario = tipo === 'H';
@@ -423,7 +440,7 @@ function actualizarCamposRequeridos() {
 document.querySelectorAll('input[name="tipo"]').forEach(r => {
   r.addEventListener('change', actualizarCamposRequeridos);
 });
-actualizarCamposRequeridos(); // inicializar según tipo por defecto (R)
+actualizarCamposRequeridos();
 
 // ── Guests grid ──────────────────────────────────────────────
 const grid = document.getElementById('guestsGrid');
@@ -584,6 +601,69 @@ async function generarPDF(data, firmaDataURL) {
   return doc.output('datauristring');
 }
 
+// ── Descarga / apertura del PDF según plataforma ─────────────
+// iOS Safari bloquea link.click() con data: URIs y también puede bloquear
+// window.open() si se llama desde dentro de async/await (pierde el contexto
+// del gesto del usuario). Estrategia:
+//   1. En iOS: abrir window.open() ANTES del fetch (vinculado al tap del usuario)
+//              y luego escribir el PDF ahí. Si falla, mostrar botón manual.
+//   2. En otros: link.click() normal.
+function entregarPDF(pdfDataURI, filename) {
+  if (isIOS) {
+    // Intentar abrir en nueva pestaña (ya fue abierta antes del fetch en el submit)
+    // Si pdfWindow todavía existe y está abierta, escribir el PDF
+    if (window._pdfWindow && !window._pdfWindow.closed) {
+      try {
+        window._pdfWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>${filename}</title>
+              <style>
+                * { margin: 0; padding: 0; box-sizing: border-box; }
+                body { background: #1a2e3a; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+                .bar { width: 100%; background: #003660; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+                .bar span { color: #71aeb7; font-family: Verdana, sans-serif; font-size: 11px; letter-spacing: 0.1em; }
+                .bar a { color: white; font-family: Verdana, sans-serif; font-size: 11px; font-weight: bold;
+                          background: #007c89; padding: 6px 14px; border-radius: 3px; text-decoration: none; }
+                iframe { width: 100%; flex: 1; border: none; min-height: calc(100vh - 48px); }
+              </style>
+            </head>
+            <body>
+              <div class="bar">
+                <span>Paraíso del Mar · PDF Registro</span>
+                <a href="${pdfDataURI}" download="${filename}">Guardar PDF</a>
+              </div>
+              <iframe src="${pdfDataURI}"></iframe>
+            </body>
+          </html>
+        `);
+        window._pdfWindow = null;
+        return; // éxito — salir
+      } catch(e) {
+        // La ventana fue bloqueada o cerrada — caer al fallback
+        window._pdfWindow = null;
+      }
+    }
+    // Fallback iOS: mostrar botón manual en la página
+    const fallbackEl = document.getElementById('pdf-fallback');
+    const fallbackLink = document.getElementById('pdf-fallback-link');
+    fallbackLink.href = pdfDataURI;
+    fallbackLink.download = filename;
+    fallbackEl.style.display = 'block';
+  } else {
+    // Android / Desktop: descarga directa
+    const link = document.createElement('a');
+    link.href = pdfDataURI;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
+
 // ── Mostrar error ─────────────────────────────────────────────
 function mostrarError(msg, detalle) {
   const errEl = document.getElementById('status-err');
@@ -596,6 +676,11 @@ function mostrarError(msg, detalle) {
     detalleEl.style.display = 'none';
   }
   errEl.style.display = 'block';
+  // Cerrar la ventana PDF vacía si se abrió en iOS y hubo error
+  if (window._pdfWindow && !window._pdfWindow.closed) {
+    window._pdfWindow.close();
+    window._pdfWindow = null;
+  }
   window.scrollTo(0, 0);
 }
 
@@ -625,7 +710,6 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 
   // 2. Campos de contacto según tipo
   const tipoSel = document.querySelector('input[name="tipo"]:checked').value;
-  // H (Propietario): solo nombre obligatorio; email, telefono y dirección son opcionales
   const camposContacto = tipoSel === 'H' ? [] : ['email', 'telefono'];
   if (tipoSel === 'R' || tipoSel === 'G') camposContacto.push('direccion');
 
@@ -637,7 +721,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 
   if (!valid) {
     mostrarError('Por favor complete todos los campos obligatorios · Please fill in all required fields.', null);
-    const firstError = document.querySelector('input.error');
+    const firstError = document.querySelector('input.error, select.error');
     if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
@@ -664,6 +748,31 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
   if (!document.getElementById('acepta_reglamento').checked) {
     alert('Debe aceptar el reglamento de Paraíso del Mar para continuar.');
     return;
+  }
+
+  // ── IMPORTANTE: abrir ventana iOS AQUÍ, antes del async ──────
+  // Safari solo acepta window.open() vinculado directamente al evento del usuario.
+  // Si se llama después de un await, el popup blocker lo cancela.
+  if (isIOS) {
+    window._pdfWindow = window.open('', '_blank');
+    // Escribir placeholder mientras se procesa
+    if (window._pdfWindow) {
+      window._pdfWindow.document.write(`
+        <!DOCTYPE html><html><head><meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Generando PDF…</title>
+        <style>
+          body { font-family: Verdana, sans-serif; background: #003660; color: #71aeb7;
+                 display: flex; align-items: center; justify-content: center;
+                 min-height: 100vh; margin: 0; flex-direction: column; gap: 16px; }
+          .dot { width: 12px; height: 12px; background: #007c89; border-radius: 50%;
+                 animation: pulse 1s ease-in-out infinite; }
+          @keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+          p { font-size: 13px; letter-spacing: 0.08em; }
+        </style></head>
+        <body><div class="dot"></div><p>Generando PDF…</p></body></html>
+      `);
+    }
   }
 
   const acompanantes = [];
@@ -696,7 +805,7 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     firma_imagen: firmaDataURL,
   };
 
-  const btn = document.getElementById('btnSubmit');
+  const btn     = document.getElementById('btnSubmit');
   const spinner = document.getElementById('spinner');
   const btnText = document.getElementById('btnText');
   btn.disabled = true;
@@ -730,14 +839,13 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
       return;
     }
 
+    // ── Éxito ─────────────────────────────────────────────────
     document.getElementById('status-ok').style.display = 'block';
     document.getElementById('regForm').style.display = 'none';
     window.scrollTo(0, 0);
 
-    const link = document.createElement('a');
-    link.href = pdfDataURI;
-    link.download = `PDM_Registro_${payload.unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
-    link.click();
+    const pdfFilename = `PDM_Registro_${payload.unidad.replace(/[^a-zA-Z0-9]/g,'')}_${payload.fecha_ingreso}.pdf`;
+    entregarPDF(pdfDataURI, pdfFilename);
 
   } catch(err) {
     mostrarError('Error de conexión. Por favor verifique su internet e intente de nuevo.');
