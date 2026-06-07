@@ -288,6 +288,9 @@ const T = {
     'tipo-pent':     'Penthouse',
     'toast':         'Link copiado',
     'wa-msg':        'Hola, te comparto el link para registrar tu llegada a Paraíso del Mar:',
+    'validando':     'Verificando disponibilidad…',
+    'no-disponible': (d) => `⚠️ Esta unidad ya tiene un registro en esas fechas:\n${d}\n\nPor favor selecciona otras fechas.`,
+    'err-validar':   'No se pudo verificar la disponibilidad. Intenta de nuevo.',
     'sel-unidad':    '— Seleccionar —',
     'err-pm':        'No se pudo cargar la información del PM. Verifica el parámetro pm_id en la URL.',
     'err-unidades':  'No se pudieron cargar las unidades. Intenta recargar la página.',
@@ -328,6 +331,9 @@ const T = {
     'tipo-pent':     'Penthouse',
     'toast':         'Link copied',
     'wa-msg':        'Hi, here is your registration link for Paraíso del Mar:',
+    'validando':     'Checking availability…',
+    'no-disponible': (d) => `⚠️ This unit already has a booking for those dates:\n${d}\n\nPlease select different dates.`,
+    'err-validar':   'Could not verify availability. Please try again.',
     'sel-unidad':    '— Select —',
     'err-pm':        'Could not load PM information. Check the pm_id parameter in the URL.',
     'err-unidades':  'Could not load units. Try reloading the page.',
@@ -548,9 +554,48 @@ function getLink() {
   return document.getElementById('preview-url').textContent;
 }
 
-function copyLink() {
+async function validarDisponibilidad() {
+  const sel    = document.getElementById('sel-unidad');
+  const unidad = sel.value;
+  const entrada = document.getElementById('fecha-entrada').value;
+  const salida  = document.getElementById('fecha-salida').value;
+  if (!unidad || !entrada || !salida) return true; // ya validado antes
+
+  // Mostrar estado de carga en botones
+  const btnCopy = document.getElementById('btn-copy');
+  const btnWa   = document.getElementById('btn-wa');
+  const textoOrigCopy = btnCopy.innerHTML;
+  const textoOrigWa   = btnWa.innerHTML;
+  btnCopy.disabled = true;
+  btnWa.disabled   = true;
+  btnCopy.innerHTML = `<span style="font-size:11px">${t('validando')}</span>`;
+
+  try {
+    const params = new URLSearchParams({ unidad, fecha_entrada: entrada, fecha_salida: salida });
+    const r = await fetch(`${API_BASE}/api/inhouse/disponibilidad?${params}`);
+    const data = await r.json();
+    if (!data.ok) throw new Error();
+    if (!data.disponible) {
+      alert(t('no-disponible', data.detalle || ''));
+      return false;
+    }
+    return true;
+  } catch(e) {
+    alert(t('err-validar'));
+    return false;
+  } finally {
+    btnCopy.disabled = false;
+    btnWa.disabled   = false;
+    btnCopy.innerHTML = textoOrigCopy;
+    btnWa.innerHTML   = textoOrigWa;
+  }
+}
+
+async function copyLink() {
   const url = getLink();
   if (!url || !url.startsWith('http')) return;
+  const disponible = await validarDisponibilidad();
+  if (!disponible) return;
   navigator.clipboard.writeText(url).then(() => {
     const toast = document.getElementById('copy-toast');
     document.getElementById('toast-txt').textContent = t('toast');
@@ -559,9 +604,11 @@ function copyLink() {
   });
 }
 
-function shareWhatsApp() {
+async function shareWhatsApp() {
   const url = getLink();
   if (!url || !url.startsWith('http')) return;
+  const disponible = await validarDisponibilidad();
+  if (!disponible) return;
   const msg = encodeURIComponent(`${t('wa-msg')}\n${url}`);
   window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
