@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Property Managers — Paraíso del Mar</title>
+<style>
+:root {
+  --teal:#007c89;--teal-lt:#71aeb7;--teal-pale:#e8f4f6;
+  --navy:#003660;--navy-lt:#0a4a7a;--emerald:#006b35;
+  --dust:#f2efec;--dust-dk:#e5e0da;--white:#ffffff;
+  --ink:#1a2e3a;--ink-mid:#3d5a66;--border:#c2d8dd;
+  --ok:#006b35;--err:#c0392b;--warn:#c87533;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust);color:var(--ink);min-height:100vh;}
+
+/* ── Header ── */
+.header{background:var(--navy);padding:0;}
+.header-inner{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;}
+.logo img{height:40px;width:auto;filter:brightness(0) invert(1);}
+.logo-fb{display:none;color:white;font-size:18px;font-weight:700;}
+.header-text h1{font-size:15px;font-weight:700;color:white;letter-spacing:.1em;text-transform:uppercase;}
+.header-text p{font-size:10px;color:var(--teal-lt);letter-spacing:.12em;margin-top:2px;}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.user-pill{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border-radius:20px;padding:5px 12px 5px 5px;cursor:pointer;}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--teal);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.user-name{color:white;font-size:12px;}
+.btn-back{background:transparent;border:1px solid var(--teal-lt);color:var(--teal-lt);padding:5px 12px;border-radius:3px;font-family:Verdana,sans-serif;font-size:10px;font-weight:700;letter-spacing:.08em;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.btn-back:hover{background:var(--teal);border-color:var(--teal);color:white;}
+.header-rule{height:3px;background:linear-gradient(90deg,var(--teal) 0%,var(--teal-lt) 60%,transparent 100%);}
+
+/* ── Layout ── */
+.container{max-width:1100px;margin:0 auto;padding:24px 16px 60px;}
+
+/* ── Tabs principales ── */
+.main-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px;}
+.main-tab{background:none;border:none;padding:10px 20px;font-family:Verdana,sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mid);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;}
+.main-tab:hover{color:var(--teal);}
+.main-tab.active{color:var(--teal);border-bottom-color:var(--teal);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── Cards y secciones ── */
+.card{background:var(--white);border:1px solid var(--border);border-radius:3px;margin-bottom:16px;overflow:hidden;}
+.card-header{background:var(--navy);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-lt);}
+.card-body{padding:16px;}
+
+/* ── Botones ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:3px;font-family:Verdana,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-teal{background:var(--teal);color:white;}
+.btn-navy{background:var(--navy);color:white;}
+.btn-emerald{background:var(--emerald);color:white;}
+.btn-outline{background:white;color:var(--ink);border:1px solid var(--border);}
+.btn-err{background:var(--err);color:white;}
+.btn-sm{padding:5px 10px;font-size:10px;}
+.btn-wa{background:#25d366;color:white;}
+
+/* ── PM List ── */
+.pm-list{display:flex;flex-direction:column;gap:8px;}
+.pm-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--border);border-radius:3px;background:var(--dust);}
+.pm-row.inactive{opacity:.55;}
+.pm-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.pm-contact{font-size:11px;color:var(--ink-mid);}
+.pm-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.badge-active{background:var(--ok);color:white;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.06em;border:none;cursor:pointer;font-family:Verdana,sans-serif;}
+.badge-inactive{background:#ccc;color:white;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.06em;border:none;cursor:pointer;font-family:Verdana,sans-serif;}
+
+/* ── Formulario nuevo PM ── */
+.form-inline{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;}
+@media(max-width:700px){.form-inline{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mid);}
+.field label .req{color:var(--teal);}
+.field input,.field select{border:1px solid var(--border);background:white;padding:8px 10px;font-family:Verdana,sans-serif;font-size:12px;color:var(--ink);border-radius:3px;outline:none;width:100%;}
+.field input:focus,.field select:focus{border-color:var(--teal);}
+.field input.error{border-color:var(--err);}
+
+/* ── Tabla unidades ── */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.filtro-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mid);}
+.filtro-select{border:1px solid var(--border);background:white;padding:6px 10px;font-family:Verdana,sans-serif;font-size:12px;color:var(--ink);border-radius:3px;outline:none;}
+.filtro-select:focus{border-color:var(--teal);}
+.filtro-input{border:1px solid var(--border);background:white;padding:6px 10px;font-family:Verdana,sans-serif;font-size:12px;color:var(--ink);border-radius:3px;outline:none;width:160px;}
+.filtro-input:focus{border-color:var(--teal);}
+.count-badge{font-size:11px;color:var(--ink-mid);margin-left:auto;}
+
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--navy);color:var(--teal-lt);font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:8px 10px;text-align:left;white-space:nowrap;}
+tbody tr{border-bottom:.5px solid var(--border);}
+tbody tr:hover{background:var(--teal-pale);}
+tbody td{padding:8px 10px;vertical-align:middle;}
+.tipo-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;}
+.tipo-condo{background:#e8f0fe;color:#1a56db;}
+.tipo-casa{background:#fef3c7;color:#92400e;}
+.tipo-penthouse{background:#ede9fe;color:#5b21b6;}
+.sin-pm{color:var(--ink-mid);font-style:italic;font-size:11px;}
+.en-renta-on{color:var(--ok);font-weight:700;font-size:11px;}
+.en-renta-off{color:#ccc;font-size:11px;}
+.btn-reasignar{background:var(--teal);color:white;border:none;padding:4px 10px;border-radius:3px;font-family:Verdana,sans-serif;font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer;}
+.btn-reasignar:hover{background:var(--navy);}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:white;border-radius:4px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.modal-head{background:var(--navy);padding:14px 18px;display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-title{font-size:13px;font-weight:700;color:white;letter-spacing:.06em;}
+.modal-sub{font-size:11px;color:var(--teal-lt);margin-top:2px;}
+.modal-close{background:none;border:none;color:var(--teal-lt);font-size:18px;cursor:pointer;line-height:1;padding:0;}
+.modal-close:hover{color:white;}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:white;padding:12px 18px;border-radius:4px;font-size:12px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;min-width:200px;}
+.toast.show{opacity:1;}
+.toast-title{font-size:10px;color:var(--teal-lt);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+/* ── Estados ── */
+.loading{text-align:center;padding:32px;color:var(--ink-mid);font-size:12px;}
+.empty{text-align:center;padding:24px;color:var(--ink-mid);font-size:12px;font-style:italic;}
+.err-box{background:#fdf0ef;border:1px solid var(--err);border-radius:3px;padding:10px 14px;color:var(--err);font-size:12px;margin-bottom:12px;display:none;}
+
+/* ── Login ── */
+.login-overlay{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:300;}
+.login-box{background:white;border-radius:4px;padding:32px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.login-logo{text-align:center;margin-bottom:20px;}
+.login-logo img{height:52px;filter:none;}
+.login-title{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-bottom:4px;}
+.login-sub{font-size:10px;color:var(--ink-mid);text-align:center;letter-spacing:.12em;margin-bottom:24px;}
+.login-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.login-field label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mid);}
+.login-field input,.login-field select{border:1px solid var(--border);padding:10px 12px;font-family:Verdana,sans-serif;font-size:13px;color:var(--ink);border-radius:3px;outline:none;width:100%;}
+.login-field input:focus,.login-field select:focus{border-color:var(--teal);}
+.btn-login{width:100%;background:var(--teal);color:white;border:none;padding:12px;font-family:Verdana,sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;border-radius:3px;margin-top:8px;}
+.btn-login:hover{background:var(--navy);}
+.login-err{color:var(--err);font-size:11px;text-align:center;margin-top:8px;display:none;}
+
+.page-footer{margin-top:32px;text-align:center;font-size:10px;color:var(--ink-mid);opacity:.6;letter-spacing:.08em;}
+</style>
+</head>
+<body>
+
+<!-- Login overlay -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="PDM_Logo_Primary_RGB.png" alt="Paraíso del Mar"
+        onerror="this.style.display='none'">
+    </div>
+    <div class="login-title">Paraíso del Mar</div>
+    <div class="login-sub">Gestión de Property Managers</div>
+    <div class="login-field">
+      <label>Usuario</label>
+      <select id="login-nombre">
+        <option value="">— Seleccionar —</option>
+      </select>
+    </div>
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()" id="btn-login">Ingresar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none;">
+
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <img src="PDM_Logo_Primary_RGB.png" alt="Paraíso del Mar"
+          onerror="this.style.display='none';document.querySelector('.logo-fb').style.display='block'">
+        <span class="logo-fb">P</span>
+      </div>
+      <div class="header-text">
+        <h1>Paraíso del Mar</h1>
+        <p>Gestión de Property Managers</p>
+      </div>
+      <div class="header-right">
+        <a href="dashboard-admin.html" class="btn-back">← Dashboard</a>
+        <div class="user-pill" id="userPill">
+          <div class="user-avatar" id="userAvatar">?</div>
+          <span class="user-name" id="userNombre">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="header-rule"></div>
+  </div>
+
+  <div class="container">
+
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="switchTab('pms', this)">👥 Property Managers</button>
+      <button class="main-tab" onclick="switchTab('unidades', this)">🏠 Asignación de Unidades</button>
+    </div>
+
+    <!-- ── TAB: Property Managers ── -->
+    <div id="panel-pms" class="tab-panel active">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Agregar Property Manager</span>
+        </div>
+        <div class="card-body">
+          <div class="err-box" id="err-add-pm"></div>
+          <div class="form-inline">
+            <div class="field">
+              <label>Nombre <span class="req">*</span></label>
+              <input type="text" id="pm-nombre" placeholder="Nombre completo">
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" id="pm-email" placeholder="correo@email.com">
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="tel" id="pm-tel" placeholder="+52 612 000 0000">
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button class="btn btn-emerald" onclick="agregarPM()" id="btn-add-pm">
+                + Agregar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Lista de Property Managers</span>
+          <span style="color:var(--teal-lt);font-size:10px;" id="pm-count"></span>
+        </div>
+        <div class="card-body">
+          <div id="pm-list-wrap">
+            <div class="loading">Cargando...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── TAB: Asignación de Unidades ── -->
+    <div id="panel-unidades" class="tab-panel">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Catálogo de unidades</span>
+        </div>
+        <div class="card-body">
+          <div class="filtros">
+            <span class="filtro-label">Filtrar:</span>
+            <select class="filtro-select" id="fil-tipo" onchange="filtrarUnidades()">
+              <option value="">Todos los tipos</option>
+              <option value="condo">Condos</option>
+              <option value="penthouse">Penthouse</option>
+              <option value="casa">Casas</option>
+            </select>
+            <select class="filtro-select" id="fil-edificio" onchange="filtrarUnidades()">
+              <option value="">Todos los edificios</option>
+              <option>A</option><option>B</option><option>C</option>
+              <option>D</option><option>E</option><option>F</option>
+              <option value="Casa">Casas</option>
+            </select>
+            <select class="filtro-select" id="fil-pm" onchange="filtrarUnidades()">
+              <option value="">Todos los PMs</option>
+              <option value="sin-pm">Sin PM asignado</option>
+            </select>
+            <select class="filtro-select" id="fil-renta" onchange="filtrarUnidades()">
+              <option value="">Renta: todos</option>
+              <option value="si">En renta</option>
+              <option value="no">Sin renta</option>
+            </select>
+            <input class="filtro-input" type="text" id="fil-buscar"
+              placeholder="Buscar unidad..." oninput="filtrarUnidades()">
+            <span class="count-badge" id="unidades-count"></span>
+          </div>
+          <div class="tbl-wrap">
+            <table id="tbl-unidades">
+              <thead>
+                <tr>
+                  <th>Unidad</th>
+                  <th>Tipo</th>
+                  <th>Edificio</th>
+                  <th>Rec.</th>
+                  <th>En renta</th>
+                  <th>Property Manager</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-body">
+                <tr><td colspan="7" class="loading">Cargando unidades...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="page-footer">Paraíso del Mar · La Paz, Baja California Sur, México</div>
+
+</div>
+
+<!-- Modal reasignación -->
+<div class="modal-overlay" id="modalReasignar">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-unidad-title">—</div>
+        <div class="modal-sub" id="modal-unidad-sub">Reasignar Property Manager</div>
+      </div>
+      <button class="modal-close" onclick="closeModalReasignar()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>PM actual</label>
+        <input type="text" id="modal-pm-actual" disabled style="background:#f5f5f5;color:var(--ink-mid);">
+      </div>
+      <div class="field">
+        <label>Nuevo Property Manager <span class="req">*</span></label>
+        <select id="modal-pm-nuevo">
+          <option value="">— Sin PM (desvincular) —</option>
+        </select>
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="modal-en-renta" style="width:auto;">
+          <span>Unidad en programa de renta</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModalReasignar()">Cancelar</button>
+      <button class="btn btn-emerald" onclick="guardarReasignacion()" id="btn-guardar-reasig">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toastTitle">Aviso</div>
+  <div id="toastMsg">—</div>
+</div>
+
+<script>
+const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+const GENERADOR_BASE = window.location.origin + window.location.pathname.replace('gestion-pms.html', '') + 'generador-link.html';
+
+let usuarioActual = null;
+let todosLosPMs = [];
+let todasLasUnidades = [];
+let unidadEnEdicion = null;
+
+// ── Auth ─────────────────────────────────────────────────────
+function authHeaders() {
+  const token = sessionStorage.getItem('pdm_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+}
+
+function showToast(msg, title = 'Aviso') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── Login ─────────────────────────────────────────────────────
+async function loadUsuariosLogin() {
+  try {
+    const r = await fetch(`${API_BASE}/api/auth/usuarios-publico`);
+    const { data } = await r.json();
+    const sel = document.getElementById('login-nombre');
+    data.forEach(u => {
+      const o = document.createElement('option');
+      o.value = o.textContent = u.nombre;
+      sel.appendChild(o);
+    });
+  } catch(e) {}
+}
+
+async function doLogin() {
+  const nombre = document.getElementById('login-nombre').value;
+  const pass   = document.getElementById('login-pass').value;
+  const errEl  = document.getElementById('login-err');
+  const btn    = document.getElementById('btn-login');
+
+  if (!nombre || !pass) { errEl.textContent = 'Completa todos los campos.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Ingresando…';
+  errEl.style.display = 'none';
+
+  try {
+    const r = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, password: pass })
+    });
+    const data = await r.json();
+    if (!data.ok) throw new Error(data.error || 'Error de autenticación');
+
+    // Verificar que tiene acceso (admin o gerente)
+    if (!['admin', 'gerente'].includes(data.usuario.rol)) {
+      throw new Error('No tienes permiso para acceder a esta sección.');
+    }
+
+    sessionStorage.setItem('pdm_token', data.token);
+    usuarioActual = data.usuario;
+    mostrarApp();
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ingresar';
+  }
+}
+
+function mostrarApp() {
+  document.getElementById('loginOverlay').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const ini = usuarioActual.nombre.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+  document.getElementById('userAvatar').textContent  = ini;
+  document.getElementById('userNombre').textContent  = usuarioActual.nombre;
+  loadPMs();
+  loadUnidades();
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+// ── Property Managers ─────────────────────────────────────────
+async function loadPMs() {
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/managers`, { headers: authHeaders() });
+    const { data } = await r.json();
+    todosLosPMs = data;
+    renderPMs(data);
+    poblarFiltroPMs(data);
+    document.getElementById('pm-count').textContent = `${data.length} registrados`;
+  } catch(e) {
+    document.getElementById('pm-list-wrap').innerHTML = '<div class="empty">Error al cargar PMs</div>';
+  }
+}
+
+function renderPMs(pms) {
+  const wrap = document.getElementById('pm-list-wrap');
+  if (!pms.length) { wrap.innerHTML = '<div class="empty">Sin PMs registrados</div>'; return; }
+  wrap.innerHTML = `<div class="pm-list">${pms.map(pm => `
+    <div class="pm-row ${pm.activo ? '' : 'inactive'}" id="pm-row-${pm.id}">
+      <div>
+        <div class="pm-name">${pm.nombre}</div>
+        <div class="pm-contact">${pm.email || ''}${pm.email && pm.telefono ? ' · ' : ''}${pm.telefono || ''}${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}</div>
+      </div>
+      <div class="pm-actions">
+        ${pm.activo ? `
+          <button class="btn btn-teal btn-sm" onclick="copyPMLink(${pm.id}, '${pm.nombre.replace(/'/g,"\\'")}')">
+            🔗 Copiar link
+          </button>
+          <button class="btn btn-wa btn-sm" onclick="shareWAPM(${pm.id}, '${pm.nombre.replace(/'/g,"\\'")}')">
+            WhatsApp
+          </button>` : ''}
+        <button class="${pm.activo ? 'badge-active' : 'badge-inactive'}" onclick="togglePM(${pm.id}, ${pm.activo})">
+          ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
+        </button>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function poblarFiltroPMs(pms) {
+  const sel = document.getElementById('fil-pm');
+  // Limpiar opciones previas excepto las dos fijas
+  while (sel.options.length > 2) sel.remove(2);
+  pms.filter(p => p.activo).forEach(pm => {
+    const o = document.createElement('option');
+    o.value = pm.id;
+    o.textContent = pm.nombre;
+    sel.appendChild(o);
+  });
+}
+
+async function agregarPM() {
+  const nombre = document.getElementById('pm-nombre').value.trim();
+  const email  = document.getElementById('pm-email').value.trim();
+  const tel    = document.getElementById('pm-tel').value.trim();
+  const errEl  = document.getElementById('err-add-pm');
+  const btn    = document.getElementById('btn-add-pm');
+
+  if (!nombre) {
+    errEl.textContent = 'El nombre es requerido.';
+    errEl.style.display = 'block';
+    document.getElementById('pm-nombre').classList.add('error');
+    return;
+  }
+  errEl.style.display = 'none';
+  document.getElementById('pm-nombre').classList.remove('error');
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/managers`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ nombre, email: email || null, telefono: tel || null })
+    });
+    const data = await r.json();
+    if (!data.ok && !data.data) throw new Error(data.error || 'Error al crear PM');
+    document.getElementById('pm-nombre').value = '';
+    document.getElementById('pm-email').value  = '';
+    document.getElementById('pm-tel').value    = '';
+    showToast(`${nombre} agregado correctamente`, 'Property Manager');
+    await loadPMs();
+    await loadUnidades(); // refrescar dropdown de PMs en tabla
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '+ Agregar';
+  }
+}
+
+async function togglePM(id, activo) {
+  const accion = activo ? 'desactivar' : 'activar';
+  if (!confirm(`¿${accion.charAt(0).toUpperCase() + accion.slice(1)} este Property Manager?`)) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/managers/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ activo: !activo })
+    });
+    const data = await r.json();
+    if (!data.ok) throw new Error(data.error);
+    showToast(`PM ${!activo ? 'activado' : 'desactivado'}`, 'Property Manager');
+    await loadPMs();
+  } catch(e) {
+    showToast('Error al actualizar el PM', 'Error');
+  }
+}
+
+function copyPMLink(pmId, pmNombre) {
+  const link = `${GENERADOR_BASE}?pm_id=${pmId}`;
+  navigator.clipboard.writeText(link).then(() => {
+    showToast(`Link de ${pmNombre} copiado`, 'Link copiado');
+  }).catch(() => {
+    prompt(`Link para ${pmNombre}:`, link);
+  });
+}
+
+function shareWAPM(pmId, pmNombre) {
+  const link = `${GENERADOR_BASE}?pm_id=${pmId}`;
+  const msg = encodeURIComponent(`Hola ${pmNombre}, este es tu link para generar registros de renta en Paraíso del Mar:\n${link}`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+// ── Unidades ──────────────────────────────────────────────────
+async function loadUnidades() {
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/pm-unidades`, { headers: authHeaders() });
+    const { data } = await r.json();
+    todasLasUnidades = data;
+    filtrarUnidades();
+  } catch(e) {
+    document.getElementById('tbl-body').innerHTML =
+      '<tr><td colspan="7" class="empty">Error al cargar unidades</td></tr>';
+  }
+}
+
+function filtrarUnidades() {
+  const tipo    = document.getElementById('fil-tipo').value;
+  const edif    = document.getElementById('fil-edificio').value;
+  const pm      = document.getElementById('fil-pm').value;
+  const renta   = document.getElementById('fil-renta').value;
+  const buscar  = document.getElementById('fil-buscar').value.toLowerCase();
+
+  let datos = todasLasUnidades.filter(u => {
+    if (tipo && u.tipo !== tipo) return false;
+    if (edif === 'Casa') { if (u.tipo !== 'casa') return false; }
+    else if (edif && u.edificio !== edif) return false;
+    if (pm === 'sin-pm' && u.pm_id) return false;
+    if (pm && pm !== 'sin-pm' && u.pm_id != pm) return false;
+    if (renta === 'si' && !u.en_renta) return false;
+    if (renta === 'no' && u.en_renta) return false;
+    if (buscar && !u.unidad.toLowerCase().includes(buscar) &&
+        !(u.pm_nombre || '').toLowerCase().includes(buscar)) return false;
+    return true;
+  });
+
+  document.getElementById('unidades-count').textContent = `${datos.length} unidades`;
+  renderTablaUnidades(datos);
+}
+
+function renderTablaUnidades(datos) {
+  const tbody = document.getElementById('tbl-body');
+  if (!datos.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Sin resultados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = datos.map(u => {
+    const tipoBadge = u.tipo === 'penthouse'
+      ? `<span class="tipo-badge tipo-penthouse">Penthouse</span>`
+      : u.tipo === 'casa'
+      ? `<span class="tipo-badge tipo-casa">Casa</span>`
+      : `<span class="tipo-badge tipo-condo">Condo</span>`;
+    const pmTxt = u.pm_nombre
+      ? `<strong>${u.pm_nombre}</strong>`
+      : `<span class="sin-pm">Sin asignar</span>`;
+    const rentaTxt = u.en_renta
+      ? `<span class="en-renta-on">✓ Sí</span>`
+      : `<span class="en-renta-off">—</span>`;
+    return `<tr>
+      <td><strong>${u.unidad}</strong></td>
+      <td>${tipoBadge}</td>
+      <td>${u.edificio || '—'}</td>
+      <td>${u.recamaras || '—'}</td>
+      <td>${rentaTxt}</td>
+      <td>${pmTxt}</td>
+      <td>
+        <button class="btn-reasignar" onclick="openModalReasignar('${u.unidad}', ${u.pm_id || 'null'}, '${(u.pm_nombre || '').replace(/'/g,"\\'")}', ${u.en_renta})">
+          Reasignar
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Modal reasignación ────────────────────────────────────────
+function openModalReasignar(unidad, pmId, pmNombre, enRenta) {
+  unidadEnEdicion = unidad;
+  document.getElementById('modal-unidad-title').textContent = unidad;
+  document.getElementById('modal-pm-actual').value = pmNombre || 'Sin asignar';
+  document.getElementById('modal-en-renta').checked = enRenta;
+
+  // Poblar select de PMs
+  const sel = document.getElementById('modal-pm-nuevo');
+  sel.innerHTML = '<option value="">— Sin PM (desvincular) —</option>';
+  todosLosPMs.filter(p => p.activo).forEach(pm => {
+    const o = document.createElement('option');
+    o.value = pm.id;
+    o.textContent = pm.nombre;
+    if (pm.id === pmId) o.selected = true;
+    sel.appendChild(o);
+  });
+
+  document.getElementById('modalReasignar').classList.add('open');
+}
+
+function closeModalReasignar() {
+  document.getElementById('modalReasignar').classList.remove('open');
+  unidadEnEdicion = null;
+}
+
+async function guardarReasignacion() {
+  if (!unidadEnEdicion) return;
+  const pm_id   = document.getElementById('modal-pm-nuevo').value || null;
+  const en_renta = document.getElementById('modal-en-renta').checked;
+  const btn     = document.getElementById('btn-guardar-reasig');
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando…';
+
+  try {
+    // Reasignar PM
+    const r1 = await fetch(`${API_BASE}/api/inhouse/pm-unidades/${encodeURIComponent(unidadEnEdicion)}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ pm_id: pm_id ? parseInt(pm_id) : null })
+    });
+    const d1 = await r1.json();
+    if (!d1.ok) throw new Error(d1.error);
+
+    // Actualizar en_renta
+    await fetch(`${API_BASE}/api/inhouse/unidades/${encodeURIComponent(unidadEnEdicion)}/en-renta`, {
+      method: 'PATCH',
+      headers: authHeaders(),
+      body: JSON.stringify({ en_renta })
+    });
+
+    showToast(`${unidadEnEdicion} actualizada correctamente`, 'Asignación');
+    closeModalReasignar();
+    await loadUnidades();
+  } catch(e) {
+    showToast('Error al guardar: ' + e.message, 'Error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  await loadUsuariosLogin();
+
+  // Verificar si ya hay sesión válida
+  const token = sessionStorage.getItem('pdm_token');
+  if (token) {
+    try {
+      const r = await fetch(`${API_BASE}/api/auth/usuarios`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      if (r.ok) {
+        // Reconstruir usuarioActual desde sessionStorage
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (!['admin', 'gerente'].includes(payload.rol)) throw new Error('Sin acceso');
+        usuarioActual = { id: payload.id, nombre: payload.nombre, rol: payload.rol };
+        mostrarApp();
+        return;
+      }
+    } catch(e) {
+      sessionStorage.removeItem('pdm_token');
+    }
+  }
+  // Mostrar login
+  document.getElementById('loginOverlay').style.display = 'flex';
+}
+
+init();
+</script>
+</body>
+</html>
