@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Links — Paraíso del Mar</title>
+<style>
+:root {
+  --teal:#007c89;--teal-lt:#71aeb7;--teal-pale:#e8f4f6;
+  --navy:#003660;--emerald:#006b35;--dust:#f2efec;--dust-dk:#e5e0da;
+  --white:#ffffff;--ink:#1a2e3a;--ink-mid:#3d5a66;--border:#c2d8dd;
+  --ok:#006b35;--err:#c0392b;--warn:#c87533;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust);color:var(--ink);min-height:100vh;}
+
+.header{background:var(--navy);}
+.header-inner{max-width:760px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;gap:14px;}
+.logo img{height:44px;width:auto;filter:brightness(0) invert(1);}
+.header-text h1{font-size:16px;font-weight:700;color:var(--white);letter-spacing:.12em;text-transform:uppercase;}
+.header-text p{font-size:10px;color:var(--teal-lt);letter-spacing:.15em;margin-top:2px;}
+.header-lang{margin-left:auto;}
+.btn-lang{background:transparent;border:1px solid var(--teal-lt);color:var(--teal-lt);padding:5px 12px;border-radius:3px;font-family:Verdana,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .2s;}
+.btn-lang:hover,.btn-lang.active{background:var(--teal);border-color:var(--teal);color:var(--white);}
+.header-rule{height:3px;background:linear-gradient(90deg,var(--teal) 0%,var(--teal-lt) 60%,transparent 100%);}
+
+.container{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+
+.banner{background:var(--teal-pale);border:1px solid var(--border);border-radius:3px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--ink-mid);line-height:1.6;display:flex;gap:10px;align-items:flex-start;}
+.banner svg{flex-shrink:0;margin-top:1px;color:var(--teal);}
+
+.section{background:var(--white);border:1px solid var(--border);border-radius:3px;margin-bottom:14px;overflow:hidden;}
+.section-header{background:var(--navy);padding:9px 16px;display:flex;align-items:center;gap:8px;}
+.section-num{width:19px;height:19px;background:var(--teal);color:white;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;}
+.section-title{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal-lt);}
+.section-body{padding:18px;}
+
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.field:last-child{margin-bottom:0;}
+.field label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mid);}
+.field label .req{color:var(--teal);margin-left:2px;}
+.field select,.field input{border:1px solid var(--border);background:var(--white);padding:9px 11px;font-family:Verdana,sans-serif;font-size:13px;color:var(--ink);border-radius:3px;outline:none;width:100%;transition:border-color .15s;}
+.field select:focus,.field input:focus{border-color:var(--teal);}
+.field select:disabled{background:var(--dust);color:var(--ink-mid);cursor:not-allowed;}
+.field .hint{font-size:10px;color:var(--ink-mid);margin-top:2px;}
+
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:500px){.row-2{grid-template-columns:1fr;}}
+
+.tipo-group{display:flex;gap:8px;flex-wrap:wrap;}
+.tipo-opt{display:none;}
+.tipo-label{padding:7px 14px;border:1px solid var(--border);border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer;color:var(--ink-mid);background:var(--dust);transition:all .15s;}
+.tipo-opt:checked+.tipo-label{background:var(--teal);color:var(--white);border-color:var(--teal);}
+
+.hab-section{margin-top:12px;padding:12px;background:var(--teal-pale);border:1px solid var(--border);border-radius:3px;display:none;}
+.hab-title{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:8px;}
+.hab-opts{display:flex;gap:8px;flex-wrap:wrap;}
+
+.noches-badge{font-size:11px;color:var(--ink-mid);margin-top:6px;}
+.noches-badge span{font-weight:700;color:var(--teal);}
+
+.preview-box{background:var(--teal-pale);border:1px solid var(--border);border-radius:3px;padding:14px 16px;}
+.preview-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:8px;}
+.preview-resumen{margin-bottom:12px;}
+.resumen-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid var(--border);font-size:12px;}
+.resumen-row:last-child{border-bottom:none;}
+.resumen-key{color:var(--ink-mid);}
+.resumen-val{font-weight:700;color:var(--ink);}
+.preview-url{font-size:11px;color:var(--teal);word-break:break-all;font-family:monospace;background:white;border:1px solid var(--border);border-radius:3px;padding:10px 12px;line-height:1.6;margin-bottom:12px;}
+.preview-placeholder{font-size:12px;color:var(--ink-mid);font-style:italic;text-align:center;padding:12px 0;}
+
+.btns{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:3px;font-family:Verdana,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border:none;transition:opacity .15s;}
+.btn:hover{opacity:.85;}
+.btn-teal{background:var(--teal);color:white;}
+.btn-navy{background:var(--navy);color:white;}
+.btn-wa{background:#25d366;color:white;}
+.btn-outline{background:white;color:var(--ink);border:1px solid var(--border);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+.loading-msg{text-align:center;padding:20px;color:var(--ink-mid);font-size:12px;}
+.error-msg{background:#fdf0ef;border:1px solid var(--err);border-radius:3px;padding:12px 14px;color:var(--err);font-size:12px;margin-bottom:14px;display:none;}
+
+.step-bar{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
+.step{display:flex;align-items:center;gap:6px;}
+.step-num{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.step.done .step-num{background:var(--emerald);color:white;}
+.step.active .step-num{background:var(--teal);color:white;}
+.step.pending .step-num{background:var(--dust-dk);color:var(--ink-mid);}
+.step-lbl{font-size:10px;font-weight:700;letter-spacing:.06em;}
+.step.done .step-lbl{color:var(--emerald);}
+.step.active .step-lbl{color:var(--teal);}
+.step.pending .step-lbl{color:var(--ink-mid);}
+.step-line{flex:1;height:1px;background:var(--border);max-width:40px;}
+
+.copy-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--emerald);color:white;padding:10px 20px;border-radius:3px;font-size:12px;font-weight:700;letter-spacing:.08em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:99;}
+.copy-toast.show{opacity:1;}
+
+.page-footer{margin-top:32px;text-align:center;font-size:10px;color:var(--ink-mid);letter-spacing:.08em;opacity:.6;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <img src="PDM_Logo_Transparent.png" alt="Paraíso del Mar" onerror="this.style.display='none';document.getElementById('logo-text').style.display='block'">
+      <span id="logo-text" style="display:none;color:white;font-size:18px;font-weight:700;">P</span>
+    </div>
+    <div class="header-text">
+      <h1>Paraíso del Mar</h1>
+      <p id="h-sub">Generador de links de registro · Link Generator</p>
+    </div>
+    <div class="header-lang">
+      <button class="btn-lang active" id="btn-es" onclick="setLang('es')">ES</button>
+      <button class="btn-lang" id="btn-en" onclick="setLang('en')" style="margin-left:4px;">EN</button>
+    </div>
+  </div>
+  <div class="header-rule"></div>
+</div>
+
+<div class="container">
+
+  <div id="error-box" class="error-msg"></div>
+
+  <div class="step-bar">
+    <div class="step active" id="step1">
+      <div class="step-num">1</div>
+      <div class="step-lbl" id="s1-lbl">UNIDAD</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step pending" id="step2">
+      <div class="step-num">2</div>
+      <div class="step-lbl" id="s2-lbl">FECHAS</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step pending" id="step3">
+      <div class="step-num">3</div>
+      <div class="step-lbl" id="s3-lbl">LINK</div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span id="banner-text">El link generado llegará al rentista con la unidad y fechas ya confirmadas y bloqueadas. El rentista solo llenará sus datos personales.</span>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title" id="sec1-title">UNIDAD · UNIT</div>
+    </div>
+    <div class="section-body">
+      <div id="loading-msg" class="loading-msg">Cargando unidades...</div>
+      <div id="unidad-form" style="display:none;">
+        <div class="field">
+          <label id="lbl-unidad">Unidad <span class="req">*</span></label>
+          <select id="sel-unidad" onchange="onUnidadChange()">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+        <div id="hab-section" class="hab-section">
+          <div class="hab-title" id="lbl-hab-titulo">¿Cómo se rentará esta unidad? · How will this unit be rented?</div>
+          <div class="hab-opts">
+            <input class="tipo-opt" type="radio" name="modo" id="modo-completa" value="completa" checked onchange="updatePreview()">
+            <label class="tipo-label" for="modo-completa" id="lbl-completa">Unidad completa · Full unit</label>
+            <input class="tipo-opt" type="radio" name="modo" id="modo-hab" value="habitacion" onchange="onModoChange()">
+            <label class="tipo-label" for="modo-hab" id="lbl-hab">Habitación individual · Single room</label>
+          </div>
+          <div id="sel-hab-wrap" style="display:none;margin-top:12px;">
+            <div class="field" style="margin-bottom:0">
+              <label id="lbl-habitacion">Habitación · Room</label>
+              <select id="sel-hab" onchange="updatePreview()">
+                <option value="a">A</option>
+                <option value="b">B</option>
+                <option value="c" id="hab-c-opt">C</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title" id="sec2-title">FECHAS DE ESTANCIA · STAY DATES</div>
+    </div>
+    <div class="section-body">
+      <div class="row-2">
+        <div class="field">
+          <label id="lbl-entrada">Fecha de entrada · Check in <span class="req">*</span></label>
+          <input type="date" id="fecha-entrada" onchange="updatePreview()">
+        </div>
+        <div class="field">
+          <label id="lbl-salida">Fecha de salida · Check out <span class="req">*</span></label>
+          <input type="date" id="fecha-salida" onchange="updatePreview()">
+        </div>
+      </div>
+      <div class="noches-badge" id="noches-badge" style="display:none;">
+        <span id="noches-txt"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title" id="sec3-title">LINK GENERADO · GENERATED LINK</div>
+    </div>
+    <div class="section-body">
+      <div class="preview-box">
+        <div class="preview-label" id="lbl-resumen">Resumen · Summary</div>
+        <div id="preview-placeholder" class="preview-placeholder">Selecciona una unidad y fechas para generar el link · Select a unit and dates to generate the link</div>
+        <div id="preview-content" style="display:none;">
+          <div class="preview-resumen">
+            <div class="resumen-row"><span class="resumen-key" id="lbl-r-unidad">Unidad · Unit</span><span class="resumen-val" id="res-unidad">—</span></div>
+            <div class="resumen-row"><span class="resumen-key" id="lbl-r-tipo">Tipo · Type</span><span class="resumen-val" id="res-tipo">—</span></div>
+            <div class="resumen-row"><span class="resumen-key" id="lbl-r-entrada">Entrada · Check in</span><span class="resumen-val" id="res-entrada">—</span></div>
+            <div class="resumen-row"><span class="resumen-key" id="lbl-r-salida">Salida · Check out</span><span class="resumen-val" id="res-salida">—</span></div>
+            <div class="resumen-row"><span class="resumen-key" id="lbl-r-pm">Property Manager</span><span class="resumen-val" id="res-pm">—</span></div>
+          </div>
+          <div class="preview-url" id="preview-url"></div>
+          <div class="btns">
+            <button class="btn btn-teal" onclick="copyLink()" id="btn-copy">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span id="lbl-copiar">Copiar link · Copy link</span>
+            </button>
+            <button class="btn btn-wa" onclick="shareWhatsApp()" id="btn-wa">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+              <span id="lbl-wa">WhatsApp</span>
+            </button>
+            <button class="btn btn-outline" onclick="resetForm()" id="btn-nuevo">
+              <span id="lbl-nuevo">Nuevo link · New link</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    Paraíso del Mar · La Paz, Baja California Sur, México
+  </div>
+</div>
+
+<div class="copy-toast" id="copy-toast">✓ <span id="toast-txt">Link copiado</span></div>
+
+<script>
+const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+const BASE_FORM_URL = 'https://paraiso-del-mar-dashboard.vercel.app/registro-rentista.html';
+
+// ── i18n ─────────────────────────────────────────────────────
+const T = {
+  es: {
+    'h-sub':         'Generador de links de registro',
+    'banner-text':   'El link generado llegará al rentista con la unidad y fechas ya confirmadas y bloqueadas. El rentista solo llenará sus datos personales.',
+    's1-lbl':        'UNIDAD',
+    's2-lbl':        'FECHAS',
+    's3-lbl':        'LINK',
+    'sec1-title':    'UNIDAD · UNIT',
+    'sec2-title':    'FECHAS DE ESTANCIA · STAY DATES',
+    'sec3-title':    'LINK GENERADO · GENERATED LINK',
+    'lbl-unidad':    'Unidad',
+    'lbl-hab-titulo':'¿Cómo se rentará esta unidad?',
+    'lbl-completa':  'Unidad completa',
+    'lbl-hab':       'Habitación individual',
+    'lbl-habitacion':'Habitación',
+    'lbl-entrada':   'Fecha de entrada',
+    'lbl-salida':    'Fecha de salida',
+    'lbl-resumen':   'Resumen',
+    'lbl-r-unidad':  'Unidad',
+    'lbl-r-tipo':    'Tipo',
+    'lbl-r-entrada': 'Entrada',
+    'lbl-r-salida':  'Salida',
+    'lbl-r-pm':      'Property Manager',
+    'lbl-copiar':    'Copiar link',
+    'lbl-wa':        'WhatsApp',
+    'lbl-nuevo':     'Nuevo link',
+    'loading':       'Cargando unidades...',
+    'placeholder':   'Selecciona una unidad y fechas para generar el link',
+    'noches':        'noches',
+    'noche':         'noche',
+    'tipo-condo':    'Condo completo',
+    'tipo-hab':      'Habitación individual',
+    'tipo-casa':     'Casa',
+    'tipo-pent':     'Penthouse',
+    'toast':         'Link copiado',
+    'wa-msg':        'Hola, te comparto el link para registrar tu llegada a Paraíso del Mar:',
+    'sel-unidad':    '— Seleccionar —',
+    'err-pm':        'No se pudo cargar la información del PM. Verifica el parámetro pm_id en la URL.',
+    'err-unidades':  'No se pudieron cargar las unidades. Intenta recargar la página.',
+    'err-fechas':    'La fecha de salida debe ser posterior a la fecha de entrada.',
+  },
+  en: {
+    'h-sub':         'Registration Link Generator',
+    'banner-text':   'The generated link will reach the renter with the unit and dates already confirmed and locked. The renter only fills in their personal details.',
+    's1-lbl':        'UNIT',
+    's2-lbl':        'DATES',
+    's3-lbl':        'LINK',
+    'sec1-title':    'UNIT · UNIDAD',
+    'sec2-title':    'STAY DATES · FECHAS DE ESTANCIA',
+    'sec3-title':    'GENERATED LINK · LINK GENERADO',
+    'lbl-unidad':    'Unit',
+    'lbl-hab-titulo':'How will this unit be rented?',
+    'lbl-completa':  'Full unit',
+    'lbl-hab':       'Single room',
+    'lbl-habitacion':'Room',
+    'lbl-entrada':   'Check in date',
+    'lbl-salida':    'Check out date',
+    'lbl-resumen':   'Summary',
+    'lbl-r-unidad':  'Unit',
+    'lbl-r-tipo':    'Type',
+    'lbl-r-entrada': 'Check in',
+    'lbl-r-salida':  'Check out',
+    'lbl-r-pm':      'Property Manager',
+    'lbl-copiar':    'Copy link',
+    'lbl-wa':        'WhatsApp',
+    'lbl-nuevo':     'New link',
+    'loading':       'Loading units...',
+    'placeholder':   'Select a unit and dates to generate the link',
+    'noches':        'nights',
+    'noche':         'night',
+    'tipo-condo':    'Full condo',
+    'tipo-hab':      'Single room',
+    'tipo-casa':     'House',
+    'tipo-pent':     'Penthouse',
+    'toast':         'Link copied',
+    'wa-msg':        'Hi, here is your registration link for Paraíso del Mar:',
+    'sel-unidad':    '— Select —',
+    'err-pm':        'Could not load PM information. Check the pm_id parameter in the URL.',
+    'err-unidades':  'Could not load units. Try reloading the page.',
+    'err-fechas':    'Check out date must be after check in date.',
+  }
+};
+
+let lang = 'es';
+let unidades = [];
+let pmNombre = '';
+let pmId = null;
+
+function t(key) { return T[lang][key] || T['es'][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-es').classList.toggle('active', l === 'es');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  applyLang();
+  updatePreview();
+}
+
+function applyLang() {
+  const ids = ['h-sub','banner-text','s1-lbl','s2-lbl','s3-lbl',
+    'sec1-title','sec2-title','sec3-title','lbl-unidad','lbl-hab-titulo',
+    'lbl-completa','lbl-hab','lbl-habitacion','lbl-entrada','lbl-salida',
+    'lbl-resumen','lbl-r-unidad','lbl-r-tipo','lbl-r-entrada','lbl-r-salida',
+    'lbl-r-pm','lbl-copiar','lbl-wa','lbl-nuevo','toast-txt'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(id === 'toast-txt' ? 'toast' : id);
+  });
+  document.getElementById('preview-placeholder').textContent = t('placeholder');
+  document.getElementById('loading-msg').textContent = t('loading');
+  // Actualizar primer option del select
+  const sel = document.getElementById('sel-unidad');
+  if (sel && sel.options[0]) sel.options[0].text = t('sel-unidad');
+}
+
+// ── Cargar datos del PM desde URL ────────────────────────────
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  pmId = parseInt(params.get('pm_id') || params.get('pm'));
+
+  if (!pmId || isNaN(pmId)) {
+    showError(t('err-pm'));
+    document.getElementById('loading-msg').style.display = 'none';
+    return;
+  }
+
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/unidades-por-pm?pm_id=${pmId}`);
+    const data = await r.json();
+    if (!data.ok || !data.data.length) throw new Error();
+    unidades = data.data;
+    pmNombre = data.data[0].property_manager;
+    document.getElementById('res-pm').textContent = pmNombre;
+    poblarSelect();
+    document.getElementById('loading-msg').style.display = 'none';
+    document.getElementById('unidad-form').style.display = 'block';
+  } catch(e) {
+    showError(t('err-unidades'));
+    document.getElementById('loading-msg').style.display = 'none';
+  }
+}
+
+function poblarSelect() {
+  const sel = document.getElementById('sel-unidad');
+  sel.innerHTML = `<option value="">${t('sel-unidad')}</option>`;
+  // Agrupar por tipo
+  const condos = unidades.filter(u => u.tipo === 'condo' || u.tipo === 'penthouse');
+  const casas  = unidades.filter(u => u.tipo === 'casa');
+  if (condos.length) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'Condos / Penthouse';
+    condos.forEach(u => {
+      const o = document.createElement('option');
+      o.value = u.unidad;
+      const rec = u.recamaras ? ` · ${u.recamaras} rec.` : '';
+      const pent = u.tipo === 'penthouse' ? ' · Penthouse' : '';
+      o.textContent = `${u.unidad}${rec}${pent}`;
+      o.dataset.tipo = u.tipo;
+      o.dataset.rec  = u.recamaras || '';
+      grp.appendChild(o);
+    });
+    sel.appendChild(grp);
+  }
+  if (casas.length) {
+    const grp = document.createElement('optgroup');
+    grp.label = 'Casas';
+    casas.forEach(u => {
+      const o = document.createElement('option');
+      o.value = u.unidad;
+      o.textContent = u.unidad;
+      o.dataset.tipo = 'casa';
+      o.dataset.rec  = '';
+      grp.appendChild(o);
+    });
+    sel.appendChild(grp);
+  }
+}
+
+function onUnidadChange() {
+  const sel = document.getElementById('sel-unidad');
+  const opt = sel.selectedOptions[0];
+  const tipo = opt?.dataset.tipo || '';
+  const rec  = parseInt(opt?.dataset.rec || '0');
+  const habSec = document.getElementById('hab-section');
+
+  if (tipo === 'condo') {
+    habSec.style.display = 'block';
+    document.getElementById('hab-c-opt').style.display = rec === 3 ? 'block' : 'none';
+    document.getElementById('modo-completa').checked = true;
+    document.getElementById('sel-hab-wrap').style.display = 'none';
+  } else {
+    habSec.style.display = 'none';
+  }
+  updateSteps();
+  updatePreview();
+}
+
+function onModoChange() {
+  const modo = document.querySelector('input[name="modo"]:checked').value;
+  document.getElementById('sel-hab-wrap').style.display = modo === 'habitacion' ? 'block' : 'none';
+  updatePreview();
+}
+
+function updateSteps() {
+  const unidad = document.getElementById('sel-unidad').value;
+  const entrada = document.getElementById('fecha-entrada').value;
+  const salida  = document.getElementById('fecha-salida').value;
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  if (unidad) { step2.className = 'step active'; }
+  if (unidad && entrada && salida) { step2.className = 'step done'; step3.className = 'step active'; }
+  if (!unidad) { step2.className = 'step pending'; step3.className = 'step pending'; }
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  const meses_es = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  const meses_en = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const meses = lang === 'en' ? meses_en : meses_es;
+  return `${parseInt(day)} ${meses[parseInt(m)-1]} ${y}`;
+}
+
+function updatePreview() {
+  const sel     = document.getElementById('sel-unidad');
+  const opt     = sel.selectedOptions[0];
+  const unidad  = sel.value;
+  const tipo    = opt?.dataset.tipo || '';
+  const rec     = parseInt(opt?.dataset.rec || '0');
+  const modo    = document.querySelector('input[name="modo"]:checked')?.value || 'completa';
+  const hab     = document.getElementById('sel-hab').value;
+  const entrada = document.getElementById('fecha-entrada').value;
+  const salida  = document.getElementById('fecha-salida').value;
+
+  updateSteps();
+
+  // Noches
+  if (entrada && salida) {
+    const d1 = new Date(entrada), d2 = new Date(salida);
+    const n = Math.round((d2-d1)/86400000);
+    const badge = document.getElementById('noches-badge');
+    if (n > 0) {
+      badge.style.display = 'block';
+      document.getElementById('noches-txt').textContent = `${n} ${n === 1 ? t('noche') : t('noches')}`;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  if (!unidad || !entrada || !salida) {
+    document.getElementById('preview-placeholder').style.display = 'block';
+    document.getElementById('preview-content').style.display = 'none';
+    return;
+  }
+
+  const d1 = new Date(entrada), d2 = new Date(salida);
+  if (d2 <= d1) {
+    showError(t('err-fechas'));
+    return;
+  }
+  clearError();
+
+  let unidadFinal = unidad;
+  if (tipo === 'condo' && modo === 'habitacion') {
+    unidadFinal = `${unidad}-${hab}`;
+  }
+
+  let tipoLabel = '';
+  if (tipo === 'penthouse') tipoLabel = t('tipo-pent');
+  else if (tipo === 'casa')  tipoLabel = t('tipo-casa');
+  else if (modo === 'habitacion') tipoLabel = t('tipo-hab');
+  else tipoLabel = t('tipo-condo');
+
+  document.getElementById('res-unidad').textContent  = unidadFinal;
+  document.getElementById('res-tipo').textContent    = tipoLabel;
+  document.getElementById('res-entrada').textContent = fmtDate(entrada);
+  document.getElementById('res-salida').textContent  = fmtDate(salida);
+  document.getElementById('res-pm').textContent      = pmNombre;
+
+  const urlParams = new URLSearchParams({
+    unidad: unidadFinal,
+    pm: pmId,
+    fecha_entrada: entrada,
+    fecha_salida: salida,
+    tipo: 'R'
+  });
+  document.getElementById('preview-url').textContent = `${BASE_FORM_URL}?${urlParams.toString()}`;
+
+  document.getElementById('preview-placeholder').style.display = 'none';
+  document.getElementById('preview-content').style.display = 'block';
+}
+
+function getLink() {
+  return document.getElementById('preview-url').textContent;
+}
+
+function copyLink() {
+  const url = getLink();
+  if (!url || !url.startsWith('http')) return;
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = document.getElementById('copy-toast');
+    document.getElementById('toast-txt').textContent = t('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+}
+
+function shareWhatsApp() {
+  const url = getLink();
+  if (!url || !url.startsWith('http')) return;
+  const msg = encodeURIComponent(`${t('wa-msg')}\n${url}`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+function resetForm() {
+  document.getElementById('sel-unidad').value = '';
+  document.getElementById('fecha-entrada').value = '';
+  document.getElementById('fecha-salida').value = '';
+  document.getElementById('modo-completa').checked = true;
+  document.getElementById('hab-section').style.display = 'none';
+  document.getElementById('sel-hab-wrap').style.display = 'none';
+  document.getElementById('noches-badge').style.display = 'none';
+  document.getElementById('preview-placeholder').style.display = 'block';
+  document.getElementById('preview-content').style.display = 'none';
+  document.getElementById('step2').className = 'step pending';
+  document.getElementById('step3').className = 'step pending';
+  clearError();
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-box');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function clearError() {
+  document.getElementById('error-box').style.display = 'none';
+}
+
+// Fecha mínima = hoy
+const hoy = new Date().toISOString().split('T')[0];
+document.getElementById('fecha-entrada').min = hoy;
+document.getElementById('fecha-salida').min  = hoy;
+
+// Actualizar mínimo de salida cuando cambia entrada
+document.getElementById('fecha-entrada').addEventListener('change', function() {
+  document.getElementById('fecha-salida').min = this.value;
+  updatePreview();
+});
+
+init();
+</script>
+</body>
+</html>
