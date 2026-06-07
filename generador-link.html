@@ -555,8 +555,14 @@ function getLink() {
 }
 
 async function validarDisponibilidad() {
+  // Usar la misma unidadFinal que se embebe en el link
   const sel    = document.getElementById('sel-unidad');
-  const unidad = sel.value;
+  const opt    = sel.selectedOptions[0];
+  const tipo   = opt?.dataset.tipo || '';
+  const modo   = document.querySelector('input[name="modo"]:checked')?.value || 'completa';
+  const hab    = document.getElementById('sel-hab').value;
+  let unidad   = sel.value;
+  if (tipo === 'condo' && modo === 'habitacion') unidad = `${unidad}-${hab}`;
   const entrada = document.getElementById('fecha-entrada').value;
   const salida  = document.getElementById('fecha-salida').value;
   if (!unidad || !entrada || !salida) return true; // ya validado antes
