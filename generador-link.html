@@ -289,7 +289,7 @@ const T = {
     'toast':         'Link copiado',
     'wa-msg':        'Hola, te comparto el link para registrar tu llegada a Paraíso del Mar:',
     'validando':     'Verificando disponibilidad…',
-    'no-disponible': (d) => `⚠️ Esta unidad ya tiene un registro en esas fechas:\n${d}\n\nPor favor selecciona otras fechas.`,
+    'no-disponible-txt': '⚠️ Esta unidad ya tiene un registro en esas fechas:',
     'err-validar':   'No se pudo verificar la disponibilidad. Intenta de nuevo.',
     'sel-unidad':    '— Seleccionar —',
     'err-pm':        'No se pudo cargar la información del PM. Verifica el parámetro pm_id en la URL.',
@@ -332,7 +332,7 @@ const T = {
     'toast':         'Link copied',
     'wa-msg':        'Hi, here is your registration link for Paraíso del Mar:',
     'validando':     'Checking availability…',
-    'no-disponible': (d) => `⚠️ This unit already has a booking for those dates:\n${d}\n\nPlease select different dates.`,
+    'no-disponible-txt': '⚠️ This unit already has a booking for those dates:',
     'err-validar':   'Could not verify availability. Please try again.',
     'sel-unidad':    '— Select —',
     'err-pm':        'Could not load PM information. Check the pm_id parameter in the URL.',
@@ -582,7 +582,8 @@ async function validarDisponibilidad() {
     const data = await r.json();
     if (!data.ok) throw new Error();
     if (!data.disponible) {
-      alert(t('no-disponible', data.detalle || ''));
+      const msg = t('no-disponible-txt') + (data.detalle ? '\n' + data.detalle : '') + '\n\n' + (lang === 'en' ? 'Please select different dates.' : 'Por favor selecciona otras fechas.');
+      alert(msg);
       return false;
     }
     return true;
