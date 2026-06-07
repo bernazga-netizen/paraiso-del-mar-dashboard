@@ -133,7 +133,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
     </div>
     <div class="header-text">
       <h1>Paraíso del Mar</h1>
-      <p id="h-sub">Guest Registration · Registro de Huéspedes</p>
+      <p id="h-sub"><span id="h-sub-span"></span></p>
     </div>
     <div class="header-lang">
       <button class="btn-lang active" id="btn-es" onclick="setLang('es')">ES</button>
@@ -175,27 +175,27 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
     <div class="prellenado">
       <div class="prellenado-title" id="pre-title">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span id="pre-title-txt">Datos confirmados por tu Property Manager · Confirmed by your Property Manager</span>
+        <span id="pre-title-txt"><span id="pre-title-span"></span></span>
       </div>
       <div class="prellenado-grid">
         <div class="pre-item">
-          <div class="pre-label" id="pre-lbl-unidad">Unidad · Unit</div>
+          <div class="pre-label" id="pre-lbl-unidad"><span id="pre-lbl-unidad-span"></span></div>
           <div class="pre-val"><span id="pre-unidad">—</span>
             <svg class="lock-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
         </div>
         <div class="pre-item">
-          <div class="pre-label" id="pre-lbl-tipo">Tipo · Type</div>
-          <div class="pre-val"><span class="tipo-pill" id="pre-tipo-pill">Renta</span></div>
+          <div class="pre-label" id="pre-lbl-tipo"><span id="pre-lbl-tipo-span"></span></div>
+          <div class="pre-val"><span class="tipo-pill" id="pre-tipo-pill"><span id="pre-tipo-span">Renta</span></span></div>
         </div>
         <div class="pre-item">
-          <div class="pre-label" id="pre-lbl-entrada">Entrada · Check in</div>
+          <div class="pre-label" id="pre-lbl-entrada"><span id="pre-lbl-entrada-span"></span></div>
           <div class="pre-val"><span id="pre-entrada">—</span>
             <svg class="lock-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
         </div>
         <div class="pre-item">
-          <div class="pre-label" id="pre-lbl-salida">Salida · Check out</div>
+          <div class="pre-label" id="pre-lbl-salida"><span id="pre-lbl-salida-span"></span></div>
           <div class="pre-val"><span id="pre-salida">—</span>
             <svg class="lock-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
@@ -209,29 +209,29 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
       <div class="section">
         <div class="section-header">
           <div class="section-num">2</div>
-          <div class="section-title" id="sec2-title">TITULAR DEL REGISTRO · PRIMARY GUEST</div>
+          <div class="section-title" id="sec2-title"><span id="sec2-txt"></span></div>
         </div>
         <div class="section-body">
           <div class="row row-1">
             <div class="field">
-              <label id="lbl-nombre">Nombre completo · Full name <span class="req">*</span></label>
-              <input id="nombre_huesped" type="text" placeholder="Como aparece en tu ID · As it appears on your ID" required>
+              <label id="lbl-nombre"><span id="lbl-nombre-txt"></span> <span class="req">*</span></label>
+              <input id="nombre_huesped" type="text" placeholder="" required>
             </div>
           </div>
           <div class="row row-2">
             <div class="field">
-              <label id="lbl-email">Correo electrónico · Email <span class="req">*</span></label>
+              <label id="lbl-email"><span id="lbl-email-txt"></span> <span class="req">*</span></label>
               <input id="email" type="email" placeholder="email@example.com">
             </div>
             <div class="field">
-              <label id="lbl-tel">Teléfono · Telephone <span class="req">*</span></label>
+              <label id="lbl-tel"><span id="lbl-tel-txt"></span> <span class="req">*</span></label>
               <input id="telefono" type="tel" placeholder="+1 555 000 0000">
             </div>
           </div>
           <div class="row row-1">
             <div class="field">
-              <label id="lbl-dir">Dirección · Address <span class="req">*</span></label>
-              <input id="direccion" type="text" placeholder="Street, City, State, Country, Postal Code">
+              <label id="lbl-dir"><span id="lbl-dir-txt"></span> <span class="req">*</span></label>
+              <input id="direccion" type="text" placeholder="">
             </div>
           </div>
         </div>
@@ -241,11 +241,11 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
       <div class="section">
         <div class="section-header">
           <div class="section-num">3</div>
-          <div class="section-title" id="sec3-title">HUÉSPEDES ADICIONALES · OTHER GUESTS (1–8)</div>
+          <div class="section-title" id="sec3-title"><span id="sec3-txt"></span></div>
         </div>
         <div class="section-body">
           <div class="adults-row">
-            <span class="adults-label" id="lbl-adultos">¿Cuántos adultos viajan? · How many adults?</span>
+            <span class="adults-label" id="lbl-adultos"><span id="lbl-adultos-span"></span></span>
             <select class="adults-select" id="adultos-sel" onchange="updateGuests()">
               <option value="1">1</option><option value="2" selected>2</option>
               <option value="3">3</option><option value="4">4</option>
@@ -266,14 +266,14 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
       <div class="section">
         <div class="section-header">
           <div class="section-num">4</div>
-          <div class="section-title" id="sec4-title">COMPROMISOS Y PREFERENCIAS · COMMITMENTS &amp; PREFERENCES</div>
+          <div class="section-title" id="sec4-title"><span id="sec4-txt"></span></div>
         </div>
         <div class="section-body">
           <div class="legal-text">
             <span id="legal-es">He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia.</span>
             <em id="legal-en">I have read and agree to abide by the rules and regulations of Paraiso del Mar. I acknowledge that breaking these rules may cause the loss of my time in the property. I also take full responsibility for any damage I or any of my guests may cause during my stay.</em>
             <div class="reglamento-links">
-              <div class="regl-label" id="lbl-regl">Leer reglamento · Read regulations:</div>
+              <div class="regl-label" id="lbl-regl"><span id="lbl-regl-span"></span></div>
               <div class="regl-btns">
                 <a id="link-regl-es" href="#" target="_blank" class="btn-reg">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -291,24 +291,24 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
               <input type="checkbox" id="acepta_reglamento">
               <div class="check-box"></div>
               <span class="check-text">
-                <strong id="chk1-title">Acepto el reglamento · I agree to the rules</strong>
-                <span id="chk1-sub">Confirmo haber leído y aceptar las reglas y reglamento de Paraíso del Mar.</span>
+                <strong id="chk1-title"><span id="chk1-title-span"></span></strong>
+                <span id="chk1-sub"><span id="chk1-sub-span"></span></span>
               </span>
             </label>
             <label class="check-item">
               <input type="checkbox" id="interesado_comprar">
               <div class="check-box"></div>
               <span class="check-text">
-                <strong id="chk2-title">Interesado en propiedad · Property interest</strong>
-                <span id="chk2-sub">Me interesa ver propiedades en La Paz / I'm interested in looking at property in La Paz.</span>
+                <strong id="chk2-title"><span id="chk2-title-span"></span></strong>
+                <span id="chk2-sub"><span id="chk2-sub-span"></span></span>
               </span>
             </label>
             <label class="check-item">
               <input type="checkbox" id="recibir_info">
               <div class="check-box"></div>
               <span class="check-text">
-                <strong id="chk3-title">Comunicaciones · Communications</strong>
-                <span id="chk3-sub">Me gustaría recibir información sobre promociones, actividades y eventos.</span>
+                <strong id="chk3-title"><span id="chk3-title-span"></span></strong>
+                <span id="chk3-sub"><span id="chk3-sub-span"></span></span>
               </span>
             </label>
           </div>
@@ -319,21 +319,20 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
       <div class="section">
         <div class="section-header">
           <div class="section-num">5</div>
-          <div class="section-title" id="sec5-title">FIRMA DEL TITULAR · GUEST SIGNATURE</div>
+          <div class="section-title" id="sec5-title"><span id="sec5-txt"></span></div>
         </div>
         <div class="section-body">
           <p style="font-size:12px;color:var(--ink-mid);margin-bottom:12px;line-height:1.6;" id="firma-instrucciones">
-            Firme en el recuadro usando su dedo (móvil) o el cursor (computadora) ·
-            Sign in the box using your finger (mobile) or cursor (computer).
+            
           </p>
           <div class="firma-wrap" id="firmaWrap">
             <div class="firma-bar">
-              <span id="lbl-firma">Firma · Signature</span>
+              <span id="lbl-firma"><span id="lbl-firma-span"></span></span>
               <span id="firma-status" style="color:var(--err);font-size:9px;font-weight:700;">Pendiente</span>
             </div>
             <canvas id="firma-canvas"></canvas>
             <div class="firma-actions">
-              <button type="button" class="btn-clear" onclick="clearFirma()" id="btn-clear-firma">✕ Borrar firma · Clear</button>
+              <button type="button" class="btn-clear" onclick="clearFirma()" id="btn-clear-firma"><span id="btn-clear-span"></span></button>
             </div>
           </div>
         </div>
@@ -342,7 +341,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
       <div class="submit-area">
         <button type="submit" class="btn-submit" id="btnSubmit">
           <div class="spinner" id="spinner"></div>
-          <span id="btnText">Enviar registro y generar PDF · Submit &amp; Generate PDF</span>
+          <span id="btnText"><span id="btn-submit-span"></span></span>
         </button>
       </div>
 
@@ -364,90 +363,98 @@ const isIOS = /iP(hone|ad|od)/i.test(navigator.userAgent) ||
 // ── i18n ─────────────────────────────────────────────────────
 const T = {
   es: {
-    'h-sub':          'Registro de Huéspedes',
-    'banner-text':    (pm) => `<strong>${pm}</strong> te ha invitado a completar tu registro de llegada. Los datos de tu unidad y fechas ya están confirmados — solo llena tus datos personales y firma el reglamento.`,
-    'pre-title-txt':  'Datos confirmados por tu Property Manager',
-    'pre-lbl-unidad': 'Unidad',
-    'pre-lbl-tipo':   'Tipo',
-    'pre-lbl-entrada':'Entrada',
-    'pre-lbl-salida': 'Salida',
-    'pre-tipo-pill':  'Renta',
-    'sec2-title':     'TITULAR DEL REGISTRO · PRIMARY GUEST',
-    'sec3-title':     'HUÉSPEDES ADICIONALES · OTHER GUESTS (1–8)',
-    'sec4-title':     'COMPROMISOS Y PREFERENCIAS · COMMITMENTS & PREFERENCES',
-    'sec5-title':     'FIRMA DEL TITULAR · GUEST SIGNATURE',
-    'lbl-nombre':     'Nombre completo · Full name',
-    'lbl-email':      'Correo electrónico · Email',
-    'lbl-tel':        'Teléfono · Telephone',
-    'lbl-dir':        'Dirección · Address',
-    'lbl-adultos':    '¿Cuántos adultos viajan? · How many adults?',
-    'guests-note':    'Los nombres completos de todos los huéspedes son requeridos para generar los accesos QR al desarrollo.<br><em>Full names of all guests are required to generate QR access codes for the development.</em>',
-    'lbl-regl':       'Leer reglamento · Read regulations:',
-    'chk1-title':     'Acepto el reglamento · I agree to the rules',
-    'chk1-sub':       'Confirmo haber leído y aceptar las reglas y reglamento de Paraíso del Mar.',
-    'chk2-title':     'Interesado en propiedad · Property interest',
-    'chk2-sub':       'Me interesa ver propiedades en La Paz / I\'m interested in looking at property in La Paz.',
-    'chk3-title':     'Comunicaciones · Communications',
-    'chk3-sub':       'Me gustaría recibir información sobre promociones, actividades y eventos.',
-    'lbl-firma':      'Firma · Signature',
-    'firma-status-ok':'✓ Firmado',
-    'firma-status-no':'Pendiente',
-    'btn-clear-firma':'✕ Borrar firma · Clear',
-    'btnText':        'Enviar registro y generar PDF · Submit & Generate PDF',
-    'btnSending':     'Enviando…',
-    'btnPDF':         'Generando PDF…',
-    'ok-msg':         '✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.',
-    'err-reglamento': 'Debe aceptar el reglamento de Paraíso del Mar para continuar.',
-    'err-firma':      'Por favor firme el formulario antes de enviar.\nPlease sign the form before submitting.',
-    'err-campos':     'Por favor complete todos los campos obligatorios · Please fill in all required fields.',
+    'h-sub':           'Registro de Huéspedes',
+    'banner-text':     (pm) => `<strong>${pm}</strong> te ha invitado a completar tu registro de llegada. Los datos de tu unidad y fechas ya están confirmados — solo llena tus datos personales y firma el reglamento.`,
+    'pre-title-txt':   'Datos confirmados por tu Property Manager',
+    'pre-lbl-unidad':  'Unidad',
+    'pre-lbl-tipo':    'Tipo',
+    'pre-lbl-entrada': 'Entrada',
+    'pre-lbl-salida':  'Salida',
+    'pre-tipo-pill':   'Renta',
+    'sec2-title':      'TITULAR DEL REGISTRO',
+    'sec3-title':      'HUÉSPEDES ADICIONALES (1–8)',
+    'sec4-title':      'COMPROMISOS Y PREFERENCIAS',
+    'sec5-title':      'FIRMA DEL TITULAR',
+    'lbl-nombre':      'Nombre completo',
+    'lbl-email':       'Correo electrónico',
+    'lbl-tel':         'Teléfono',
+    'lbl-dir':         'Dirección',
+    'lbl-adultos':     '¿Cuántos adultos viajan?',
+    'placeholder-nombre': 'Como aparece en tu identificación',
+    'placeholder-dir':    'Calle, Ciudad, Estado, País, Código Postal',
+    'guests-note':     'Los nombres completos de todos los huéspedes son requeridos para generar los accesos QR al desarrollo.',
+    'lbl-regl':        'Leer reglamento:',
+    'chk1-title':      'Acepto el reglamento',
+    'chk1-sub':        'Confirmo haber leído y aceptar las reglas y reglamento de Paraíso del Mar.',
+    'chk2-title':      'Interesado en propiedad',
+    'chk2-sub':        'Me interesa ver propiedades en La Paz.',
+    'chk3-title':      'Comunicaciones',
+    'chk3-sub':        'Me gustaría recibir información sobre promociones, actividades y eventos.',
+    'lbl-firma':       'Firma',
+    'firma-status-ok': '✓ Firmado',
+    'firma-status-no': 'Pendiente',
+    'btn-clear-firma': '✕ Borrar firma',
+    'btnText':         'Enviar registro y generar PDF',
+    'btnSending':      'Enviando…',
+    'btnPDF':          'Generando PDF…',
+    'ok-msg':          '✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.',
+    'err-reglamento':  'Debe aceptar el reglamento de Paraíso del Mar para continuar.',
+    'err-firma':       'Por favor firme el formulario antes de enviar.',
+    'err-campos':      'Por favor complete todos los campos obligatorios.',
     'err-params-title':'Link inválido',
-    'err-params-sub': 'Este link no contiene la información necesaria. Por favor solicita un nuevo link a tu Property Manager.',
-    'guest-placeholder':'Nombre completo · Full name',
-    'solo-titular':   'Solo viaja el titular · Only the primary guest is traveling.',
-    'meses':          ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
+    'err-params-sub':  'Este link no contiene la información necesaria. Por favor solicita un nuevo link a tu Property Manager.',
+    'guest-placeholder':'Nombre completo',
+    'solo-titular':    'Solo viaja el titular.',
+    'legal-txt':       'He leído y acepto cumplir con el reglamento de Paraíso del Mar, comprendo que romper estas reglas puede causar que se pierda mi estadía en la propiedad, adicionalmente asumo la responsabilidad por cualquier daño que yo o cualquiera de mis huéspedes en mi unidad causen durante mi estancia.',
+    'firma-instrucciones': 'Firme en el recuadro usando su dedo (móvil) o el cursor (computadora).',
+    'meses':           ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],
   },
   en: {
-    'h-sub':          'Guest Registration',
-    'banner-text':    (pm) => `<strong>${pm}</strong> has invited you to complete your arrival registration. Your unit and dates are already confirmed — just fill in your personal details and sign the regulations.`,
-    'pre-title-txt':  'Confirmed by your Property Manager',
-    'pre-lbl-unidad': 'Unit',
-    'pre-lbl-tipo':   'Type',
-    'pre-lbl-entrada':'Check in',
-    'pre-lbl-salida': 'Check out',
-    'pre-tipo-pill':  'Rental',
-    'sec2-title':     'PRIMARY GUEST · TITULAR DEL REGISTRO',
-    'sec3-title':     'OTHER GUESTS (1–8) · HUÉSPEDES ADICIONALES',
-    'sec4-title':     'COMMITMENTS & PREFERENCES · COMPROMISOS Y PREFERENCIAS',
-    'sec5-title':     'GUEST SIGNATURE · FIRMA DEL TITULAR',
-    'lbl-nombre':     'Full name · Nombre completo',
-    'lbl-email':      'Email · Correo electrónico',
-    'lbl-tel':        'Telephone · Teléfono',
-    'lbl-dir':        'Address · Dirección',
-    'lbl-adultos':    'How many adults? · ¿Cuántos adultos viajan?',
-    'guests-note':    'Full names of all guests are required to generate QR access codes for the development.<br><em>Los nombres completos de todos los huéspedes son requeridos para generar los accesos QR al desarrollo.</em>',
-    'lbl-regl':       'Read regulations · Leer reglamento:',
-    'chk1-title':     'I agree to the rules · Acepto el reglamento',
-    'chk1-sub':       'I confirm I have read and agree to the rules and regulations of Paraíso del Mar.',
-    'chk2-title':     'Property interest · Interesado en propiedad',
-    'chk2-sub':       'I\'m interested in looking at property in La Paz / Me interesa ver propiedades en La Paz.',
-    'chk3-title':     'Communications · Comunicaciones',
-    'chk3-sub':       'I would like to receive information about promotions, activities and events.',
-    'lbl-firma':      'Signature · Firma',
-    'firma-status-ok':'✓ Signed',
-    'firma-status-no':'Pending',
-    'btn-clear-firma':'✕ Clear · Borrar firma',
-    'btnText':        'Submit & Generate PDF · Enviar registro y generar PDF',
-    'btnSending':     'Sending…',
-    'btnPDF':         'Generating PDF…',
-    'ok-msg':         '✓ Registration submitted successfully. Your signed PDF has been saved. Administration will review the information shortly.',
-    'err-reglamento': 'You must accept the Paraíso del Mar regulations to continue.',
-    'err-firma':      'Please sign the form before submitting.\nPor favor firme el formulario antes de enviar.',
-    'err-campos':     'Please fill in all required fields · Por favor complete todos los campos obligatorios.',
+    'h-sub':           'Guest Registration',
+    'banner-text':     (pm) => `<strong>${pm}</strong> has invited you to complete your arrival registration. Your unit and dates are already confirmed — just fill in your personal details and sign the regulations.`,
+    'pre-title-txt':   'Confirmed by your Property Manager',
+    'pre-lbl-unidad':  'Unit',
+    'pre-lbl-tipo':    'Type',
+    'pre-lbl-entrada': 'Check in',
+    'pre-lbl-salida':  'Check out',
+    'pre-tipo-pill':   'Rental',
+    'sec2-title':      'PRIMARY GUEST',
+    'sec3-title':      'OTHER GUESTS (1–8)',
+    'sec4-title':      'COMMITMENTS & PREFERENCES',
+    'sec5-title':      'GUEST SIGNATURE',
+    'lbl-nombre':      'Full name',
+    'lbl-email':       'Email',
+    'lbl-tel':         'Telephone',
+    'lbl-dir':         'Address',
+    'lbl-adultos':     'How many adults?',
+    'placeholder-nombre': 'As it appears on your ID',
+    'placeholder-dir':    'Street, City, State, Country, Postal Code',
+    'guests-note':     'Full names of all guests are required to generate QR access codes for the development.',
+    'lbl-regl':        'Read regulations:',
+    'chk1-title':      'I agree to the rules',
+    'chk1-sub':        'I confirm I have read and agree to the rules and regulations of Paraíso del Mar.',
+    'chk2-title':      'Property interest',
+    'chk2-sub':        "I'm interested in looking at property in La Paz.",
+    'chk3-title':      'Communications',
+    'chk3-sub':        'I would like to receive information about promotions, activities and events.',
+    'lbl-firma':       'Signature',
+    'firma-status-ok': '✓ Signed',
+    'firma-status-no': 'Pending',
+    'btn-clear-firma': '✕ Clear signature',
+    'btnText':         'Submit & Generate PDF',
+    'btnSending':      'Sending…',
+    'btnPDF':          'Generating PDF…',
+    'ok-msg':          '✓ Registration submitted successfully. Your signed PDF has been saved. Administration will review the information shortly.',
+    'err-reglamento':  'You must accept the Paraíso del Mar regulations to continue.',
+    'err-firma':       'Please sign the form before submitting.',
+    'err-campos':      'Please fill in all required fields.',
     'err-params-title':'Invalid link',
-    'err-params-sub': 'This link does not contain the necessary information. Please request a new link from your Property Manager.',
-    'guest-placeholder':'Full name · Nombre completo',
-    'solo-titular':   'Only the primary guest is traveling · Solo viaja el titular.',
-    'meses':          ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    'err-params-sub':  'This link does not contain the necessary information. Please request a new link from your Property Manager.',
+    'guest-placeholder':'Full name',
+    'solo-titular':    'Only the primary guest is traveling.',
+    'legal-txt':       'I have read and agree to abide by the rules and regulations of Paraiso del Mar. I acknowledge that breaking these rules may cause the loss of my time in the property. I also take full responsibility for any damage I or any of my guests may cause during my stay.',
+    'firma-instrucciones': 'Sign in the box using your finger (mobile) or cursor (computer).',
+    'meses':           ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
   }
 };
 
@@ -468,27 +475,69 @@ function setLang(l) {
 }
 
 function applyLang() {
-  const simpleIds = ['h-sub','pre-title-txt','pre-lbl-unidad','pre-lbl-tipo',
-    'pre-lbl-entrada','pre-lbl-salida','pre-tipo-pill','sec2-title','sec3-title',
-    'sec4-title','sec5-title','lbl-nombre','lbl-email','lbl-tel','lbl-dir',
-    'lbl-adultos','lbl-regl','chk1-title','chk1-sub','chk2-title','chk2-sub',
-    'chk3-title','chk3-sub','lbl-firma','btn-clear-firma','ok-msg',
-    'err-params-title','err-params-sub'];
-  simpleIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = t(id);
+  // Span IDs en el HTML
+  const spanMap = {
+    'h-sub-span':         'h-sub',
+    'pre-title-span':     'pre-title-txt',
+    'pre-lbl-unidad-span':'pre-lbl-unidad',
+    'pre-lbl-tipo-span':  'pre-lbl-tipo',
+    'pre-lbl-entrada-span':'pre-lbl-entrada',
+    'pre-lbl-salida-span':'pre-lbl-salida',
+    'pre-tipo-span':      'pre-tipo-pill',
+    'sec2-txt':           'sec2-title',
+    'sec3-txt':           'sec3-title',
+    'sec4-txt':           'sec4-title',
+    'sec5-txt':           'sec5-title',
+    'lbl-nombre-txt':     'lbl-nombre',
+    'lbl-email-txt':      'lbl-email',
+    'lbl-tel-txt':        'lbl-tel',
+    'lbl-dir-txt':        'lbl-dir',
+    'lbl-adultos-span':   'lbl-adultos',
+    'lbl-regl-span':      'lbl-regl',
+    'chk1-title-span':    'chk1-title',
+    'chk1-sub-span':      'chk1-sub',
+    'chk2-title-span':    'chk2-title',
+    'chk2-sub-span':      'chk2-sub',
+    'chk3-title-span':    'chk3-title',
+    'chk3-sub-span':      'chk3-sub',
+    'lbl-firma-span':     'lbl-firma',
+    'btn-clear-span':     'btn-clear-firma',
+    'btn-submit-span':    'btnText',
+    'ok-msg':             'ok-msg',
+    'err-params-title':   'err-params-title',
+    'err-params-sub':     'err-params-sub',
+  };
+  Object.entries(spanMap).forEach(([spanId, key]) => {
+    const el = document.getElementById(spanId);
+    if (el) el.textContent = t(key);
   });
-  // guests-note tiene HTML
+  // Placeholders
+  const nombre = document.getElementById('nombre_huesped');
+  if (nombre) nombre.placeholder = t('placeholder-nombre');
+  const dir = document.getElementById('direccion');
+  if (dir) dir.placeholder = t('placeholder-dir');
+  // guests-note texto simple
   const gn = document.getElementById('guests-note');
-  if (gn) gn.innerHTML = t('guests-note');
-  // banner con PM
+  if (gn) gn.textContent = t('guests-note');
+  // Texto legal — un solo idioma
+  const legalEl = document.getElementById('legal-es');
+  if (legalEl) legalEl.textContent = t('legal-txt');
+  const legalEnEl = document.getElementById('legal-en');
+  if (legalEnEl) legalEnEl.style.display = 'none';
+  // Instrucciones firma
+  const fi = document.getElementById('firma-instrucciones');
+  if (fi) fi.textContent = t('firma-instrucciones');
+  // Banner con PM
   document.getElementById('banner-text').innerHTML = t('banner-text', pmNombre || 'Property Manager');
-  // firma status
+  // Firma status
   updateFirmaStatusText();
-  // regenerar guests con placeholder correcto
+  // Guests con placeholder correcto
   updateGuests();
-  // fechas en el idioma correcto
+  // Fechas en idioma correcto
   if (urlParams.fecha_entrada) renderFechas();
+  // Header sub
+  const hsub = document.getElementById('h-sub');
+  if (hsub) hsub.innerHTML = t('h-sub');
 }
 
 // ── Leer parámetros URL ───────────────────────────────────────
