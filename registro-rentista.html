@@ -590,7 +590,16 @@ function resizeCanvas() {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 }
-resizeCanvas();
+// Esperar a que el canvas tenga dimensiones reales antes de inicializar
+function initCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width === 0) {
+    requestAnimationFrame(initCanvas);
+    return;
+  }
+  resizeCanvas();
+}
+requestAnimationFrame(initCanvas);
 window.addEventListener('resize', resizeCanvas);
 
 function getPos(e) {
