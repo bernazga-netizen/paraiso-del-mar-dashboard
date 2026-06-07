@@ -1138,11 +1138,24 @@ async function loadPMs() {
           <div class="pm-name">${pm.nombre}</div>
           <div class="pm-contact">${pm.email || ''}${pm.email && pm.telefono ? ' · ' : ''}${pm.telefono || ''}${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}</div>
         </div>
-        <button class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}" onclick="togglePM(${pm.id}, ${pm.activo})">
-          ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
-        </button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          ${pm.activo ? `<button style="background:var(--teal);border:none;color:white;padding:4px 10px;border-radius:3px;font-family:Verdana,sans-serif;font-size:9px;font-weight:bold;letter-spacing:.08em;cursor:pointer;white-space:nowrap;" onclick="copyPMLink(${pm.id}, '${pm.nombre.replace(/'/g, "\\'")}')">🔗 Copiar link</button>` : ''}
+          <button class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}" onclick="togglePM(${pm.id}, ${pm.activo})">
+            ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
+          </button>
+        </div>
       </div>`).join('');
   } catch(e) { document.getElementById('pmListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar PMs</div>'; }
+}
+
+function copyPMLink(pmId, pmNombre) {
+  const base = window.location.origin + window.location.pathname.replace('dashboard-admin.html', '');
+  const link = `${base}generador-link.html?pm_id=${pmId}`;
+  navigator.clipboard.writeText(link).then(() => {
+    showToast(`Link de ${pmNombre} copiado`, 'Property Manager');
+  }).catch(() => {
+    prompt(`Link para ${pmNombre} — copia manualmente:`, link);
+  });
 }
 
 async function agregarPM() {
