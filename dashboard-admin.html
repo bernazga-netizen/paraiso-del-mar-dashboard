@@ -398,6 +398,7 @@
       <span id="clock"></span>
       <div class="user-pill" onclick="openPerfilModal()" title="Mi perfil"><div class="user-avatar" id="userAvatar">?</div><span id="userNombre">—</span></div>
       <button id="btnUsuarios" class="btn-pm" onclick="openUsuariosModal()" style="display:none">👥 Usuarios</button>
+      <button id="btnGestionPMs" class="btn-pm" onclick="window.location.href='gestion-pms.html'" style="display:none">🏢 Gestión PMs</button>
       <button class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
       <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
     </div>
@@ -1295,6 +1296,7 @@ function mostrarDashboard() {
   document.getElementById('userNombre').textContent = usuarioActual.nombre.split(' ')[0];
   document.getElementById('userAvatar').textContent = usuarioActual.nombre.charAt(0).toUpperCase();
   document.getElementById('btnUsuarios').style.display = usuarioActual.rol === 'admin' ? 'inline-block' : 'none';
+  document.getElementById('btnGestionPMs').style.display = ['admin','gerente'].includes(usuarioActual.rol) ? 'inline-block' : 'none';
   loadData();
   loadPMFilter();
   loadAuditoriaUsuarios();
