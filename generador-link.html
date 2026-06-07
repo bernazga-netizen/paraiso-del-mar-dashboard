@@ -124,18 +124,23 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
   <div id="error-box" class="error-msg"></div>
 
   <div class="step-bar">
-    <div class="step active" id="step1">
+    <div class="step active" id="step0">
       <div class="step-num">1</div>
+      <div class="step-lbl" id="s0-lbl">PM</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step pending" id="step1">
+      <div class="step-num">2</div>
       <div class="step-lbl" id="s1-lbl">UNIDAD</div>
     </div>
     <div class="step-line"></div>
     <div class="step pending" id="step2">
-      <div class="step-num">2</div>
+      <div class="step-num">3</div>
       <div class="step-lbl" id="s2-lbl">FECHAS</div>
     </div>
     <div class="step-line"></div>
     <div class="step pending" id="step3">
-      <div class="step-num">3</div>
+      <div class="step-num">4</div>
       <div class="step-lbl" id="s3-lbl">LINK</div>
     </div>
   </div>
@@ -148,10 +153,27 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
   <div class="section">
     <div class="section-header">
       <div class="section-num">1</div>
+      <div class="section-title">PROPERTY MANAGER</div>
+    </div>
+    <div class="section-body">
+      <div class="field">
+        <label id="lbl-sel-pm">Selecciona el Property Manager <span style="color:var(--teal)">*</span></label>
+        <div class="select-wrap">
+          <select id="sel-pm" onchange="onPMSelect()">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
       <div class="section-title" id="sec1-title">UNIDAD · UNIT</div>
     </div>
     <div class="section-body">
-      <div id="loading-msg" class="loading-msg">Cargando unidades...</div>
+      <div id="loading-msg" class="loading-msg" style="display:none;">Cargando unidades...</div>
       <div id="unidad-form" style="display:none;">
         <div class="field">
           <label id="lbl-unidad">Unidad <span class="req">*</span></label>
@@ -184,7 +206,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
 
   <div class="section">
     <div class="section-header">
-      <div class="section-num">2</div>
+      <div class="section-num">3</div>
       <div class="section-title" id="sec2-title">FECHAS DE ESTANCIA · STAY DATES</div>
     </div>
     <div class="section-body">
@@ -206,7 +228,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
 
   <div class="section">
     <div class="section-header">
-      <div class="section-num">3</div>
+      <div class="section-num">4</div>
       <div class="section-title" id="sec3-title">LINK GENERADO · GENERATED LINK</div>
     </div>
     <div class="section-body">
@@ -345,6 +367,7 @@ let lang = 'es';
 let unidades = [];
 let pmNombre = '';
 let pmId = null;
+let todosPMs = [];
 
 function t(key) { return T[lang][key] || T['es'][key] || key; }
 
@@ -375,14 +398,52 @@ function applyLang() {
 
 // ── Cargar datos del PM desde URL ────────────────────────────
 async function init() {
-  const params = new URLSearchParams(window.location.search);
-  pmId = parseInt(params.get('pm_id') || params.get('pm'));
+  // Cargar lista de PMs activos para el selector
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/managers`);
+    const data = await r.json();
+    todosPMs = (data.data || []).filter(p => p.activo);
+    const sel = document.getElementById('sel-pm');
+    todosPMs.forEach(pm => {
+      const o = document.createElement('option');
+      o.value = pm.id;
+      o.textContent = pm.nombre;
+      sel.appendChild(o);
+    });
+  } catch(e) {
+    showError(t('err-unidades'));
+  }
 
-  if (!pmId || isNaN(pmId)) {
-    showError(t('err-pm'));
-    document.getElementById('loading-msg').style.display = 'none';
+  // Si viene pm_id en la URL, preseleccionar
+  const params = new URLSearchParams(window.location.search);
+  const urlPmId = parseInt(params.get('pm_id') || params.get('pm'));
+  if (urlPmId && !isNaN(urlPmId)) {
+    document.getElementById('sel-pm').value = urlPmId;
+    await onPMSelect();
+  }
+}
+
+async function onPMSelect() {
+  const sel = document.getElementById('sel-pm');
+  pmId = parseInt(sel.value) || null;
+
+  // Resetear unidades y preview
+  unidades = [];
+  pmNombre = '';
+  document.getElementById('unidad-form').style.display = 'none';
+  document.getElementById('loading-msg').style.display = 'none';
+  document.getElementById('sel-unidad').innerHTML = `<option value="">${t('sel-unidad')}</option>`;
+  resetForm();
+
+  if (!pmId) {
+    document.getElementById('step0').className = 'step active';
+    document.getElementById('step1').className = 'step pending';
     return;
   }
+
+  document.getElementById('loading-msg').style.display = 'block';
+  document.getElementById('step0').className = 'step done';
+  document.getElementById('step1').className = 'step active';
 
   try {
     const r = await fetch(`${API_BASE}/api/inhouse/unidades-por-pm?pm_id=${pmId}`);
@@ -395,8 +456,8 @@ async function init() {
     document.getElementById('loading-msg').style.display = 'none';
     document.getElementById('unidad-form').style.display = 'block';
   } catch(e) {
-    showError(t('err-unidades'));
     document.getElementById('loading-msg').style.display = 'none';
+    showError(t('err-unidades'));
   }
 }
 
@@ -465,11 +526,12 @@ function updateSteps() {
   const unidad = document.getElementById('sel-unidad').value;
   const entrada = document.getElementById('fecha-entrada').value;
   const salida  = document.getElementById('fecha-salida').value;
+  const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
-  if (unidad) { step2.className = 'step active'; }
+  if (unidad) { step1.className = 'step done'; step2.className = 'step active'; }
   if (unidad && entrada && salida) { step2.className = 'step done'; step3.className = 'step active'; }
-  if (!unidad) { step2.className = 'step pending'; step3.className = 'step pending'; }
+  if (!unidad) { step1.className = pmId ? 'step active' : 'step pending'; step2.className = 'step pending'; step3.className = 'step pending'; }
 }
 
 function fmtDate(d) {
@@ -630,6 +692,7 @@ function resetForm() {
   document.getElementById('noches-badge').style.display = 'none';
   document.getElementById('preview-placeholder').style.display = 'block';
   document.getElementById('preview-content').style.display = 'none';
+  document.getElementById('step1').className = pmId ? 'step active' : 'step pending';
   document.getElementById('step2').className = 'step pending';
   document.getElementById('step3').className = 'step pending';
   clearError();
