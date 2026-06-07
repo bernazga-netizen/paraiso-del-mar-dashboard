@@ -589,6 +589,7 @@ async function loadUnidades() {
 }
 
 function filtrarUnidades() {
+  if (!todasLasUnidades.length) return;
   const tipo    = document.getElementById('fil-tipo').value;
   const edif    = document.getElementById('fil-edificio').value;
   const pm      = document.getElementById('fil-pm').value;
