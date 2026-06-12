@@ -853,6 +853,13 @@
 </div>
 
 <script>
+// ── Utilidad de escape XSS ───────────────────────────────────
+function esc(str) {
+  const d = document.createElement('div');
+  d.textContent = str ?? '';
+  return d.innerHTML;
+}
+
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
 function authHeaders() {
   const token = sessionStorage.getItem('pdm_token');
@@ -931,15 +938,15 @@ function renderTable(rows) {
     const hasPdf = !!r.pdf_firmado_url;
     return `
       <tr onclick="openModal('${r.id}')">
-        <td class="primary">${r.unidad}</td>
-        <td class="primary">${r.nombre_huesped}</td>
-        <td><span class="tipo-badge tipo-${r.tipo || 'R'}">${r.tipo} · ${tipos[r.tipo] || ''}</span></td>
+        <td class="primary">${esc(r.unidad)}</td>
+        <td class="primary">${esc(r.nombre_huesped)}</td>
+        <td><span class="tipo-badge tipo-${esc(r.tipo || 'R')}">${esc(r.tipo)} · ${esc(tipos[r.tipo] || '')}</span></td>
         <td>${fmtDate(r.fecha_ingreso)}</td>
         <td>${r.fecha_salida ? fmtDate(r.fecha_salida) : '<span style="color:var(--ink-mid);font-size:10px">Sin fecha</span>'}</td>
-        <td style="text-align:center;font-weight:bold">${r.num_personas}</td>
-        <td>${r.property_manager || '<span style="color:var(--ink-mid)">—</span>'}</td>
+        <td style="text-align:center;font-weight:bold">${esc(String(r.num_personas))}</td>
+        <td>${r.property_manager ? esc(r.property_manager) : '<span style="color:var(--ink-mid)">—</span>'}</td>
         <td><span class="${estCls}">${estTxt}</span></td>
-        <td onclick="event.stopPropagation();${hasPdf ? `downloadPdf('${r.id}','${r.unidad}')` : ''}">
+        <td onclick="event.stopPropagation();${hasPdf ? `downloadPdf('${r.id}','${esc(r.unidad)}')` : ''}">
           <span class="pdf-icon ${hasPdf ? 'has-pdf' : ''}" title="${hasPdf ? 'Descargar PDF firmado' : 'Sin PDF'}">📄</span>
         </td>
       </tr>`;
@@ -994,25 +1001,25 @@ async function openModal(id) {
     const tipoLabels = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente Permanente' };
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
-        <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
-        <div class="detail-field"><label>Tipo</label><p>${tipoLabels[r.tipo] || r.tipo}</p></div>
+        <div class="detail-field"><label>Unidad</label><p>${esc(r.unidad)}</p></div>
+        <div class="detail-field"><label>Tipo</label><p>${esc(tipoLabels[r.tipo] || r.tipo)}</p></div>
       </div>
       <div class="detail-row">
         <div class="detail-field"><label>Check in</label><p>${fmtDate(r.fecha_ingreso)}</p></div>
         <div class="detail-field"><label>Check out</label><p>${r.fecha_salida ? fmtDate(r.fecha_salida) : 'Sin fecha'}</p></div>
       </div>
       <div class="detail-row">
-        <div class="detail-field"><label>Email</label><p>${r.email || '—'}</p></div>
-        <div class="detail-field"><label>Teléfono</label><p>${r.telefono || '—'}</p></div>
+        <div class="detail-field"><label>Email</label><p>${esc(r.email || '—')}</p></div>
+        <div class="detail-field"><label>Teléfono</label><p>${esc(r.telefono || '—')}</p></div>
       </div>
-      <div class="detail-field"><label>Dirección</label><p>${r.direccion || '—'}</p></div>
-      <div class="detail-field"><label>Total personas</label><p>${r.num_personas}</p></div>
+      <div class="detail-field"><label>Dirección</label><p>${esc(r.direccion || '—')}</p></div>
+      <div class="detail-field"><label>Total personas</label><p>${esc(String(r.num_personas))}</p></div>
       ${acomps.length ? `<div class="detail-field"><label>Huéspedes adicionales</label>
-        <div class="acomp-list">${acomps.map(n => `<span class="acomp-chip">${typeof n === 'object' ? n.nombre : n}</span>`).join('')}</div></div>` : ''}
-      ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${r.notas}</p></div>` : ''}
+        <div class="acomp-list">${acomps.map(n => `<span class="acomp-chip">${esc(typeof n === 'object' ? n.nombre : n)}</span>`).join('')}</div></div>` : ''}
+      ${r.notas ? `<div class="detail-field"><label>Notas</label><p>${esc(r.notas)}</p></div>` : ''}
       ${r.pdf_firmado_url
         ? `<div class="detail-field"><label>Documento firmado</label>
-            <button class="btn-sec" onclick="downloadPdf('${r.id}','${r.unidad}')">📄 Descargar PDF firmado</button></div>`
+            <button class="btn-sec" onclick="downloadPdf('${r.id}','${esc(r.unidad)}')">📄 Descargar PDF firmado</button></div>`
         : `<div style="font-size:11px;color:var(--ink-mid)">Sin PDF adjunto</div>`}
     `;
     document.getElementById('modalOverlay').classList.add('open');
@@ -1038,7 +1045,7 @@ async function openEditModal() {
     pmsCatalogo = pms.filter(p => p.activo);
     const selPm = document.getElementById('edit-pm');
     selPm.innerHTML = '<option value="">— Sin PM —</option>' +
-      pmsCatalogo.map(p => `<option value="${p.id}">${p.nombre}</option>`).join('');
+      pmsCatalogo.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
 
     const { data: r } = await fetch(`${API_BASE}/api/inhouse/${actualId}`, { headers: authHeaders() }).then(x => x.json());
     document.getElementById('editSub').textContent = `${r.unidad} · ${r.nombre_huesped}`;
@@ -1136,11 +1143,11 @@ async function loadPMs() {
     el.innerHTML = data.map(pm => `
       <div class="pm-row ${pm.activo ? '' : 'inactive'}">
         <div>
-          <div class="pm-name">${pm.nombre}</div>
-          <div class="pm-contact">${pm.email || ''}${pm.email && pm.telefono ? ' · ' : ''}${pm.telefono || ''}${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}</div>
+          <div class="pm-name">${esc(pm.nombre)}</div>
+          <div class="pm-contact">${esc(pm.email || '')}${pm.email && pm.telefono ? ' · ' : ''}${esc(pm.telefono || '')}${!pm.email && !pm.telefono ? 'Sin contacto registrado' : ''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          ${pm.activo ? `<button style="background:var(--teal);border:none;color:white;padding:4px 10px;border-radius:3px;font-family:Verdana,sans-serif;font-size:9px;font-weight:bold;letter-spacing:.08em;cursor:pointer;white-space:nowrap;" onclick="copyPMLink(${pm.id}, '${pm.nombre.replace(/'/g, "\\'")}')">🔗 Copiar link</button>` : ''}
+          ${pm.activo ? `<button style="background:var(--teal);border:none;color:white;padding:4px 10px;border-radius:3px;font-family:Verdana,sans-serif;font-size:9px;font-weight:bold;letter-spacing:.08em;cursor:pointer;white-space:nowrap;" onclick="copyPMLink(${pm.id})">🔗 Copiar link</button>` : ''}
           <button class="${pm.activo ? 'pm-badge-active' : 'pm-badge-inactive'}" onclick="togglePM(${pm.id}, ${pm.activo})">
             ${pm.activo ? '✓ Activo' : '✗ Inactivo'}
           </button>
@@ -1149,13 +1156,13 @@ async function loadPMs() {
   } catch(e) { document.getElementById('pmListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar PMs</div>'; }
 }
 
-function copyPMLink(pmId, pmNombre) {
+function copyPMLink(pmId) {
   const base = window.location.origin + window.location.pathname.replace('dashboard-admin.html', '');
   const link = `${base}generador-link.html?pm_id=${pmId}`;
   navigator.clipboard.writeText(link).then(() => {
-    showToast(`Link de ${pmNombre} copiado`, 'Property Manager');
+    showToast('Link copiado', 'Property Manager');
   }).catch(() => {
-    prompt(`Link para ${pmNombre} — copia manualmente:`, link);
+    prompt('Copia el link manualmente:', link);
   });
 }
 
