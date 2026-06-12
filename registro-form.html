@@ -650,7 +650,13 @@ actualizarCamposRequeridos();
 
 // ── Renta: abrir generador de link al presionar R ────────────
 document.getElementById('tipoR').addEventListener('click', function() {
-  window.open('https://paraiso-del-mar-dashboard.vercel.app/generador-link.html', '_blank');
+  const a = document.createElement('a');
+  a.href = 'https://paraiso-del-mar-dashboard.vercel.app/generador-link.html';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 });
 
 // ── Guests grid ──────────────────────────────────────────────
