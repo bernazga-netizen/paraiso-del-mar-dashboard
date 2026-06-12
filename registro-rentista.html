@@ -586,8 +586,8 @@ function setReglamentoLinks() {
   const unidad = urlParams.unidad || '';
   const esCasa = unidad.toUpperCase().startsWith('CASA') || /^\d/.test(unidad);
   const tipo = esCasa ? 'casas' : 'condos';
-  document.getElementById('link-regl-es').href = `/docs/reglamento-${tipo}-es.pdf`;
-  document.getElementById('link-regl-en').href = `/docs/reglamento-${tipo}-en.pdf`;
+  document.getElementById('link-regl-es').href = '/docs/reglamento-rental-es.pdf';
+  document.getElementById('link-regl-en').href = '/docs/reglamento-rental-en.pdf';
 }
 
 async function init() {
