@@ -91,6 +91,12 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
 .regl-btns{display:flex;gap:8px;flex-wrap:wrap;}
 .btn-reg{display:inline-flex;align-items:center;gap:6px;background:var(--navy);color:white;padding:7px 14px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.08em;text-decoration:none;transition:background .15s;}
 .btn-reg:hover{background:var(--teal);}
+.btn-reg.abierto{background:var(--emerald);}
+.regl-hint{font-size:11px;display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:3px;margin-top:10px;}
+.regl-hint.locked{background:#fdf0ef;color:#c0392b;border:1px solid #f5c6c6;}
+.regl-hint.unlocked{background:#e8f5ee;color:var(--ok);border:1px solid #a8d5b5;}
+.check-item.disabled{cursor:not-allowed;opacity:.45;}
+.check-item.disabled .check-box{background:var(--dust);border-color:var(--border);}
 
 .check-group{display:flex;flex-direction:column;gap:10px;}
 .check-item{display:flex;gap:11px;cursor:pointer;align-items:flex-start;}
@@ -284,11 +290,14 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
                   English
                 </a>
               </div>
+              <div class="regl-hint locked" id="regl-hint">
+                🔒 <span id="regl-hint-txt">Abra el reglamento para habilitar esta opción</span>
+              </div>
             </div>
           </div>
           <div class="check-group">
-            <label class="check-item">
-              <input type="checkbox" id="acepta_reglamento">
+            <label class="check-item disabled" id="check-reglamento-item">
+              <input type="checkbox" id="acepta_reglamento" disabled>
               <div class="check-box"></div>
               <span class="check-text">
                 <strong id="chk1-title"><span id="chk1-title-span"></span></strong>
@@ -533,6 +542,18 @@ function applyLang() {
   updateFirmaStatusText();
   // Guests con placeholder correcto
   updateGuests();
+  // Hint reglamento — actualizar si ya está desbloqueado
+  const hintTxt = document.getElementById('regl-hint-txt');
+  const hint = document.getElementById('regl-hint');
+  if (hint && hint.classList.contains('unlocked') && hintTxt) {
+    hintTxt.textContent = lang === 'en'
+      ? 'Regulations opened — you may now accept the terms'
+      : 'Reglamento abierto — ya puede aceptar los términos';
+  } else if (hintTxt && !hint.classList.contains('unlocked')) {
+    hintTxt.textContent = lang === 'en'
+      ? 'Open the regulations to enable this option'
+      : 'Abra el reglamento para habilitar esta opción';
+  }
   // Fechas en idioma correcto
   if (urlParams.fecha_entrada) renderFechas();
   // Header sub
@@ -583,11 +604,32 @@ function renderFechas() {
 }
 
 function setReglamentoLinks() {
-  const unidad = urlParams.unidad || '';
-  const esCasa = unidad.toUpperCase().startsWith('CASA') || /^\d/.test(unidad);
-  const tipo = esCasa ? 'casas' : 'condos';
   document.getElementById('link-regl-es').href = '/docs/reglamento-rental-es.pdf';
   document.getElementById('link-regl-en').href = '/docs/reglamento-rental-en.pdf';
+
+  ['link-regl-es','link-regl-en'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function() {
+      this.classList.add('abierto');
+      const svgIcon = this.querySelector('svg');
+      if (svgIcon) svgIcon.outerHTML = '✓';
+      desbloquearReglamento();
+    });
+  });
+}
+
+function desbloquearReglamento() {
+  const hint     = document.getElementById('regl-hint');
+  const hintTxt  = document.getElementById('regl-hint-txt');
+  const chkItem  = document.getElementById('check-reglamento-item');
+  const chk      = document.getElementById('acepta_reglamento');
+  hint.classList.remove('locked');
+  hint.classList.add('unlocked');
+  hint.querySelector('span') || hint;
+  hintTxt.textContent = lang === 'en'
+    ? 'Regulations opened — you may now accept the terms'
+    : 'Reglamento abierto — ya puede aceptar los términos';
+  chkItem.classList.remove('disabled');
+  chk.disabled = false;
 }
 
 async function init() {
