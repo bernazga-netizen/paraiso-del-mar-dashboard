@@ -628,13 +628,18 @@ if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').val
 
 // ── Validación dinámica por tipo ─────────────────────────────
 function actualizarCamposRequeridos() {
-  const tipo = document.querySelector('input[name="tipo"]:checked').value;
+  const tipoEl = document.querySelector('input[name="tipo"]:checked');
+  if (!tipoEl) return;
+  const tipo = tipoEl.value;
   const esPropietario = tipo === 'H';
   const dirReq = tipo === 'R' || tipo === 'G';
 
-  document.getElementById('req-email').style.display     = esPropietario ? 'none' : 'inline';
-  document.getElementById('req-telefono').style.display  = esPropietario ? 'none' : 'inline';
-  document.getElementById('req-direccion').style.display = dirReq ? 'inline' : 'none';
+  const reqEmail = document.getElementById('req-email');
+  const reqTel   = document.getElementById('req-telefono');
+  const reqDir   = document.getElementById('req-direccion');
+  if (reqEmail) reqEmail.style.display     = esPropietario ? 'none' : 'inline';
+  if (reqTel)   reqTel.style.display       = esPropietario ? 'none' : 'inline';
+  if (reqDir)   reqDir.style.display       = dirReq ? 'inline' : 'none';
 
   const optTxt = lang === 'en' ? ' (optional)' : ' (opcional)';
   document.getElementById('email').placeholder    = 'email@example.com' + (esPropietario ? optTxt : '');
