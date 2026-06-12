@@ -496,11 +496,9 @@ document.querySelectorAll('input[name="tipo"]').forEach(r => {
 });
 actualizarCamposRequeridos();
 
-// ── Renta: abrir generador de link al seleccionar R ───────────
-document.getElementById('tipoR').addEventListener('change', function() {
-  if (this.checked) {
-    window.open('https://paraiso-del-mar-dashboard.vercel.app/generador-link.html', '_blank');
-  }
+// ── Renta: abrir generador de link al presionar R ────────────
+document.getElementById('tipoR').addEventListener('click', function() {
+  window.open('https://paraiso-del-mar-dashboard.vercel.app/generador-link.html', '_blank');
 });
 
 // ── Guests grid ──────────────────────────────────────────────
