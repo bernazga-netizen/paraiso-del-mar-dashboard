@@ -676,7 +676,7 @@ let drawing = false, hasFirma = false;
 
 function resizeCanvas() {
   const rect = canvas.getBoundingClientRect();
-  if (rect.width === 0) return; // aún no renderizado
+  if (rect.width === 0) { requestAnimationFrame(resizeCanvas); return; }
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = rect.width  * dpr;
   canvas.height = rect.height * dpr;
@@ -687,16 +687,15 @@ function resizeCanvas() {
   ctx.lineJoin = 'round';
 }
 window.addEventListener('resize', resizeCanvas);
-document.addEventListener('DOMContentLoaded', resizeCanvas);
-// fallback por si DOMContentLoaded ya pasó
-if (document.readyState === 'complete' || document.readyState === 'interactive') resizeCanvas();
+document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(resizeCanvas));
+if (document.readyState === 'complete' || document.readyState === 'interactive') requestAnimationFrame(resizeCanvas);
 
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const src = e.touches ? e.touches[0] : e;
   return { x: src.clientX - rect.left, y: src.clientY - rect.top };
 }
-canvas.addEventListener('mousedown',  e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousedown',  e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
 canvas.addEventListener('mousemove',  e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasFirma = true; });
 canvas.addEventListener('mouseup',    () => { drawing = false; updateFirmaStatus(); });
 canvas.addEventListener('mouseleave', () => { drawing = false; });
