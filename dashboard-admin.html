@@ -1333,7 +1333,7 @@ function cerrarSesion() {
   sessionStorage.removeItem('pdm_usuario');
   sessionStorage.removeItem('pdm_token');
   usuarioActual = null;
-  document.getElementById('perfilOverlay').style.display = 'none';
+  document.getElementById('perfilOverlay').classList.remove('open');
   document.getElementById('dashboardScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('login-password').value = '';
