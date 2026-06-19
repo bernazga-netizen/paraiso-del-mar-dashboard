@@ -637,6 +637,7 @@ function actualizarCamposRequeridos() {
   const tipo = tipoEl.value;
   const esPropietario = tipo === 'H' || tipo === 'P';
   const dirReq = tipo === 'R' || tipo === 'G';
+  const fechaSalidaReq = tipo === 'H' || tipo === 'G';
 
   const reqEmail = document.getElementById('req-email');
   const reqTel   = document.getElementById('req-telefono');
@@ -644,6 +645,11 @@ function actualizarCamposRequeridos() {
   if (reqEmail) reqEmail.style.display     = esPropietario ? 'none' : 'inline';
   if (reqTel)   reqTel.style.display       = esPropietario ? 'none' : 'inline';
   if (reqDir)   reqDir.style.display       = dirReq ? 'inline' : 'none';
+
+  const fechaSalidaInput = document.getElementById('fecha_salida');
+  if (fechaSalidaInput && tipo !== 'P') {
+    fechaSalidaInput.required = fechaSalidaReq;
+  }
 
   const optTxt = lang === 'en' ? ' (optional)' : ' (opcional)';
   document.getElementById('email').placeholder    = 'email@example.com' + (esPropietario ? optTxt : '');
