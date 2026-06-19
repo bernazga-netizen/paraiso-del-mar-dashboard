@@ -207,6 +207,8 @@
               <label class="tipo-label" for="tipoR" id="lbl-tipoR">R · Renta</label>
               <input class="tipo-opt" type="radio" name="tipo" id="tipoG" value="G">
               <label class="tipo-label" for="tipoG" id="lbl-tipoG">G · Invitado</label>
+              <input class="tipo-opt" type="radio" name="tipo" id="tipoP" value="P">
+              <label class="tipo-label" for="tipoP" id="lbl-tipoP">P · Residente Permanente</label>
             </div>
           </div>
         </div>
@@ -364,6 +366,7 @@ const T = {
     'lbl-tipoH':          'H · Propietario',
     'lbl-tipoR':          'R · Renta',
     'lbl-tipoG':          'G · Invitado',
+    'lbl-tipoP':          'P · Residente Permanente',
     'lbl-nombre':         'Nombre completo',
     'lbl-email':          'Correo electrónico',
     'lbl-telefono':       'Teléfono',
@@ -406,6 +409,7 @@ const T = {
     'lbl-tipoH':          'H · Owner',
     'lbl-tipoR':          'R · Rental',
     'lbl-tipoG':          'G · Guest',
+    'lbl-tipoP':          'P · Permanent Resident',
     'lbl-nombre':         'Full name',
     'lbl-email':          'Email',
     'lbl-telefono':       'Phone',
@@ -447,7 +451,7 @@ function setLang(l) {
 function applyLang() {
   const textIds = ['h-sub','sec1-title','sec2-title','sec3-title','sec4-title','sec5-title',
     'lbl-tipo-prop','lbl-edificio','lbl-unidad','lbl-entrada','lbl-salida','lbl-pm',
-    'lbl-tipo-ocup','lbl-tipoH','lbl-tipoR','lbl-tipoG','lbl-nombre','lbl-email',
+    'lbl-tipo-ocup','lbl-tipoH','lbl-tipoR','lbl-tipoG','lbl-tipoP','lbl-nombre','lbl-email',
     'lbl-telefono','lbl-direccion','lbl-firma-inst','lbl-firma','lbl-acepto-title',
     'lbl-acepto-body','lbl-interes-title','lbl-interes-body','lbl-com-title','lbl-com-body',
     'lbl-reglamento-leer','lbl-status-ok','lbl-pdf-fallback'];
@@ -650,6 +654,18 @@ function actualizarCamposRequeridos() {
 
 document.querySelectorAll('input[name="tipo"]').forEach(r => {
   r.addEventListener('change', actualizarCamposRequeridos);
+  r.addEventListener('change', function() {
+    const fechaSalida = document.getElementById('fecha_salida');
+    const fechaSalidaField = fechaSalida.closest('.field');
+    if (this.value === 'P') {
+      fechaSalida.value = '';
+      fechaSalida.disabled = true;
+      if (fechaSalidaField) fechaSalidaField.style.display = 'none';
+    } else {
+      fechaSalida.disabled = false;
+      if (fechaSalidaField) fechaSalidaField.style.display = '';
+    }
+  });
 });
 actualizarCamposRequeridos();
 
