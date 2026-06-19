@@ -207,6 +207,8 @@
               <label class="tipo-label" for="tipoR" id="lbl-tipoR">R · Renta</label>
               <input class="tipo-opt" type="radio" name="tipo" id="tipoG" value="G">
               <label class="tipo-label" for="tipoG" id="lbl-tipoG">G · Invitado</label>
+              <input class="tipo-opt" type="radio" name="tipo" id="tipoP" value="P">
+              <label class="tipo-label" for="tipoP" id="lbl-tipoP">P · Residente Permanente</label>
             </div>
           </div>
         </div>
@@ -364,6 +366,7 @@ const T = {
     'lbl-tipoH':          'H · Propietario',
     'lbl-tipoR':          'R · Renta',
     'lbl-tipoG':          'G · Invitado',
+    'lbl-tipoP':          'P · Residente Permanente',
     'lbl-nombre':         'Nombre completo',
     'lbl-email':          'Correo electrónico',
     'lbl-telefono':       'Teléfono',
@@ -406,6 +409,7 @@ const T = {
     'lbl-tipoH':          'H · Owner',
     'lbl-tipoR':          'R · Rental',
     'lbl-tipoG':          'G · Guest',
+    'lbl-tipoP':          'P · Permanent Resident',
     'lbl-nombre':         'Full name',
     'lbl-email':          'Email',
     'lbl-telefono':       'Phone',
@@ -447,7 +451,7 @@ function setLang(l) {
 function applyLang() {
   const textIds = ['h-sub','sec1-title','sec2-title','sec3-title','sec4-title','sec5-title',
     'lbl-tipo-prop','lbl-edificio','lbl-unidad','lbl-entrada','lbl-salida','lbl-pm',
-    'lbl-tipo-ocup','lbl-tipoH','lbl-tipoR','lbl-tipoG','lbl-nombre','lbl-email',
+    'lbl-tipo-ocup','lbl-tipoH','lbl-tipoR','lbl-tipoG','lbl-tipoP','lbl-nombre','lbl-email',
     'lbl-telefono','lbl-direccion','lbl-firma-inst','lbl-firma','lbl-acepto-title',
     'lbl-acepto-body','lbl-interes-title','lbl-interes-body','lbl-com-title','lbl-com-body',
     'lbl-reglamento-leer','lbl-status-ok','lbl-pdf-fallback'];
@@ -631,8 +635,9 @@ function actualizarCamposRequeridos() {
   const tipoEl = document.querySelector('input[name="tipo"]:checked');
   if (!tipoEl) return;
   const tipo = tipoEl.value;
-  const esPropietario = tipo === 'H';
+  const esPropietario = tipo === 'H' || tipo === 'P';
   const dirReq = tipo === 'R' || tipo === 'G';
+  const fechaSalidaReq = tipo === 'H' || tipo === 'G';
 
   const reqEmail = document.getElementById('req-email');
   const reqTel   = document.getElementById('req-telefono');
@@ -640,6 +645,11 @@ function actualizarCamposRequeridos() {
   if (reqEmail) reqEmail.style.display     = esPropietario ? 'none' : 'inline';
   if (reqTel)   reqTel.style.display       = esPropietario ? 'none' : 'inline';
   if (reqDir)   reqDir.style.display       = dirReq ? 'inline' : 'none';
+
+  const fechaSalidaInput = document.getElementById('fecha_salida');
+  if (fechaSalidaInput && tipo !== 'P') {
+    fechaSalidaInput.required = fechaSalidaReq;
+  }
 
   const optTxt = lang === 'en' ? ' (optional)' : ' (opcional)';
   document.getElementById('email').placeholder    = 'email@example.com' + (esPropietario ? optTxt : '');
@@ -650,6 +660,18 @@ function actualizarCamposRequeridos() {
 
 document.querySelectorAll('input[name="tipo"]').forEach(r => {
   r.addEventListener('change', actualizarCamposRequeridos);
+  r.addEventListener('change', function() {
+    const fechaSalida = document.getElementById('fecha_salida');
+    const fechaSalidaField = fechaSalida.closest('.field');
+    if (this.value === 'P') {
+      fechaSalida.value = '';
+      fechaSalida.disabled = true;
+      if (fechaSalidaField) fechaSalidaField.style.display = 'none';
+    } else {
+      fechaSalida.disabled = false;
+      if (fechaSalidaField) fechaSalidaField.style.display = '';
+    }
+  });
 });
 actualizarCamposRequeridos();
 
@@ -907,7 +929,8 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 
   // 2. Campos de contacto según tipo
   const tipoSel = document.querySelector('input[name="tipo"]:checked').value;
-  const camposContacto = tipoSel === 'H' ? [] : ['email', 'telefono'];
+  const camposContacto = (tipoSel === 'H' || tipoSel === 'P') ? [] : ['email', 'telefono'];
+  if (tipoSel === 'H' || tipoSel === 'G') camposContacto.push('fecha_salida');
   if (tipoSel === 'R' || tipoSel === 'G') camposContacto.push('direccion');
 
   camposContacto.forEach(id => {
