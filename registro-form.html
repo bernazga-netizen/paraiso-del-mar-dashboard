@@ -635,7 +635,7 @@ function actualizarCamposRequeridos() {
   const tipoEl = document.querySelector('input[name="tipo"]:checked');
   if (!tipoEl) return;
   const tipo = tipoEl.value;
-  const esPropietario = tipo === 'H';
+  const esPropietario = tipo === 'H' || tipo === 'P';
   const dirReq = tipo === 'R' || tipo === 'G';
 
   const reqEmail = document.getElementById('req-email');
