@@ -929,7 +929,8 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
 
   // 2. Campos de contacto según tipo
   const tipoSel = document.querySelector('input[name="tipo"]:checked').value;
-  const camposContacto = tipoSel === 'H' ? [] : ['email', 'telefono'];
+  const camposContacto = (tipoSel === 'H' || tipoSel === 'P') ? [] : ['email', 'telefono'];
+  if (tipoSel === 'H' || tipoSel === 'G') camposContacto.push('fecha_salida');
   if (tipoSel === 'R' || tipoSel === 'G') camposContacto.push('direccion');
 
   camposContacto.forEach(id => {
