@@ -219,7 +219,7 @@
             <label id="lbl-tipo-ocup">Tipo de ocupación <span class="req">*</span></label>
             <div class="banner-permanente" id="banner-permanente">
               <strong id="banner-permanente-unidad"></strong>
-              <span id="banner-permanente-texto"> tiene un residente permanente registrado. Solo puedes registrar visitas temporales con fecha de salida obligatoria.</span>
+              <span id="banner-permanente-texto"></span>
             </div>
             <div class="tipo-group">
               <input class="tipo-opt" type="radio" name="tipo" id="tipoH" value="H">
@@ -400,6 +400,8 @@ const T = {
     'lbl-interes-body':   'Me interesa ver propiedades en La Paz.',
     'lbl-com-title':      'Comunicaciones',
     'lbl-com-body':       'Me gustaría recibir información sobre promociones, actividades y eventos.',
+    'banner-permanente-texto':   ' tiene un residente permanente registrado. Solo puedes registrar visitas temporales con fecha de salida obligatoria.',
+    'banner-permanente-prefijo': 'Unidad ',
     'lbl-reglamento-leer':'Leer reglamento',
     'lbl-status-ok':      '✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.',
     'lbl-pdf-fallback':   'En iPhone/iPad, toca el botón para abrir tu PDF firmado.',
@@ -443,6 +445,8 @@ const T = {
     'lbl-interes-body':   "I'm interested in looking at property in La Paz.",
     'lbl-com-title':      'Communications',
     'lbl-com-body':       'I would like to receive information about promotions, activities and events.',
+    'banner-permanente-texto':   ' has a permanent resident registered. You can only register temporary visits with a mandatory check-out date.',
+    'banner-permanente-prefijo': 'Unit ',
     'lbl-reglamento-leer':'Read regulations',
     'lbl-status-ok':      '✓ Registration submitted successfully. Your signed PDF has been saved. Administration will review the information shortly.',
     'lbl-pdf-fallback':   'On iPhone/iPad, tap the button to open your signed PDF.',
@@ -514,6 +518,8 @@ function applyLang() {
   // Firma status
   const fs = document.getElementById('firma-status');
   if (fs && fs.textContent !== '') fs.textContent = lang === 'es' ? 'Pendiente' : 'Pending';
+  const bannerTexto = document.getElementById('banner-permanente-texto');
+  if (bannerTexto) bannerTexto.textContent = t('banner-permanente-texto');
 }
 
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
@@ -657,7 +663,7 @@ async function checkResidentePermanente() {
 
 function activarEstadoPermanente(unidad) {
   const banner = document.getElementById('banner-permanente');
-  document.getElementById('banner-permanente-unidad').textContent = 'Unidad ' + unidad;
+  document.getElementById('banner-permanente-unidad').textContent = t('banner-permanente-prefijo') + unidad;
   banner.style.display = 'block';
   ['tipoH', 'tipoR', 'tipoP'].forEach(id => {
     document.getElementById(id).disabled = true;
