@@ -442,7 +442,7 @@
         <div class="cat-left">
           <div class="cat-dot" style="background:var(--G)"></div>
           <div>
-            <div class="cat-name">Invitados</div>
+            <div class="cat-name">Huéspedes</div>
             <div class="cat-unidades" id="cat-G-uni">— unidades</div>
           </div>
         </div>
@@ -487,6 +487,25 @@
       </div>
     </div>
 
+    <!-- RESUMEN CONDOMINIOS / CASAS -->
+    <div>
+      <div class="kpi-label">Unidades ocupadas · hoy</div>
+      <div class="edificio-row" style="border-left:3px solid var(--teal);margin-bottom:4px">
+        <div>
+          <div class="edificio-name">Condominios</div>
+          <div style="font-size:9px;color:var(--ink-mid);margin-top:1px" id="condo-edificios-label">— edificios</div>
+        </div>
+        <span class="edificio-num" id="kpi-condos-total">—</span>
+      </div>
+      <div class="edificio-row" style="border-left:3px solid var(--navy);margin-bottom:4px">
+        <div>
+          <div class="edificio-name">Casas</div>
+          <div style="font-size:9px;color:var(--ink-mid);margin-top:1px" id="casas-total-label">— unidades</div>
+        </div>
+        <span class="edificio-num" id="kpi-casas-total">—</span>
+      </div>
+    </div>
+
     <!-- POR EDIFICIO -->
     <div>
       <div class="kpi-label">Por edificio · hoy</div>
@@ -511,7 +530,7 @@
       <button class="tab"       onclick="setEstado('salida',this)">Salidas</button>
       <button class="tab"       onclick="setEstado('',this)">Todos</button>
       <select class="filter-select" id="f-edificio" onchange="loadData()">
-        <option value="">Edificio: Todos</option>
+        <option value="">Propiedad: Todos</option>
         <option>A</option><option>B</option><option>C</option>
         <option>D</option><option>E</option><option>F</option>
         <option value="Casa">Casas</option>
@@ -520,7 +539,7 @@
         <option value="">Tipo: Todos</option>
         <option value="H">H · Propietario</option>
         <option value="R">R · Renta</option>
-        <option value="G">G · Invitado</option>
+        <option value="G">G · Huésped</option>
         <option value="P">P · Residente</option>
       </select>
       <select class="filter-select" id="f-pm" onchange="loadData()">
@@ -799,7 +818,7 @@
           <select id="edit-tipo" onchange="if(this.value==='P'){document.getElementById('edit-fecha-out').value=''}">
             <option value="H">H · Propietario</option>
             <option value="R">R · Renta</option>
-            <option value="G">G · Invitado</option>
+            <option value="G">G · Huésped</option>
             <option value="P">P · Residente Permanente</option>
           </select>
         </div>
@@ -923,7 +942,7 @@ function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Sin registros para los filtros seleccionados</td></tr>`; return; }
   // ── CAMBIO: etiquetas de tipo en español ──
-  const tipos = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente' };
+  const tipos = { H:'Propietario', R:'Renta', G:'Huésped', P:'Residente' };
   tbody.innerHTML = rows.map(r => {
     const estCls = `estado-${r.estado}`;
     const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
@@ -974,6 +993,24 @@ function renderKPIs(oc) {
   const el = document.getElementById('edificioRows');
   const rows = oc.por_edificio || [];
   if (!rows.length) { el.innerHTML = `<div style="color:var(--ink-mid);font-size:11px">Sin datos hoy</div>`; return; }
+
+  // Calcular resumen condominios vs casas
+  const condoEdificios = ['A','B','C','D','E','F'];
+  let condoPersonas = 0, condoEdifCount = 0, casasPersonas = 0, casasUnidades = 0;
+  rows.forEach(r => {
+    if (condoEdificios.includes(r.edificio)) {
+      condoPersonas += parseInt(r.personas_total) || 0;
+      condoEdifCount++;
+    } else if (r.edificio === 'Casa') {
+      casasPersonas += parseInt(r.personas_total) || 0;
+      casasUnidades += parseInt(r.unidades_total) || 0;
+    }
+  });
+  document.getElementById('kpi-condos-total').textContent  = condoPersonas;
+  document.getElementById('condo-edificios-label').textContent = `${condoEdifCount} edificio${condoEdifCount !== 1 ? 's' : ''}`;
+  document.getElementById('kpi-casas-total').textContent   = casasPersonas;
+  document.getElementById('casas-total-label').textContent = `${casasUnidades} unidad${casasUnidades !== 1 ? 'es' : ''}`;
+
   el.innerHTML = rows.map(r => `
     <div class="edificio-row">
       <span class="edificio-name">${r.edificio === 'Casa' ? 'Casas' : 'Edif. ' + r.edificio}</span>
@@ -990,7 +1027,7 @@ async function openModal(id) {
     document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
     const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
     // ── CAMBIO: etiquetas de tipo en español ──
-    const tipoLabels = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente Permanente' };
+    const tipoLabels = { H:'Propietario', R:'Renta', G:'Huésped', P:'Residente Permanente' };
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
         <div class="detail-field"><label>Unidad</label><p>${r.unidad}</p></div>
@@ -1828,7 +1865,7 @@ async function buscarHistorial() {
     summaryEl.style.display = '';
 
     histBody.innerHTML = data.map(r => {
-      const tipoLabel = t => ({ 'H': 'Huésped', 'P': 'Propietario', 'G': 'Invitado', 'R': 'Residente' }[t] || t);
+      const tipoLabel = t => ({ 'H': 'Huésped', 'P': 'Propietario', 'G': 'Huésped', 'R': 'Residente' }[t] || t);
       const tipoCls   = t => ({ 'H': 'tipo-H', 'P': 'tipo-P', 'G': 'tipo-G', 'R': 'tipo-R' }[t] || '');
       return `
         <tr>
