@@ -345,15 +345,7 @@
 <div id="loginScreen" class="login-screen">
   <div class="login-box">
     <div class="login-header">
-      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="26" cy="26" r="25" stroke="#71aeb7" stroke-width="1"/>
-        <path d="M26 38 V20" stroke="#71aeb7" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M26 22 Q20 14 12 16 Q18 18 22 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-        <path d="M26 22 Q32 14 40 16 Q34 18 30 24" stroke="#71aeb7" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-        <path d="M26 26 Q19 20 13 23 Q19 23 23 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-        <path d="M26 26 Q33 20 39 23 Q33 23 29 28" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-        <path d="M16 41 Q21 38 26 40 Q31 38 36 41" stroke="#71aeb7" stroke-width="1" stroke-linecap="round" fill="none"/>
-      </svg>
+      <img src="PDM_Logo_Primary_RGB.png" alt="Paraíso del Mar" style="height: 64px; width: auto; filter: brightness(0) invert(1); margin-bottom: 10px;">
       <div class="login-title">Paraíso del Mar</div>
       <div class="login-sub">Control Inhouse · Administración</div>
     </div>
@@ -362,11 +354,6 @@
         <label>Usuario</label>
         <select id="login-nombre">
           <option value="">— Seleccionar —</option>
-          <option>Beatriz Loubet</option>
-          <option>Christopher Davila</option>
-          <option>Mario Orozco</option>
-          <option>Cristina Robledo</option>
-          <option>Bernardo Zuñiga</option>
         </select>
       </div>
       <div class="login-field">
@@ -399,7 +386,7 @@
       <div class="user-pill" onclick="openPerfilModal()" title="Mi perfil"><div class="user-avatar" id="userAvatar">?</div><span id="userNombre">—</span></div>
       <button id="btnUsuarios" class="btn-pm" onclick="openUsuariosModal()" style="display:none">👥 Usuarios</button>
       <button id="btnGestionPMs" class="btn-pm" onclick="window.location.href='gestion-pms.html'" style="display:none">🏢 Gestión PMs</button>
-      <button class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
+      <button id="btnPM" class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
       <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
     </div>
   </div>
@@ -744,10 +731,60 @@
   <div class="modal usuarios-modal">
     <div class="modal-header">
       <div><div class="modal-title">Gestión de usuarios</div><div class="modal-sub">Solo administrador</div></div>
-      <button class="modal-close" onclick="closeUsuariosModal()">×</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-sec" style="font-size:10px;padding:5px 12px" onclick="toggleNuevoUsuarioForm()">＋ Nuevo usuario</button>
+        <button class="modal-close" onclick="closeUsuariosModal()">×</button>
+      </div>
     </div>
     <div class="modal-body">
       <div id="usuariosListBody">Cargando…</div>
+      <div id="nuevo-usuario-form" style="display:none;margin-top:16px;padding-top:16px;border-top:2px solid var(--border)">
+        <div style="font-size:10px;font-weight:bold;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:12px">Nuevo usuario</div>
+        <div class="edit-grid">
+          <div class="edit-field full">
+            <label>Nombre completo *</label>
+            <input type="text" id="nu-nombre" placeholder="Nombre completo">
+          </div>
+          <div class="edit-field">
+            <label>Correo electrónico *</label>
+            <input type="email" id="nu-email" placeholder="email@example.com">
+          </div>
+          <div class="edit-field">
+            <label>Contraseña inicial *</label>
+            <input type="password" id="nu-password" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="edit-field">
+            <label>Rol</label>
+            <select id="nu-rol">
+              <option value="usuario">Usuario</option>
+              <option value="gerente">Gerente</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="edit-field full">
+            <label>Acceso a propiedades</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+              <button type="button" id="acc-condos" onclick="setAccesoBtn('condos')"
+                style="padding:7px 14px;border:1px solid var(--border);border-radius:3px;font-size:11px;font-weight:bold;cursor:pointer;background:var(--dust);color:var(--ink-mid)">
+                Solo condominios
+              </button>
+              <button type="button" id="acc-casas" onclick="setAccesoBtn('casas')"
+                style="padding:7px 14px;border:1px solid var(--border);border-radius:3px;font-size:11px;font-weight:bold;cursor:pointer;background:var(--dust);color:var(--ink-mid)">
+                Solo casas
+              </button>
+              <button type="button" id="acc-ambos" onclick="setAccesoBtn('ambos')"
+                style="padding:7px 14px;border:1px solid var(--teal);border-radius:3px;font-size:11px;font-weight:bold;cursor:pointer;background:var(--teal);color:var(--white)">
+                Ambos
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="nu-error" style="display:none;color:#c0392b;font-size:11px;margin-top:8px;padding:7px 10px;background:#fdf0ef;border-radius:3px"></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+          <button type="button" class="btn-edit" onclick="toggleNuevoUsuarioForm()">Cancelar</button>
+          <button type="button" class="btn-sec" onclick="crearUsuario()">Crear usuario</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -896,6 +933,15 @@ async function loadData() {
     const fpm = document.getElementById('f-pm').value;
     const fq = document.getElementById('f-q').value;
     if (fe) params.set('edificio', fe);
+
+    // Restricciones por acceso del usuario
+    if (!usuarioActual.acceso_casas && !fe) {
+      params.set('excluir_casas', 'true');
+    }
+    if (!usuarioActual.acceso_condominios && !fe) {
+      params.set('excluir_condominios', 'true');
+    }
+
     if (ft) params.set('tipo', ft);
     if (fpm) params.set('pm', fpm);
     if (fq) params.set('q', fq);
@@ -1050,6 +1096,9 @@ async function openModal(id) {
         : `<div style="font-size:11px;color:var(--ink-mid)">Sin PDF adjunto</div>`}
     `;
     document.getElementById('modalOverlay').classList.add('open');
+    const canEdit = usuarioActual && usuarioActual.rol !== 'usuario';
+    document.querySelector('#modalOverlay .btn-danger').style.display = canEdit ? '' : 'none';
+    document.querySelector('#modalOverlay .btn-edit').style.display   = canEdit ? '' : 'none';
   } catch(e) { console.error(e); }
 }
 
@@ -1316,7 +1365,20 @@ async function loadPMFilter() {
 // ── Sesión ────────────────────────────────────────────────────
 let usuarioActual = null;
 
-function initSesion() {
+async function initSesion() {
+  // Poblar select de login con usuarios activos del backend
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/usuarios-publico`);
+    const { data } = await res.json();
+    const sel = document.getElementById('login-nombre');
+    (data || []).forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.nombre;
+      opt.textContent = u.nombre;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.warn('No se pudo cargar lista de usuarios:', e); }
+
   const saved = sessionStorage.getItem('pdm_usuario');
   if (saved) {
     usuarioActual = JSON.parse(saved);
@@ -1331,6 +1393,27 @@ function mostrarDashboard() {
   document.getElementById('userAvatar').textContent = usuarioActual.nombre.charAt(0).toUpperCase();
   document.getElementById('btnUsuarios').style.display = usuarioActual.rol === 'admin' ? 'inline-block' : 'none';
   document.getElementById('btnGestionPMs').style.display = ['admin','gerente'].includes(usuarioActual.rol) ? 'inline-block' : 'none';
+
+  // Permisos por rol
+  const esUsuario = usuarioActual.rol === 'usuario';
+  const tabDisplay = esUsuario ? 'none' : '';
+  document.querySelector('[onclick*="auditoria"]').style.display    = tabDisplay;
+  document.querySelector('[onclick*="estadisticas"]').style.display = tabDisplay;
+  document.querySelector('[onclick*="historial"]').style.display    = tabDisplay;
+  document.getElementById('btnPM').style.display = usuarioActual.rol === 'usuario' ? 'none' : '';
+
+  // Filtrar opciones del select de edificio según acceso a propiedades
+  const selEdificio = document.getElementById('f-edificio');
+  if (!usuarioActual.acceso_condominios) {
+    Array.from(selEdificio.options).forEach(opt => {
+      if (['A','B','C','D','E','F'].includes(opt.value)) opt.remove();
+    });
+  }
+  if (!usuarioActual.acceso_casas) {
+    const casaOpt = selEdificio.querySelector('option[value="Casa"]');
+    if (casaOpt) casaOpt.remove();
+  }
+
   loadData();
   loadPMFilter();
   loadAuditoriaUsuarios();
@@ -1543,14 +1626,23 @@ async function loadUsuarios() {
   try {
     const { data } = await fetch(`${API_BASE}/api/auth/usuarios`, { headers: authHeaders() }).then(r => r.json());
     const el = document.getElementById('usuariosListBody');
-    el.innerHTML = data.map(u => `
+    el.innerHTML = data.map(u => {
+      const accesoBadge = (u.acceso_condominios && u.acceso_casas)
+        ? `<span style="font-size:9px;font-weight:bold;padding:2px 7px;border-radius:10px;background:#e8f4f6;color:#007c89">Condominios + Casas</span>`
+        : u.acceso_condominios
+        ? `<span style="font-size:9px;font-weight:bold;padding:2px 7px;border-radius:10px;background:#e8f5ee;color:#006b35">Solo condominios</span>`
+        : u.acceso_casas
+        ? `<span style="font-size:9px;font-weight:bold;padding:2px 7px;border-radius:10px;background:#f4eefb;color:#7b4fa6">Solo casas</span>`
+        : '';
+      return `
       <div class="usr-row ${u.activo ? '' : 'inactive'}">
         <div>
           <div class="usr-nombre">${u.nombre}</div>
-          <div class="usr-meta">
-            ${u.rol === 'admin' ? '⭐ Admin' : 'Usuario'} ·
+          <div class="usr-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+            <span>${u.rol === 'admin' ? '⭐ Admin' : u.rol === 'gerente' ? '🔹 Gerente' : 'Usuario'} ·
             ${u.tiene_password ? '🔒 Con contraseña' : '⚠️ Sin contraseña'} ·
-            Último acceso: ${u.last_login ? fmtDateTime(u.last_login) : 'Nunca'}
+            Último acceso: ${u.last_login ? fmtDateTime(u.last_login) : 'Nunca'}</span>
+            ${accesoBadge}
           </div>
         </div>
         <div class="usr-actions">
@@ -1563,9 +1655,76 @@ async function loadUsuarios() {
             ${u.activo ? '✓ Activo' : '✗ Inactivo'}
           </button>` : '<span style="font-size:10px;color:var(--ink-mid)">(tú)</span>'}
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   } catch(e) {
     document.getElementById('usuariosListBody').innerHTML = '<div style="color:red;font-size:11px">Error al cargar usuarios</div>';
+  }
+}
+
+function toggleNuevoUsuarioForm() {
+  const form = document.getElementById('nuevo-usuario-form');
+  form.style.display = form.style.display === 'none' ? '' : 'none';
+  if (form.style.display === '') document.getElementById('nu-nombre').focus();
+}
+
+let accesoSeleccionado = { condominios: true, casas: true };
+
+function setAccesoBtn(tipo) {
+  ['acc-condos','acc-casas','acc-ambos'].forEach(id => {
+    const btn = document.getElementById(id);
+    btn.style.background   = 'var(--dust)';
+    btn.style.color        = 'var(--ink-mid)';
+    btn.style.borderColor  = 'var(--border)';
+  });
+  const activeId = tipo === 'condos' ? 'acc-condos' : tipo === 'casas' ? 'acc-casas' : 'acc-ambos';
+  const active = document.getElementById(activeId);
+  active.style.background  = 'var(--teal)';
+  active.style.color       = 'var(--white)';
+  active.style.borderColor = 'var(--teal)';
+  accesoSeleccionado = tipo === 'condos' ? { condominios: true,  casas: false }
+                     : tipo === 'casas'  ? { condominios: false, casas: true  }
+                     :                     { condominios: true,  casas: true  };
+}
+
+async function crearUsuario() {
+  const nombre   = document.getElementById('nu-nombre').value.trim();
+  const email    = document.getElementById('nu-email').value.trim();
+  const password = document.getElementById('nu-password').value;
+  const rol      = document.getElementById('nu-rol').value;
+  const errEl    = document.getElementById('nu-error');
+  errEl.style.display = 'none';
+  if (!nombre || !email || !password) {
+    errEl.textContent = 'Nombre, correo y contraseña son obligatorios.';
+    errEl.style.display = 'block'; return;
+  }
+  if (password.length < 6) {
+    errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+    errEl.style.display = 'block'; return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/usuarios`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({
+        nombre, email, password, rol,
+        acceso_condominios: accesoSeleccionado.condominios,
+        acceso_casas:       accesoSeleccionado.casas
+      })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Error al crear usuario');
+    document.getElementById('nu-nombre').value   = '';
+    document.getElementById('nu-email').value    = '';
+    document.getElementById('nu-password').value = '';
+    document.getElementById('nu-rol').value      = 'usuario';
+    setAccesoBtn('ambos');
+    toggleNuevoUsuarioForm();
+    showToast(`Usuario ${nombre} creado`, 'Usuarios');
+    await loadUsuarios();
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
   }
 }
 
