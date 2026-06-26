@@ -487,29 +487,9 @@
       </div>
     </div>
 
-    <!-- RESUMEN CONDOMINIOS / CASAS -->
     <div>
       <div class="kpi-label">Unidades ocupadas · hoy</div>
-      <div class="edificio-row" style="border-left:3px solid var(--teal);margin-bottom:4px">
-        <div>
-          <div class="edificio-name">Condominios</div>
-          <div style="font-size:9px;color:var(--ink-mid);margin-top:1px" id="condo-edificios-label">— edificios</div>
-        </div>
-        <span class="edificio-num" id="kpi-condos-total">—</span>
-      </div>
-      <div class="edificio-row" style="border-left:3px solid var(--navy);margin-bottom:4px">
-        <div>
-          <div class="edificio-name">Casas</div>
-          <div style="font-size:9px;color:var(--ink-mid);margin-top:1px" id="casas-total-label">— unidades</div>
-        </div>
-        <span class="edificio-num" id="kpi-casas-total">—</span>
-      </div>
-    </div>
-
-    <!-- POR EDIFICIO -->
-    <div>
-      <div class="kpi-label">Por edificio · hoy</div>
-      <div id="edificioRows"><div style="color:var(--ink-mid);font-size:11px;padding:4px">Cargando…</div></div>
+      <div id="ocupacion-resumen"></div>
     </div>
 
   </aside>
@@ -989,33 +969,43 @@ function renderKPIs(oc) {
     document.getElementById(`cat-${tipo}-uni`).textContent = `${d.unidades} unidad${d.unidades !== 1 ? 'es' : ''}`;
   });
 
-  // Por edificio
-  const el = document.getElementById('edificioRows');
+  // Resumen condominios + casas con desglose
+  const resumenEl = document.getElementById('ocupacion-resumen');
   const rows = oc.por_edificio || [];
-  if (!rows.length) { el.innerHTML = `<div style="color:var(--ink-mid);font-size:11px">Sin datos hoy</div>`; return; }
+  if (!rows.length) { resumenEl.innerHTML = '<div style="color:var(--ink-mid);font-size:11px">Sin datos hoy</div>'; return; }
 
-  // Calcular resumen condominios vs casas
   const condoEdificios = ['A','B','C','D','E','F'];
-  let condoPersonas = 0, condoEdifCount = 0, casasPersonas = 0, casasUnidades = 0;
-  rows.forEach(r => {
-    if (condoEdificios.includes(r.edificio)) {
-      condoPersonas += parseInt(r.personas_total) || 0;
-      condoEdifCount++;
-    } else if (r.edificio === 'Casa') {
-      casasPersonas += parseInt(r.personas_total) || 0;
-      casasUnidades += parseInt(r.unidades_total) || 0;
-    }
-  });
-  document.getElementById('kpi-condos-total').textContent  = condoPersonas;
-  document.getElementById('condo-edificios-label').textContent = `${condoEdifCount} edificio${condoEdifCount !== 1 ? 's' : ''}`;
-  document.getElementById('kpi-casas-total').textContent   = casasPersonas;
-  document.getElementById('casas-total-label').textContent = `${casasUnidades} unidad${casasUnidades !== 1 ? 'es' : ''}`;
+  const condoRows = rows.filter(r => condoEdificios.includes(r.edificio)).sort((a,b) => a.edificio.localeCompare(b.edificio));
+  const casaRow   = rows.find(r => r.edificio === 'Casa');
 
-  el.innerHTML = rows.map(r => `
-    <div class="edificio-row">
-      <span class="edificio-name">${r.edificio === 'Casa' ? 'Casas' : 'Edif. ' + r.edificio}</span>
-      <span class="edificio-num">${r.personas_total || 0}</span>
+  const condoTotal = condoRows.reduce((acc, r) => acc + (parseInt(r.personas_total) || 0), 0);
+  const casaTotal  = parseInt(casaRow?.personas_total) || 0;
+  const casaUnidades = parseInt(casaRow?.unidades_total) || 0;
+
+  const desglose = condoRows.map(r => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px solid var(--teal-pale);background:var(--white)">
+      <span style="font-size:10px;color:var(--ink-mid)">Edif. ${r.edificio}</span>
+      <span style="font-size:13px;font-weight:bold;color:var(--teal)">${r.personas_total || 0}</span>
     </div>`).join('');
+
+  resumenEl.innerHTML = `
+    <div style="border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--dust);border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;font-weight:bold;color:var(--ink-mid)">Condominios</div>
+          <div style="font-size:8px;color:var(--ink-mid);opacity:.7;margin-top:1px">${condoRows.length} edificios</div>
+        </div>
+        <span style="font-size:20px;font-weight:bold;color:var(--teal)">${condoTotal}</span>
+      </div>
+      ${desglose}
+    </div>
+    <div style="border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:3px;display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--dust)">
+      <div>
+        <div style="font-size:11px;font-weight:bold;color:var(--ink-mid)">Casas</div>
+        <div style="font-size:8px;color:var(--ink-mid);opacity:.7;margin-top:1px">${casaUnidades} unidades</div>
+      </div>
+      <span style="font-size:20px;font-weight:bold;color:var(--navy)">${casaTotal}</span>
+    </div>`;
 }
 
 // ── Modal detalle ─────────────────────────────────────────────
