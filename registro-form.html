@@ -227,7 +227,7 @@
               <input class="tipo-opt" type="radio" name="tipo" id="tipoR" value="R" checked>
               <label class="tipo-label" for="tipoR" id="lbl-tipoR">R · Renta</label>
               <input class="tipo-opt" type="radio" name="tipo" id="tipoG" value="G">
-              <label class="tipo-label" for="tipoG" id="lbl-tipoG">G · Invitado</label>
+              <label class="tipo-label" for="tipoG" id="lbl-tipoG">G · Huésped</label>
               <input class="tipo-opt" type="radio" name="tipo" id="tipoP" value="P">
               <label class="tipo-label" for="tipoP" id="lbl-tipoP">P · Residente Permanente</label>
             </div>
@@ -386,7 +386,7 @@ const T = {
     'lbl-tipo-ocup':      'Tipo de ocupación',
     'lbl-tipoH':          'H · Propietario',
     'lbl-tipoR':          'R · Renta',
-    'lbl-tipoG':          'G · Invitado',
+    'lbl-tipoG':          'G · Huésped',
     'lbl-tipoP':          'P · Residente Permanente',
     'lbl-nombre':         'Nombre completo',
     'lbl-email':          'Correo electrónico',
@@ -400,7 +400,8 @@ const T = {
     'lbl-interes-body':   'Me interesa ver propiedades en La Paz.',
     'lbl-com-title':      'Comunicaciones',
     'lbl-com-body':       'Me gustaría recibir información sobre promociones, actividades y eventos.',
-    'banner-permanente-texto':   ' tiene un residente permanente registrado. Solo puedes registrar visitas temporales con fecha de salida obligatoria.',
+    'banner-permanente-texto':   ' tiene un Residente Permanente registrado. Solo puedes registrar Huéspedes temporales con fecha de salida obligatoria.',
+    'banner-propietario-texto':  ' tiene un Propietario activo registrado. Solo puedes registrar Huéspedes temporales con fecha de salida obligatoria.',
     'banner-permanente-prefijo': 'Unidad ',
     'lbl-reglamento-leer':'Leer reglamento',
     'lbl-status-ok':      '✓ Registro enviado correctamente. Su PDF firmado se ha guardado. La administración revisará la información en breve.',
@@ -445,7 +446,8 @@ const T = {
     'lbl-interes-body':   "I'm interested in looking at property in La Paz.",
     'lbl-com-title':      'Communications',
     'lbl-com-body':       'I would like to receive information about promotions, activities and events.',
-    'banner-permanente-texto':   ' has a permanent resident registered. You can only register temporary visits with a mandatory check-out date.',
+    'banner-permanente-texto':   ' has a Permanent Resident registered. You can only register temporary Guests with a mandatory check-out date.',
+    'banner-propietario-texto':  ' has an active Owner registered. You can only register temporary Guests with a mandatory check-out date.',
     'banner-permanente-prefijo': 'Unit ',
     'lbl-reglamento-leer':'Read regulations',
     'lbl-status-ok':      '✓ Registration submitted successfully. Your signed PDF has been saved. Administration will review the information shortly.',
@@ -519,7 +521,10 @@ function applyLang() {
   const fs = document.getElementById('firma-status');
   if (fs && fs.textContent !== '') fs.textContent = lang === 'es' ? 'Pendiente' : 'Pending';
   const bannerTexto = document.getElementById('banner-permanente-texto');
-  if (bannerTexto) bannerTexto.textContent = t('banner-permanente-texto');
+  if (bannerTexto && bannerTexto.textContent !== '') {
+    const tipoHActivo = document.getElementById('tipoH').disabled;
+    bannerTexto.textContent = tipoHActivo ? t('banner-propietario-texto') : t('banner-permanente-texto');
+  }
 }
 
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
@@ -652,7 +657,9 @@ async function checkResidentePermanente() {
     );
     const data = await r.json();
     if (data.ok && !data.disponible && data.tipo === 'P') {
-      activarEstadoPermanente(unidadVal);
+      activarEstadoPermanente(unidadVal, 'P');
+    } else if (data.ok && !data.disponible && data.tipo === 'H') {
+      activarEstadoPermanente(unidadVal, 'H');
     } else {
       limpiarEstadoPermanente();
     }
@@ -661,9 +668,11 @@ async function checkResidentePermanente() {
   }
 }
 
-function activarEstadoPermanente(unidad) {
+function activarEstadoPermanente(unidad, tipo) {
   const banner = document.getElementById('banner-permanente');
+  const bannerTexto = document.getElementById('banner-permanente-texto');
   document.getElementById('banner-permanente-unidad').textContent = t('banner-permanente-prefijo') + unidad;
+  bannerTexto.textContent = tipo === 'P' ? t('banner-permanente-texto') : t('banner-propietario-texto');
   banner.style.display = 'block';
   ['tipoH', 'tipoR', 'tipoP'].forEach(id => {
     document.getElementById(id).disabled = true;
