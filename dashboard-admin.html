@@ -443,7 +443,7 @@
         <div class="cat-left">
           <div class="cat-dot" style="background:var(--G)"></div>
           <div>
-            <div class="cat-name">Invitados</div>
+            <div class="cat-name">Huéspedes</div>
             <div class="cat-unidades" id="cat-G-uni">— unidades</div>
           </div>
         </div>
@@ -488,10 +488,9 @@
       </div>
     </div>
 
-    <!-- POR EDIFICIO -->
     <div>
-      <div class="kpi-label">Por edificio · hoy</div>
-      <div id="edificioRows"><div style="color:var(--ink-mid);font-size:11px;padding:4px">Cargando…</div></div>
+      <div class="kpi-label">Unidades ocupadas · hoy</div>
+      <div id="ocupacion-resumen"></div>
     </div>
 
   </aside>
@@ -512,7 +511,7 @@
       <button class="tab"       onclick="setEstado('salida',this)">Salidas</button>
       <button class="tab"       onclick="setEstado('',this)">Todos</button>
       <select class="filter-select" id="f-edificio" onchange="loadData()">
-        <option value="">Edificio: Todos</option>
+        <option value="">Propiedad: Todos</option>
         <option>A</option><option>B</option><option>C</option>
         <option>D</option><option>E</option><option>F</option>
         <option value="Casa">Casas</option>
@@ -521,7 +520,7 @@
         <option value="">Tipo: Todos</option>
         <option value="H">H · Propietario</option>
         <option value="R">R · Renta</option>
-        <option value="G">G · Invitado</option>
+        <option value="G">G · Huésped</option>
         <option value="P">P · Residente</option>
       </select>
       <select class="filter-select" id="f-pm" onchange="loadData()">
@@ -800,7 +799,7 @@
           <select id="edit-tipo" onchange="if(this.value==='P'){document.getElementById('edit-fecha-out').value=''}">
             <option value="H">H · Propietario</option>
             <option value="R">R · Renta</option>
-            <option value="G">G · Invitado</option>
+            <option value="G">G · Huésped</option>
             <option value="P">P · Residente Permanente</option>
           </select>
         </div>
@@ -931,7 +930,7 @@ function renderTable(rows) {
   const tbody = document.getElementById('tableBody');
   if (!rows.length) { tbody.innerHTML = `<tr><td colspan="9" class="empty-state">Sin registros para los filtros seleccionados</td></tr>`; return; }
   // ── CAMBIO: etiquetas de tipo en español ──
-  const tipos = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente' };
+  const tipos = { H:'Propietario', R:'Renta', G:'Huésped', P:'Residente' };
   tbody.innerHTML = rows.map(r => {
     const estCls = `estado-${r.estado}`;
     const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
@@ -978,15 +977,43 @@ function renderKPIs(oc) {
     document.getElementById(`cat-${tipo}-uni`).textContent = `${d.unidades} unidad${d.unidades !== 1 ? 'es' : ''}`;
   });
 
-  // Por edificio
-  const el = document.getElementById('edificioRows');
+  // Resumen condominios + casas con desglose
+  const resumenEl = document.getElementById('ocupacion-resumen');
   const rows = oc.por_edificio || [];
-  if (!rows.length) { el.innerHTML = `<div style="color:var(--ink-mid);font-size:11px">Sin datos hoy</div>`; return; }
-  el.innerHTML = rows.map(r => `
-    <div class="edificio-row">
-      <span class="edificio-name">${r.edificio === 'Casa' ? 'Casas' : 'Edif. ' + r.edificio}</span>
-      <span class="edificio-num">${r.personas_total || 0}</span>
+  if (!rows.length) { resumenEl.innerHTML = '<div style="color:var(--ink-mid);font-size:11px">Sin datos hoy</div>'; return; }
+
+  const condoEdificios = ['A','B','C','D','E','F'];
+  const condoRows = rows.filter(r => condoEdificios.includes(r.edificio)).sort((a,b) => a.edificio.localeCompare(b.edificio));
+  const casaRow   = rows.find(r => r.edificio === 'Casa');
+
+  const condoTotal = condoRows.reduce((acc, r) => acc + (parseInt(r.personas_total) || 0), 0);
+  const casaTotal  = parseInt(casaRow?.personas_total) || 0;
+  const casaUnidades = parseInt(casaRow?.unidades_total) || 0;
+
+  const desglose = condoRows.map(r => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 10px;border-bottom:1px solid var(--teal-pale);background:var(--white)">
+      <span style="font-size:10px;color:var(--ink-mid)">Edif. ${r.edificio}</span>
+      <span style="font-size:13px;font-weight:bold;color:var(--teal)">${r.personas_total || 0}</span>
     </div>`).join('');
+
+  resumenEl.innerHTML = `
+    <div style="border:1px solid var(--border);border-left:3px solid var(--teal);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--dust);border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;font-weight:bold;color:var(--ink-mid)">Condominios</div>
+          <div style="font-size:8px;color:var(--ink-mid);opacity:.7;margin-top:1px">${condoRows.length} edificios</div>
+        </div>
+        <span style="font-size:20px;font-weight:bold;color:var(--teal)">${condoTotal}</span>
+      </div>
+      ${desglose}
+    </div>
+    <div style="border:1px solid var(--border);border-left:3px solid var(--navy);border-radius:3px;display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--dust)">
+      <div>
+        <div style="font-size:11px;font-weight:bold;color:var(--ink-mid)">Casas</div>
+        <div style="font-size:8px;color:var(--ink-mid);opacity:.7;margin-top:1px">${casaUnidades} propiedades</div>
+      </div>
+      <span style="font-size:20px;font-weight:bold;color:var(--navy)">${casaTotal}</span>
+    </div>`;
 }
 
 // ── Modal detalle ─────────────────────────────────────────────
@@ -998,7 +1025,7 @@ async function openModal(id) {
     document.getElementById('modalSub').textContent = `${r.unidad} · ${r.property_manager || 'Sin PM'} · Tipo ${r.tipo}`;
     const acomps = Array.isArray(r.acompanantes) ? r.acompanantes : [];
     // ── CAMBIO: etiquetas de tipo en español ──
-    const tipoLabels = { H:'Propietario', R:'Renta', G:'Invitado', P:'Residente Permanente' };
+    const tipoLabels = { H:'Propietario', R:'Renta', G:'Huésped', P:'Residente Permanente' };
     document.getElementById('modalBody').innerHTML = `
       <div class="detail-row">
         <div class="detail-field"><label>Unidad</label><p>${esc(r.unidad)}</p></div>
@@ -1850,7 +1877,7 @@ async function buscarHistorial() {
     summaryEl.style.display = '';
 
     histBody.innerHTML = data.map(r => {
-      const tipoLabel = t => ({ 'H': 'Huésped', 'P': 'Propietario', 'G': 'Invitado', 'R': 'Residente' }[t] || t);
+      const tipoLabel = t => ({ 'H': 'Huésped', 'P': 'Propietario', 'G': 'Huésped', 'R': 'Residente' }[t] || t);
       const tipoCls   = t => ({ 'H': 'tipo-H', 'P': 'tipo-P', 'G': 'tipo-G', 'R': 'tipo-R' }[t] || '');
       return `
         <tr>
