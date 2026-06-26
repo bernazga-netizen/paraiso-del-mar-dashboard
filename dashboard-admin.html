@@ -393,7 +393,7 @@
       <span id="clock"></span>
       <div class="user-pill" onclick="openPerfilModal()" title="Mi perfil"><div class="user-avatar" id="userAvatar">?</div><span id="userNombre">—</span></div>
       <button id="btnUsuarios" class="btn-pm" onclick="openUsuariosModal()" style="display:none">👥 Usuarios</button>
-      <button class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
+      <button id="btnPM" class="btn-pm" onclick="openPMModal()">⚙ Property Managers</button>
       <a href="registro-form.html" target="_blank" class="btn-nuevo">＋ Nuevo registro</a>
     </div>
   </div>
@@ -1386,7 +1386,7 @@ function mostrarDashboard() {
   document.querySelector('[onclick*="auditoria"]').style.display    = tabDisplay;
   document.querySelector('[onclick*="estadisticas"]').style.display = tabDisplay;
   document.querySelector('[onclick*="historial"]').style.display    = tabDisplay;
-  document.querySelector('[onclick*="openPMModal"]').style.display  = esUsuario ? 'none' : '';
+  document.getElementById('btnPM').style.display = usuarioActual.rol === 'usuario' ? 'none' : '';
 
   // Filtrar opciones del select de edificio según acceso a propiedades
   const selEdificio = document.getElementById('f-edificio');
