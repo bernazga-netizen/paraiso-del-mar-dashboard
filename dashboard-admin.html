@@ -362,11 +362,6 @@
         <label>Usuario</label>
         <select id="login-nombre">
           <option value="">— Seleccionar —</option>
-          <option>Beatriz Loubet</option>
-          <option>Christopher Davila</option>
-          <option>Mario Orozco</option>
-          <option>Cristina Robledo</option>
-          <option>Bernardo Zuñiga</option>
         </select>
       </div>
       <div class="login-field">
@@ -1345,7 +1340,20 @@ async function loadPMFilter() {
 // ── Sesión ────────────────────────────────────────────────────
 let usuarioActual = null;
 
-function initSesion() {
+async function initSesion() {
+  // Poblar select de login con usuarios activos del backend
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/usuarios`);
+    const { data } = await res.json();
+    const sel = document.getElementById('login-nombre');
+    (data || []).filter(u => u.activo).forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.nombre;
+      opt.textContent = u.nombre;
+      sel.appendChild(opt);
+    });
+  } catch(e) { console.warn('No se pudo cargar lista de usuarios:', e); }
+
   const saved = sessionStorage.getItem('pdm_usuario');
   if (saved) {
     usuarioActual = JSON.parse(saved);
