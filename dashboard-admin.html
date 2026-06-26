@@ -1087,6 +1087,9 @@ async function openModal(id) {
         : `<div style="font-size:11px;color:var(--ink-mid)">Sin PDF adjunto</div>`}
     `;
     document.getElementById('modalOverlay').classList.add('open');
+    const canEdit = usuarioActual && usuarioActual.rol !== 'usuario';
+    document.querySelector('#modalOverlay .btn-danger').style.display = canEdit ? '' : 'none';
+    document.querySelector('#modalOverlay .btn-edit').style.display   = canEdit ? '' : 'none';
   } catch(e) { console.error(e); }
 }
 
@@ -1367,6 +1370,27 @@ function mostrarDashboard() {
   document.getElementById('userNombre').textContent = usuarioActual.nombre.split(' ')[0];
   document.getElementById('userAvatar').textContent = usuarioActual.nombre.charAt(0).toUpperCase();
   document.getElementById('btnUsuarios').style.display = usuarioActual.rol === 'admin' ? 'inline-block' : 'none';
+
+  // Permisos por rol
+  const esUsuario = usuarioActual.rol === 'usuario';
+  const tabDisplay = esUsuario ? 'none' : '';
+  document.querySelector('[onclick*="auditoria"]').style.display    = tabDisplay;
+  document.querySelector('[onclick*="estadisticas"]').style.display = tabDisplay;
+  document.querySelector('[onclick*="historial"]').style.display    = tabDisplay;
+  document.querySelector('[onclick*="openPMModal"]').style.display  = esUsuario ? 'none' : '';
+
+  // Filtrar opciones del select de edificio según acceso a propiedades
+  const selEdificio = document.getElementById('f-edificio');
+  if (!usuarioActual.acceso_condominios) {
+    Array.from(selEdificio.options).forEach(opt => {
+      if (['A','B','C','D','E','F'].includes(opt.value)) opt.remove();
+    });
+  }
+  if (!usuarioActual.acceso_casas) {
+    const casaOpt = selEdificio.querySelector('option[value="Casa"]');
+    if (casaOpt) casaOpt.remove();
+  }
+
   loadData();
   loadPMFilter();
   loadAuditoriaUsuarios();
