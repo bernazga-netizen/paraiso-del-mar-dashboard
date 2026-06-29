@@ -124,18 +124,23 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
   <div id="error-box" class="error-msg"></div>
 
   <div class="step-bar">
-    <div class="step active" id="step1">
+    <div class="step active" id="step0">
       <div class="step-num">1</div>
+      <div class="step-lbl" id="s0-lbl">PM</div>
+    </div>
+    <div class="step-line"></div>
+    <div class="step pending" id="step1">
+      <div class="step-num">2</div>
       <div class="step-lbl" id="s1-lbl">UNIDAD</div>
     </div>
     <div class="step-line"></div>
     <div class="step pending" id="step2">
-      <div class="step-num">2</div>
+      <div class="step-num">3</div>
       <div class="step-lbl" id="s2-lbl">FECHAS</div>
     </div>
     <div class="step-line"></div>
     <div class="step pending" id="step3">
-      <div class="step-num">3</div>
+      <div class="step-num">4</div>
       <div class="step-lbl" id="s3-lbl">LINK</div>
     </div>
   </div>
@@ -148,10 +153,27 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
   <div class="section">
     <div class="section-header">
       <div class="section-num">1</div>
+      <div class="section-title">PROPERTY MANAGER</div>
+    </div>
+    <div class="section-body">
+      <div class="field">
+        <label id="lbl-sel-pm">Selecciona el Property Manager <span style="color:var(--teal)">*</span></label>
+        <div class="select-wrap">
+          <select id="sel-pm" onchange="onPMSelect()">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
       <div class="section-title" id="sec1-title">UNIDAD · UNIT</div>
     </div>
     <div class="section-body">
-      <div id="loading-msg" class="loading-msg">Cargando unidades...</div>
+      <div id="loading-msg" class="loading-msg" style="display:none;">Cargando unidades...</div>
       <div id="unidad-form" style="display:none;">
         <div class="field">
           <label id="lbl-unidad">Unidad <span class="req">*</span></label>
@@ -184,7 +206,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
 
   <div class="section">
     <div class="section-header">
-      <div class="section-num">2</div>
+      <div class="section-num">3</div>
       <div class="section-title" id="sec2-title">FECHAS DE ESTANCIA · STAY DATES</div>
     </div>
     <div class="section-body">
@@ -206,7 +228,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
 
   <div class="section">
     <div class="section-header">
-      <div class="section-num">3</div>
+      <div class="section-num">4</div>
       <div class="section-title" id="sec3-title">LINK GENERADO · GENERATED LINK</div>
     </div>
     <div class="section-body">
@@ -249,7 +271,7 @@ body{font-family:Verdana,Geneva,sans-serif;font-size:13px;background:var(--dust)
 
 <script>
 const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
-const BASE_FORM_URL = 'https://paraiso-del-mar-dashboard.vercel.app/registro-rentista.html';
+const BASE_FORM_URL = 'https://app.paraisodelmar.com/registro-rentista.html';
 
 // ── i18n ─────────────────────────────────────────────────────
 const T = {
@@ -288,6 +310,9 @@ const T = {
     'tipo-pent':     'Penthouse',
     'toast':         'Link copiado',
     'wa-msg':        'Hola, te comparto el link para registrar tu llegada a Paraíso del Mar:',
+    'validando':     'Verificando disponibilidad…',
+    'no-disponible-txt': '⚠️ Esta unidad ya tiene un registro en esas fechas:',
+    'err-validar':   'No se pudo verificar la disponibilidad. Intenta de nuevo.',
     'sel-unidad':    '— Seleccionar —',
     'err-pm':        'No se pudo cargar la información del PM. Verifica el parámetro pm_id en la URL.',
     'err-unidades':  'No se pudieron cargar las unidades. Intenta recargar la página.',
@@ -328,6 +353,9 @@ const T = {
     'tipo-pent':     'Penthouse',
     'toast':         'Link copied',
     'wa-msg':        'Hi, here is your registration link for Paraíso del Mar:',
+    'validando':     'Checking availability…',
+    'no-disponible-txt': '⚠️ This unit already has a booking for those dates:',
+    'err-validar':   'Could not verify availability. Please try again.',
     'sel-unidad':    '— Select —',
     'err-pm':        'Could not load PM information. Check the pm_id parameter in the URL.',
     'err-unidades':  'Could not load units. Try reloading the page.',
@@ -339,6 +367,7 @@ let lang = 'es';
 let unidades = [];
 let pmNombre = '';
 let pmId = null;
+let todosPMs = [];
 
 function t(key) { return T[lang][key] || T['es'][key] || key; }
 
@@ -369,14 +398,52 @@ function applyLang() {
 
 // ── Cargar datos del PM desde URL ────────────────────────────
 async function init() {
-  const params = new URLSearchParams(window.location.search);
-  pmId = parseInt(params.get('pm_id') || params.get('pm'));
+  // Cargar lista de PMs activos para el selector
+  try {
+    const r = await fetch(`${API_BASE}/api/inhouse/managers`);
+    const data = await r.json();
+    todosPMs = (data.data || []).filter(p => p.activo);
+    const sel = document.getElementById('sel-pm');
+    todosPMs.forEach(pm => {
+      const o = document.createElement('option');
+      o.value = pm.id;
+      o.textContent = pm.nombre;
+      sel.appendChild(o);
+    });
+  } catch(e) {
+    showError(t('err-unidades'));
+  }
 
-  if (!pmId || isNaN(pmId)) {
-    showError(t('err-pm'));
-    document.getElementById('loading-msg').style.display = 'none';
+  // Si viene pm_id en la URL, preseleccionar
+  const params = new URLSearchParams(window.location.search);
+  const urlPmId = parseInt(params.get('pm_id') || params.get('pm'));
+  if (urlPmId && !isNaN(urlPmId)) {
+    document.getElementById('sel-pm').value = urlPmId;
+    await onPMSelect();
+  }
+}
+
+async function onPMSelect() {
+  const sel = document.getElementById('sel-pm');
+  pmId = parseInt(sel.value) || null;
+
+  // Resetear unidades y preview
+  unidades = [];
+  pmNombre = '';
+  document.getElementById('unidad-form').style.display = 'none';
+  document.getElementById('loading-msg').style.display = 'none';
+  document.getElementById('sel-unidad').innerHTML = `<option value="">${t('sel-unidad')}</option>`;
+  resetForm();
+
+  if (!pmId) {
+    document.getElementById('step0').className = 'step active';
+    document.getElementById('step1').className = 'step pending';
     return;
   }
+
+  document.getElementById('loading-msg').style.display = 'block';
+  document.getElementById('step0').className = 'step done';
+  document.getElementById('step1').className = 'step active';
 
   try {
     const r = await fetch(`${API_BASE}/api/inhouse/unidades-por-pm?pm_id=${pmId}`);
@@ -389,8 +456,8 @@ async function init() {
     document.getElementById('loading-msg').style.display = 'none';
     document.getElementById('unidad-form').style.display = 'block';
   } catch(e) {
-    showError(t('err-unidades'));
     document.getElementById('loading-msg').style.display = 'none';
+    showError(t('err-unidades'));
   }
 }
 
@@ -459,11 +526,12 @@ function updateSteps() {
   const unidad = document.getElementById('sel-unidad').value;
   const entrada = document.getElementById('fecha-entrada').value;
   const salida  = document.getElementById('fecha-salida').value;
+  const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
-  if (unidad) { step2.className = 'step active'; }
+  if (unidad) { step1.className = 'step done'; step2.className = 'step active'; }
   if (unidad && entrada && salida) { step2.className = 'step done'; step3.className = 'step active'; }
-  if (!unidad) { step2.className = 'step pending'; step3.className = 'step pending'; }
+  if (!unidad) { step1.className = pmId ? 'step active' : 'step pending'; step2.className = 'step pending'; step3.className = 'step pending'; }
 }
 
 function fmtDate(d) {
@@ -548,9 +616,55 @@ function getLink() {
   return document.getElementById('preview-url').textContent;
 }
 
-function copyLink() {
+async function validarDisponibilidad() {
+  // Usar la misma unidadFinal que se embebe en el link
+  const sel    = document.getElementById('sel-unidad');
+  const opt    = sel.selectedOptions[0];
+  const tipo   = opt?.dataset.tipo || '';
+  const modo   = document.querySelector('input[name="modo"]:checked')?.value || 'completa';
+  const hab    = document.getElementById('sel-hab').value;
+  let unidad   = sel.value;
+  if (tipo === 'condo' && modo === 'habitacion') unidad = `${unidad}-${hab}`;
+  const entrada = document.getElementById('fecha-entrada').value;
+  const salida  = document.getElementById('fecha-salida').value;
+  if (!unidad || !entrada || !salida) return true; // ya validado antes
+
+  // Mostrar estado de carga en botones
+  const btnCopy = document.getElementById('btn-copy');
+  const btnWa   = document.getElementById('btn-wa');
+  const textoOrigCopy = btnCopy.innerHTML;
+  const textoOrigWa   = btnWa.innerHTML;
+  btnCopy.disabled = true;
+  btnWa.disabled   = true;
+  btnCopy.innerHTML = `<span style="font-size:11px">${t('validando')}</span>`;
+
+  try {
+    const params = new URLSearchParams({ unidad, fecha_entrada: entrada, fecha_salida: salida });
+    const r = await fetch(`${API_BASE}/api/inhouse/disponibilidad?${params}`);
+    const data = await r.json();
+    if (!data.ok) throw new Error();
+    if (!data.disponible) {
+      const msg = t('no-disponible-txt') + (data.detalle ? '\n' + data.detalle : '') + '\n\n' + (lang === 'en' ? 'Please select different dates.' : 'Por favor selecciona otras fechas.');
+      alert(msg);
+      return false;
+    }
+    return true;
+  } catch(e) {
+    alert(t('err-validar'));
+    return false;
+  } finally {
+    btnCopy.disabled = false;
+    btnWa.disabled   = false;
+    btnCopy.innerHTML = textoOrigCopy;
+    btnWa.innerHTML   = textoOrigWa;
+  }
+}
+
+async function copyLink() {
   const url = getLink();
   if (!url || !url.startsWith('http')) return;
+  const disponible = await validarDisponibilidad();
+  if (!disponible) return;
   navigator.clipboard.writeText(url).then(() => {
     const toast = document.getElementById('copy-toast');
     document.getElementById('toast-txt').textContent = t('toast');
@@ -559,9 +673,11 @@ function copyLink() {
   });
 }
 
-function shareWhatsApp() {
+async function shareWhatsApp() {
   const url = getLink();
   if (!url || !url.startsWith('http')) return;
+  const disponible = await validarDisponibilidad();
+  if (!disponible) return;
   const msg = encodeURIComponent(`${t('wa-msg')}\n${url}`);
   window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
@@ -576,6 +692,7 @@ function resetForm() {
   document.getElementById('noches-badge').style.display = 'none';
   document.getElementById('preview-placeholder').style.display = 'block';
   document.getElementById('preview-content').style.display = 'none';
+  document.getElementById('step1').className = pmId ? 'step active' : 'step pending';
   document.getElementById('step2').className = 'step pending';
   document.getElementById('step3').className = 'step pending';
   clearError();
