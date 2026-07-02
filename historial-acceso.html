@@ -720,6 +720,14 @@
                             <option>Base 4</option><option>Base 1</option>
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label class="field-label">Movimiento</label>
+                        <select id="auditoriaMovimiento">
+                            <option value="">Todos</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -872,11 +880,13 @@
             const usuario     = document.getElementById('auditoriaUsuario').value;
             const tipo        = document.getElementById('auditoriaTipo').value;
             const acceso      = document.getElementById('auditoriaAcceso').value;
+            const movimiento  = document.getElementById('auditoriaMovimiento').value;
 
             let url = `${API}/api/auditoria?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-            if (usuario) url += `&usuario_captura=${encodeURIComponent(usuario)}`;
-            if (tipo)    url += `&tipo_persona=${encodeURIComponent(tipo)}`;
-            if (acceso)  url += `&acceso=${encodeURIComponent(acceso)}`;
+            if (usuario)    url += `&usuario_captura=${encodeURIComponent(usuario)}`;
+            if (tipo)       url += `&tipo_persona=${encodeURIComponent(tipo)}`;
+            if (acceso)     url += `&acceso=${encodeURIComponent(acceso)}`;
+            if (movimiento) url += `&tipo_movimiento=${encodeURIComponent(movimiento)}`;
 
             const res = await fetch(url, { headers: authHeaders() });
             if (res.status === 401 || res.status === 403) { cerrarSesion(); return; }
@@ -889,12 +899,14 @@
             }
 
             let html = '<div class="data-table"><h3>Histórico de registros (últimos 500)</h3>';
-            html += '<table><tr><th>Fecha</th><th>Hora</th><th>Acceso</th><th>Tipo</th><th style="text-align:right">Cantidad</th><th>Usuario</th><th>Timestamp</th></tr>';
+            html += '<table><tr><th>Fecha</th><th>Hora</th><th>Acceso</th><th>Tipo</th><th>Movimiento</th><th style="text-align:right">Cantidad</th><th>Usuario</th><th>Timestamp</th></tr>';
             datosAuditoria.forEach(r => {
                 const ts = new Date(r.timestamp);
+                const esEntrada = r.tipo_movimiento === 'entrada';
+                const badge = `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;color:#fff;background:${esEntrada ? '#007c89' : '#c87533'}">${esEntrada ? 'Entrada' : 'Salida'}</span>`;
                 html += `<tr>
-                    <td>${r.fecha}</td><td>${r.hora}</td><td>${r.acceso}</td>
-                    <td>${r.tipo_persona}</td><td style="text-align:right">${r.cantidad}</td>
+                    <td>${new Date(r.fecha).toLocaleDateString('es-MX')}</td><td>${r.hora}</td><td>${r.acceso}</td>
+                    <td>${r.tipo_persona}</td><td>${badge}</td><td style="text-align:right">${r.cantidad}</td>
                     <td>${r.usuario_captura}</td>
                     <td>${ts.toLocaleDateString('es-MX')} ${ts.toLocaleTimeString('es-MX')}</td>
                 </tr>`;
@@ -1118,11 +1130,12 @@
         const data = [
             ['PARAÍSO DEL MAR - Auditoría de Registros'],
             ['Desde:', fi],['Hasta:', ff],[''],
-            ['Fecha','Hora','Acceso','Tipo','Cantidad','Usuario','Timestamp']
+            ['Fecha','Hora','Acceso','Tipo','Movimiento','Cantidad','Usuario','Timestamp']
         ];
         datosAuditoria.forEach(r => {
             const ts = new Date(r.timestamp);
-            data.push([r.fecha,r.hora,r.acceso,r.tipo_persona,r.cantidad,r.usuario_captura,
+            const movimiento = r.tipo_movimiento === 'entrada' ? 'Entrada' : 'Salida';
+            data.push([new Date(r.fecha).toLocaleDateString('es-MX'),r.hora,r.acceso,r.tipo_persona,movimiento,r.cantidad,r.usuario_captura,
                 `${ts.toLocaleDateString('es-MX')} ${ts.toLocaleTimeString('es-MX')}`]);
         });
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), 'Auditoría');
