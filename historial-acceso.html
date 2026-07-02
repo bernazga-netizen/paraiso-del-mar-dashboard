@@ -19,6 +19,7 @@
             --cactus:      #8a941e;
             --emerald:     #006b35;
             --soft-blue:   #71aeb7;
+            --warn:        #c87533;
         }
 
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -445,6 +446,8 @@
         }
 
         .kpi-card.total::before { background: var(--navy); }
+        .kpi-card.entradas::before { background: var(--teal); }
+        .kpi-card.salidas::before { background: var(--warn); }
         .kpi-card.muelle::before { background: var(--teal); }
         .kpi-card.base4::before { background: var(--cactus); }
         .kpi-card.base1::before { background: var(--soft-blue); }
@@ -649,6 +652,14 @@
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label class="field-label">Movimiento</label>
+                        <select id="filtroMovimiento">
+                            <option value="">Todos</option>
+                            <option value="entrada">Entrada</option>
+                            <option value="salida">Salida</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label class="field-label">Hora desde</label>
                         <input type="time" id="filtroHoraDesde">
                     </div>
@@ -722,6 +733,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
 <script>
     const API = 'https://paraiso-del-mar-backend.onrender.com';
     let datosActuales  = null;
@@ -898,25 +910,28 @@
     // ── Filtros
     function aplicarFiltros() {
         if (!datosActuales) return;
-        const filtroTipo      = document.getElementById('filtroTipo').value;
-        const filtroAcceso    = document.getElementById('filtroAcceso').value;
-        const filtroHoraDesde = document.getElementById('filtroHoraDesde').value;
-        const filtroHoraHasta = document.getElementById('filtroHoraHasta').value;
+        const filtroTipo       = document.getElementById('filtroTipo').value;
+        const filtroAcceso     = document.getElementById('filtroAcceso').value;
+        const filtroMovimiento = document.getElementById('filtroMovimiento').value;
+        const filtroHoraDesde  = document.getElementById('filtroHoraDesde').value;
+        const filtroHoraHasta  = document.getElementById('filtroHoraHasta').value;
 
         let badges = '';
-        if (filtroTipo)      badges += `<span class="badge-filtro">Tipo: ${filtroTipo}</span>`;
-        if (filtroAcceso)    badges += `<span class="badge-filtro">Acceso: ${filtroAcceso}</span>`;
-        if (filtroHoraDesde) badges += `<span class="badge-filtro">Desde: ${filtroHoraDesde}</span>`;
-        if (filtroHoraHasta) badges += `<span class="badge-filtro">Hasta: ${filtroHoraHasta}</span>`;
+        if (filtroTipo)       badges += `<span class="badge-filtro">Tipo: ${filtroTipo}</span>`;
+        if (filtroAcceso)     badges += `<span class="badge-filtro">Acceso: ${filtroAcceso}</span>`;
+        if (filtroMovimiento) badges += `<span class="badge-filtro">Movimiento: ${filtroMovimiento === 'entrada' ? 'Entrada' : 'Salida'}</span>`;
+        if (filtroHoraDesde)  badges += `<span class="badge-filtro">Desde: ${filtroHoraDesde}</span>`;
+        if (filtroHoraHasta)  badges += `<span class="badge-filtro">Hasta: ${filtroHoraHasta}</span>`;
         document.getElementById('filtrosActivos').innerHTML = badges;
 
         datosFiltrados = JSON.parse(JSON.stringify(datosActuales));
 
-        if (filtroTipo || filtroAcceso) {
+        if (filtroTipo || filtroAcceso || filtroMovimiento) {
             if (datosFiltrados.detalladoPorAccesoYTipo) {
                 datosFiltrados.detalladoPorAccesoYTipo = datosFiltrados.detalladoPorAccesoYTipo.filter(d => {
-                    if (filtroTipo   && d.tipo_persona !== filtroTipo)   return false;
-                    if (filtroAcceso && d.acceso       !== filtroAcceso) return false;
+                    if (filtroTipo       && d.tipo_persona   !== filtroTipo)       return false;
+                    if (filtroAcceso     && d.acceso         !== filtroAcceso)     return false;
+                    if (filtroMovimiento && d.tipo_movimiento !== filtroMovimiento) return false;
                     return true;
                 });
                 const tm = {}, am = {};
@@ -926,6 +941,10 @@
                 });
                 datosFiltrados.porTipo   = Object.keys(tm).map(tipo_persona => ({ tipo_persona, total: tm[tipo_persona] }));
                 datosFiltrados.porAcceso = Object.keys(am).map(acceso       => ({ acceso,        total: am[acceso] }));
+                datosFiltrados.entradas = datosFiltrados.detalladoPorAccesoYTipo
+                    .filter(d => d.tipo_movimiento === 'entrada').reduce((s,d) => s + parseInt(d.total), 0);
+                datosFiltrados.salidas = datosFiltrados.detalladoPorAccesoYTipo
+                    .filter(d => d.tipo_movimiento === 'salida').reduce((s,d) => s + parseInt(d.total), 0);
             }
         }
 
@@ -946,7 +965,7 @@
     }
 
     function limpiarFiltros() {
-        ['filtroTipo','filtroAcceso','filtroHoraDesde','filtroHoraHasta'].forEach(id => {
+        ['filtroTipo','filtroAcceso','filtroMovimiento','filtroHoraDesde','filtroHoraHasta'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('filtrosActivos').innerHTML = '';
@@ -960,9 +979,13 @@
         // KPIs
         const accesoClases = { 'Muelle Principal':'muelle','Base 4':'base4','Base 1':'base1' };
         let html = '<div class="kpi-grid">';
-        html += `<div class="kpi-card total">
-            <div class="kpi-num">${data.total}</div>
-            <div class="kpi-label">Total del día</div>
+        html += `<div class="kpi-card entradas">
+            <div class="kpi-num">${data.entradas}</div>
+            <div class="kpi-label">Entradas</div>
+        </div>`;
+        html += `<div class="kpi-card salidas">
+            <div class="kpi-num">${data.salidas}</div>
+            <div class="kpi-label">Salidas</div>
         </div>`;
 
         if (data.detalladoPorAccesoYTipo?.length > 0) {
@@ -990,7 +1013,7 @@
         html += '</div>';
 
         if (data.porHora?.length > 0) {
-            html += '<div class="chart-wrap"><h3>Ingresos por hora</h3><canvas id="chartHora"></canvas></div>';
+            html += '<div class="chart-wrap"><h3>Entradas y salidas por hora</h3><canvas id="chartHora"></canvas></div>';
         }
 
         if (data.porTipo?.length > 0) {
@@ -1006,9 +1029,10 @@
         }
 
         if (data.detalladoPorAccesoYTipo?.length > 0) {
-            html += '<div class="data-table"><h3>Detalle por acceso y tipo</h3><table><tr><th>Acceso</th><th>Tipo</th><th style="text-align:right">Cantidad</th></tr>';
+            html += '<div class="data-table"><h3>Detalle por acceso y tipo</h3><table><tr><th>Acceso</th><th>Tipo</th><th>Movimiento</th><th style="text-align:right">Cantidad</th></tr>';
             data.detalladoPorAccesoYTipo.forEach(d => {
-                html += `<tr><td>${d.acceso}</td><td>${d.tipo_persona}</td><td style="text-align:right">${d.total}</td></tr>`;
+                const movimiento = d.tipo_movimiento === 'entrada' ? 'Entrada' : 'Salida';
+                html += `<tr><td>${d.acceso}</td><td>${d.tipo_persona}</td><td>${movimiento}</td><td style="text-align:right">${d.total}</td></tr>`;
             });
             html += '</table></div>';
         }
@@ -1026,8 +1050,8 @@
             data: {
                 labels: porHora.map(h => h.hora.substring(0,5)),
                 datasets: [{
-                    label: 'Ingresos',
-                    data: porHora.map(h => h.total),
+                    label: 'Entradas',
+                    data: porHora.map(h => parseInt(h.entradas)),
                     borderColor: '#007c89',
                     backgroundColor: 'rgba(0,124,137,0.07)',
                     borderWidth: 2,
@@ -1035,12 +1059,22 @@
                     fill: true,
                     pointBackgroundColor: '#007c89',
                     pointRadius: 4
+                }, {
+                    label: 'Salidas',
+                    data: porHora.map(h => parseInt(h.salidas)),
+                    borderColor: '#c87533',
+                    backgroundColor: 'rgba(200,117,51,0.07)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#c87533',
+                    pointRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { display: true } },
                 scales: {
                     y: { beginAtZero: true, grid: { color: 'rgba(0,54,96,0.06)' } },
                     x: { grid: { display: false } }
@@ -1056,7 +1090,7 @@
         const wb = XLSX.utils.book_new();
         const resumen = [
             ['PARAÍSO DEL MAR - Reporte de Ingresos'],['Fecha:', fecha],
-            ['Total General:', datosFiltrados.total],[''],
+            ['Entradas:', datosFiltrados.entradas],['Salidas:', datosFiltrados.salidas],[''],
             ['Por Acceso'],['Acceso','Cantidad']
         ];
         datosFiltrados.porAcceso?.forEach(a => resumen.push([a.acceso, a.total]));
@@ -1064,13 +1098,13 @@
         datosFiltrados.porTipo?.forEach(t => resumen.push([t.tipo_persona, t.total]));
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen');
         if (datosFiltrados.detalladoPorAccesoYTipo?.length > 0) {
-            const det = [['Acceso','Tipo de Persona','Cantidad']];
-            datosFiltrados.detalladoPorAccesoYTipo.forEach(d => det.push([d.acceso, d.tipo_persona, d.total]));
+            const det = [['Acceso','Tipo de Persona','Movimiento','Cantidad']];
+            datosFiltrados.detalladoPorAccesoYTipo.forEach(d => det.push([d.acceso, d.tipo_persona, d.tipo_movimiento === 'entrada' ? 'Entrada' : 'Salida', d.total]));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(det), 'Detalle');
         }
         if (datosFiltrados.porHora?.length > 0) {
-            const ph = [['Hora','Cantidad']];
-            datosFiltrados.porHora.forEach(h => ph.push([h.hora, h.total]));
+            const ph = [['Hora','Entradas','Salidas']];
+            datosFiltrados.porHora.forEach(h => ph.push([h.hora, h.entradas, h.salidas]));
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ph), 'Por Hora');
         }
         XLSX.writeFile(wb, `Paraiso_del_Mar_${fecha}.xlsx`);
@@ -1095,7 +1129,18 @@
         XLSX.writeFile(wb, `Auditoria_${fi}_a_${ff}.xlsx`);
     }
 
-    setInterval(() => { if (sessionStorage.getItem('pdm_acceso_token')) cargar(); }, 30000);
+    // ── Socket.io
+    try {
+        const socket = io(API);
+        socket.on('nuevoRegistro', d => {
+            const fecha = document.getElementById('fechaInput').value;
+            if (d.fecha === fecha) cargar();
+        });
+        socket.on('connect_error', e => console.warn('Socket.io no conectó:', e.message));
+    } catch(e) { console.warn('Socket.io no disponible:', e); }
+
+    // Respaldo por si el socket se desconecta sin avisar
+    setInterval(() => { if (sessionStorage.getItem('pdm_acceso_token')) cargar(); }, 300000);
 </script>
 </body>
 </html>
