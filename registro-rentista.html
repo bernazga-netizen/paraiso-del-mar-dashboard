@@ -806,7 +806,11 @@ async function generarPDF(data, firmaDataURL) {
   checks.forEach(([checked, text]) => {
     doc.setDrawColor(0, 124, 137); doc.setFillColor(0, 124, 137);
     doc.rect(M, y - 3.2, 4, 4, checked ? 'F' : 'S');
-    if (checked) { doc.setTextColor(255,255,255); doc.setFontSize(6); doc.text('✓', M + 0.8, y + 0.2); }
+    if (checked) {
+      doc.setDrawColor(255,255,255); doc.setLineWidth(0.5);
+      doc.line(M + 0.8, y - 1.3, M + 1.7, y - 0.3);
+      doc.line(M + 1.7, y - 0.3, M + 3.4, y - 2.8);
+    }
     doc.setTextColor(61, 90, 102); doc.setFontSize(8); doc.text(text, M + 6, y);
     y += 7;
   });
