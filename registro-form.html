@@ -379,6 +379,7 @@ const T = {
     'h-sub':              'Registro de Dueños',
     'sec1-title':         'UNIDAD Y ESTADÍA',
     'sec2-title':         'TITULAR DEL REGISTRO',
+    'sec2-title-owner':   'TITULAR DEL REGISTRO',
     'sec3-title':         'HUÉSPEDES ADICIONALES (1–8)',
     'sec4-title':         'COMPROMISOS Y PREFERENCIAS',
     'sec5-title':         'FIRMA DEL TITULAR',
@@ -425,6 +426,7 @@ const T = {
     'h-sub':              'Owner Registration',
     'sec1-title':         'UNIT & STAY',
     'sec2-title':         'PRIMARY GUEST',
+    'sec2-title-owner':   'PRIMARY OWNER',
     'sec3-title':         'ADDITIONAL GUESTS (1–8)',
     'sec4-title':         'COMMITMENTS & PREFERENCES',
     'sec5-title':         'GUEST SIGNATURE',
@@ -491,6 +493,7 @@ function applyLang() {
     const el = document.getElementById(id);
     if (el) el.textContent = t(id);
   });
+  actualizarTituloSec2();
   // Labels con req span — reconstruir sin borrar el span
   ['lbl-tipo-prop','lbl-edificio','lbl-unidad','lbl-nombre','lbl-email','lbl-telefono','lbl-direccion'].forEach(id => {
     const el = document.getElementById(id);
@@ -730,11 +733,21 @@ applyLang();
 const urlPm = new URLSearchParams(window.location.search).get('pm');
 if (urlPm) setTimeout(() => { document.getElementById('property_manager_id').value = parseInt(urlPm) || ''; }, 500);
 
+// ── Título sección 2: Owner para H y P ───────────────────────
+function actualizarTituloSec2() {
+  const el = document.getElementById('sec2-title');
+  if (!el) return;
+  const tipoEl = document.querySelector('input[name="tipo"]:checked');
+  const esOwner = tipoEl && (tipoEl.value === 'H' || tipoEl.value === 'P');
+  el.textContent = t(esOwner ? 'sec2-title-owner' : 'sec2-title');
+}
+
 // ── Validación dinámica por tipo ─────────────────────────────
 function actualizarCamposRequeridos() {
   const tipoEl = document.querySelector('input[name="tipo"]:checked');
   if (!tipoEl) return;
   const tipo = tipoEl.value;
+  actualizarTituloSec2();
   const esPropietario = tipo === 'H' || tipo === 'P';
   const dirReq = tipo === 'R' || tipo === 'G';
   const fechaSalidaReq = tipo === 'H' || tipo === 'G';
