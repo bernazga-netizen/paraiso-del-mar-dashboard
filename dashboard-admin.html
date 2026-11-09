@@ -924,6 +924,26 @@ try {
 } catch(e) {}
 
 // ── Data ─────────────────────────────────────────────────────
+const PAGE_SIZE = 500;
+const MAX_PAGES = 40; // tope de seguridad: 20,000 registros
+let loadDataReqId = 0;
+
+async function fetchTodosRegistros(baseParams) {
+  const todos = [];
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const params = new URLSearchParams(baseParams);
+    params.set('limit', PAGE_SIZE);
+    params.set('offset', page * PAGE_SIZE);
+    const res = await fetch(`${API_BASE}/api/inhouse?${params}`, { headers: authHeaders() }).then(r => r.json());
+    const data = res.data || [];
+    todos.push(...data);
+    if (data.length < PAGE_SIZE) break;
+  }
+  // El backend ordena solo por fecha_ingreso; con empates, el offset podría repetir filas
+  const vistos = new Set();
+  return todos.filter(r => !vistos.has(r.id) && vistos.add(r.id));
+}
+
 async function loadData() {
   try {
     const params = new URLSearchParams();
@@ -952,11 +972,15 @@ async function loadData() {
     if (fini) params.set('fecha_inicio', fini);
     if (ffin) params.set('fecha_fin', ffin);
 
-    const [dataRes, oc] = await Promise.all([
-      fetch(`${API_BASE}/api/inhouse?${params}`, { headers: authHeaders() }).then(r => r.json()),
+    // El backend pagina (limit/offset, 100 por defecto). Se piden páginas
+    // hasta traer todo, para que no se oculten registros (antes se cortaba en 100).
+    const reqId = ++loadDataReqId;
+    const [rows, oc] = await Promise.all([
+      fetchTodosRegistros(params),
       fetch(`${API_BASE}/api/inhouse/ocupacion`, { headers: authHeaders() }).then(r => r.json())
     ]);
-    renderTable(dataRes.data || []);
+    if (reqId !== loadDataReqId) return; // llegó una búsqueda más nueva; descartar esta
+    renderTable(rows);
     renderKPIs(oc);
   } catch(e) {
     document.getElementById('tableBody').innerHTML =
@@ -980,7 +1004,7 @@ function renderTable(rows) {
   tbody.innerHTML = rows.map(r => {
     const estCls = `estado-${r.estado}`;
     const estTxt = r.estado === 'activo' ? '● Activo' : r.estado === 'futuro' ? '◆ Futuro' : '○ Salida';
-    const hasPdf = !!r.pdf_firmado_url;
+    const hasPdf = r.tiene_pdf ?? !!r.pdf_firmado_url;
     return `
       <tr onclick="openModal('${r.id}')">
         <td class="primary">${esc(r.unidad)}</td>
