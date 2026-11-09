@@ -1129,9 +1129,16 @@ document.getElementById('regForm').addEventListener('submit', async function(e) 
     payload.pdf_firmado_url = pdfDataURI;
     btnText.textContent = 'Enviando…';
 
+    // Si el formulario se abrió desde el panel admin, se manda la sesión para que
+    // la auditoría registre quién capturó el alta (si no, el backend lo marca
+    // como "Formulario público").
+    const headers = { 'Content-Type': 'application/json' };
+    const adminToken = sessionStorage.getItem('pdm_token');
+    if (adminToken) headers['Authorization'] = `Bearer ${adminToken}`;
+
     const res = await fetch(`${API_BASE}/api/inhouse`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(payload)
     });
 
