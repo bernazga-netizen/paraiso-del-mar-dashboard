@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIN de tablets · Paraíso del Mar</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal: #007c89; --teal-lt: #71aeb7; --teal-pale: #e8f4f6;
+      --navy: #003660; --navy-lt: #0a4a7a; --emerald: #006b35;
+      --dust: #f2efec; --white: #ffffff; --ink: #1a2e3a; --ink-mid: #3d5a66;
+      --border: #c2d8dd; --warn: #c87533;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Jost', sans-serif; background: var(--dust); color: var(--ink); min-height: 100vh; }
+    header { background: var(--navy); color: #fff; padding: 18px 28px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 24px; }
+    header small { color: var(--teal-lt); font-size: 12px; letter-spacing: .06em; }
+    header button { background: none; border: 1px solid var(--teal-lt); color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    main { max-width: 900px; margin: 32px auto; padding: 0 20px; }
+    .card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 18px; }
+    .card h2 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--navy); }
+    .card .meta { color: var(--ink-mid); font-size: 13px; margin-top: 4px; margin-bottom: 16px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    label { display: block; font-size: 12px; color: var(--ink-mid); margin-bottom: 4px; letter-spacing: .04em; text-transform: uppercase; }
+    input, select { font-family: inherit; font-size: 18px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; width: 160px; letter-spacing: 6px; text-align: center; }
+    input:focus, select:focus { outline: 2px solid var(--teal); border-color: var(--teal); }
+    button.primary { background: var(--emerald); color: #fff; border: none; padding: 11px 20px; border-radius: 6px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+    button.primary:disabled { opacity: .5; cursor: not-allowed; }
+    .msg { margin-top: 12px; font-size: 14px; min-height: 18px; }
+    .msg.ok { color: var(--emerald); }
+    .msg.err { color: #c62828; }
+    .login-wrap { max-width: 380px; margin: 60px auto; }
+    .login-wrap select, .login-wrap input { width: 100%; letter-spacing: normal; text-align: left; }
+    .login-wrap .field { margin-bottom: 14px; }
+    .login-wrap button { width: 100%; }
+    .aviso { color: var(--warn); font-size: 13px; margin-top: 14px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>PIN de tablets</h1>
+    <small>Control de accesos · Administración</small>
+  </div>
+  <button id="btnSalir" style="display:none" onclick="cerrarSesion()">Cerrar sesión</button>
+</header>
+
+<main>
+  <!-- LOGIN -->
+  <section id="vistaLogin" class="login-wrap" style="display:none">
+    <div class="card">
+      <h2>Ingresar</h2>
+      <p class="meta">Solo usuarios con rol admin pueden cambiar los PIN.</p>
+      <div class="field">
+        <label for="loginNombre">Usuario</label>
+        <select id="loginNombre"><option value="">— Seleccionar —</option></select>
+      </div>
+      <div class="field">
+        <label for="loginPassword">Contraseña</label>
+        <input id="loginPassword" type="password" style="letter-spacing:normal">
+      </div>
+      <button class="primary" id="btnLogin" onclick="doLogin()">Ingresar</button>
+      <div class="msg err" id="loginErr"></div>
+    </div>
+  </section>
+
+  <!-- SIN PERMISO -->
+  <section id="vistaSinPermiso" class="login-wrap" style="display:none">
+    <div class="card">
+      <h2>Acceso restringido</h2>
+      <p class="meta">Tu usuario no tiene rol admin.</p>
+      <button class="primary" onclick="cerrarSesion()">Cambiar de usuario</button>
+    </div>
+  </section>
+
+  <!-- PANEL -->
+  <section id="vistaPanel" style="display:none">
+    <div id="listaTablets"></div>
+    <p class="aviso">El PIN nuevo entra en vigor de inmediato. Las tablets que ya estén abiertas seguirán funcionando hasta que expire su sesión (12 horas).</p>
+  </section>
+</main>
+
+<script>
+  const API_BASE = 'https://paraiso-del-mar-backend.onrender.com';
+
+  function sesionActual() {
+    try { return JSON.parse(sessionStorage.getItem('pdm_usuario')); } catch { return null; }
+  }
+  function tokenActual() {
+    return sessionStorage.getItem('pdm_token');
+  }
+
+  function mostrar(vista) {
+    ['vistaLogin', 'vistaSinPermiso', 'vistaPanel'].forEach(id => {
+      document.getElementById(id).style.display = id === vista ? 'block' : 'none';
+    });
+    document.getElementById('btnSalir').style.display = tokenActual() ? 'inline-block' : 'none';
+  }
+
+  async function iniciar() {
+    const usuario = sesionActual();
+    if (!tokenActual() || !usuario) {
+      await cargarUsuarios();
+      mostrar('vistaLogin');
+      return;
+    }
+    if (usuario.rol !== 'admin') {
+      mostrar('vistaSinPermiso');
+      return;
+    }
+    await cargarPanel();
+  }
+
+  async function cargarUsuarios() {
+    try {
+      const res  = await fetch(`${API_BASE}/api/auth/usuarios-publico`);
+      const data = await res.json();
+      const sel  = document.getElementById('loginNombre');
+      (data || []).forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.nombre;
+        opt.textContent = u.nombre;
+        sel.appendChild(opt);
+      });
+    } catch {
+      document.getElementById('loginErr').textContent = 'No se pudo cargar la lista de usuarios.';
+    }
+  }
+
+  async function doLogin() {
+    const nombre   = document.getElementById('loginNombre').value;
+    const password = document.getElementById('loginPassword').value;
+    const errEl    = document.getElementById('loginErr');
+    const btn      = document.getElementById('btnLogin');
+    errEl.textContent = '';
+    if (!nombre || !password) { errEl.textContent = 'Selecciona usuario e ingresa la contraseña.'; return; }
+
+    btn.disabled = true;
+    try {
+      const res  = await fetch(`${API_BASE}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, password })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        errEl.textContent = data.error || 'Usuario o contraseña incorrectos.';
+        return;
+      }
+      // Mismas llaves que dashboard-admin.html, para compartir la sesión
+      sessionStorage.setItem('pdm_usuario', JSON.stringify(data.usuario));
+      sessionStorage.setItem('pdm_token', data.token);
+      document.getElementById('loginPassword').value = '';
+      await iniciar();
+    } catch {
+      errEl.textContent = 'No se pudo conectar. Intenta de nuevo.';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function cerrarSesion() {
+    sessionStorage.removeItem('pdm_token');
+    sessionStorage.removeItem('pdm_usuario');
+    location.reload();
+  }
+
+  async function cargarPanel() {
+    mostrar('vistaPanel');
+    const cont = document.getElementById('listaTablets');
+    cont.textContent = 'Cargando…';
+    try {
+      const res  = await fetch(`${API_BASE}/api/tablets/pins`, {
+        headers: { 'Authorization': `Bearer ${tokenActual()}` }
+      });
+      if (res.status === 401 || res.status === 403) { cerrarSesion(); return; }
+      const data = await res.json();
+      cont.textContent = '';
+      (data.tablets || []).forEach(t => cont.appendChild(tarjetaTablet(t)));
+    } catch {
+      cont.textContent = 'No se pudo cargar la información de las tablets.';
+    }
+  }
+
+  function tarjetaTablet(t) {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const h2 = document.createElement('h2');
+    h2.textContent = t.acceso;
+    card.appendChild(h2);
+
+    const meta = document.createElement('p');
+    meta.className = 'meta';
+    const fecha = t.updated_at ? new Date(t.updated_at).toLocaleString('es-MX', { timeZone: 'America/Mazatlan' }) : '—';
+    meta.textContent = `Tablet: ${t.tablet_key} · Último cambio: ${fecha}`;
+    card.appendChild(meta);
+
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <div><label>Nuevo PIN</label><input type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
+      <div><label>Confirmar</label><input type="password" inputmode="numeric" maxlength="4" placeholder="••••"></div>
+      <div><button class="primary">Guardar PIN</button></div>`;
+    const [inNuevo, inConf] = row.querySelectorAll('input');
+    const btn = row.querySelector('button');
+    const msg = document.createElement('div');
+    msg.className = 'msg';
+
+    [inNuevo, inConf].forEach(i => i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 4); }));
+
+    btn.addEventListener('click', async () => {
+      msg.textContent = ''; msg.className = 'msg';
+      if (!/^\d{4}$/.test(inNuevo.value)) { msg.classList.add('err'); msg.textContent = 'El PIN debe tener exactamente 4 dígitos.'; return; }
+      if (inNuevo.value !== inConf.value) { msg.classList.add('err'); msg.textContent = 'Los PIN no coinciden.'; return; }
+
+      btn.disabled = true;
+      try {
+        const res  = await fetch(`${API_BASE}/api/tablets/pins/${encodeURIComponent(t.tablet_key)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenActual()}` },
+          body: JSON.stringify({ pin: inNuevo.value })
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          msg.classList.add('ok');
+          msg.textContent = '✓ ' + data.mensaje;
+          inNuevo.value = ''; inConf.value = '';
+          t.updated_at = new Date().toISOString();
+          meta.textContent = `Tablet: ${t.tablet_key} · Último cambio: ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mazatlan' })}`;
+        } else {
+          msg.classList.add('err');
+          msg.textContent = data.error || 'No se pudo guardar el PIN.';
+        }
+      } catch {
+        msg.classList.add('err');
+        msg.textContent = 'No se pudo conectar. Intenta de nuevo.';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    card.appendChild(row);
+    card.appendChild(msg);
+    return card;
+  }
+
+  document.getElementById('loginPassword').addEventListener('keypress', e => { if (e.key === 'Enter') doLogin(); });
+  iniciar();
+</script>
+</body>
+</html>
