@@ -119,9 +119,9 @@
   async function cargarUsuarios() {
     try {
       const res  = await fetch(`${API_BASE}/api/auth/usuarios-publico`);
-      const data = await res.json();
+      const json = await res.json();
       const sel  = document.getElementById('loginNombre');
-      (data || []).forEach(u => {
+      (json.data || []).forEach(u => {
         const opt = document.createElement('option');
         opt.value = u.nombre;
         opt.textContent = u.nombre;
